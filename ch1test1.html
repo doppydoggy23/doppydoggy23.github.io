@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Color hexagon test 1</title>
+<style>
+
+#canvasDiv {
+  background-color: white;
+  width: 550px;
+  height: 550px;
+  position: relative; /* makes next element align vertically bellow this one*/
+  margin: auto; /*center horizontally*/
+  
+  outline-style: solid;
+  outline-color: black;
+  outline-width: 1px;
+}
+
+#docfooter {
+  background-color: red;
+}
+
+
+
+</style>
+
+	<script src="cht1.js"></script>
+
+</head>
+<body onload="initializeUI()">
+
+<!-- Before header -->
+<p> Color hexagon test 1</p>
+<!-- Before header -->
+
+<div id="canvasDiv">
+<canvas id="mainCanvas" width="550" height="550"></canvas>
+</div>
+
+<footer id="docfooter">
+footer
+</footer>
+
+</body>
+</html>
