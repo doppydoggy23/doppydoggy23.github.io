@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Web RISC-V Simulator</title>
+<style type="text/css" media="screen">
+    #editor { 
+        /*position: absolute;*/
+        /*top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;*/
+        width: 500px;
+        height: 650px;
+        /*background-color:white;*/
+        float: left;
+        border-style: solid;
+        border-width: 1px;
+        margin: 10px;
+        margin-right: 0px;
+    }
+
+#horizontalBar {
+  /*background-color:blueviolet;*/
+  display: table;
+  margin:auto;
+}
+
+#RegistersDiv {
+    background-color: rgba(76, 175, 80, 0.3); 
+    width: 170px; 
+    height: 650px;
+    float: left;
+    font-size: 10pt;
+    font-family: monospace;
+    text-align: center;
+    border-style: solid;
+    border-width: 1px;
+    margin: 10px;
+    margin-right: 0px;
+}
+
+#TextAreaDiv {
+    /*background-color: crimson;*/
+    text-align: center;
+}
+
+#RegsTable {
+    /*background-color: green;*/
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#MemDiv {
+    background-color: rgba(276, 75, 0, 0.3);
+    width: 210px; 
+    height: 650px;
+    float: left;
+    font-size: 10pt;
+    font-family: monospace;
+    text-align: center;
+    border-style: solid;
+    border-width: 1px;
+    margin: 10px;
+}
+
+#RegsTableMem {
+    /*background-color: blue;*/
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#AddrLabel {
+    /*display: block; */
+    width: 100px;
+}
+
+#AddrButton {
+    /*display: block; */
+    width: 30px;
+}
+
+#ButtonsDiv {
+    background-color:rgba(6, 17, 180, 0.3);
+    width: 100px; 
+    height: 650px;
+    float: left;
+    font-size: 10pt;
+    font-family: monospace;
+    text-align: center;
+    border-style: solid;
+    border-width: 1px;
+    margin: 10px;
+    margin-right: 0px;
+}
+
+#ButtonsTable {
+    /*background-color: yellowgreen;*/
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#LoadButton {
+    width: 90px;
+}
+
+#RunButton {
+    width: 90px;
+}
+
+#StepButton {
+    width: 90px;
+}
+
+
+</style>
+
+<script src="ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="WRV.js"></script>
+
+</head>
+<body onload="initializeUI()">
+
+    <div style="text-align:center">
+        <a href="doc.html">Examples & Documentation</a>
+    </div>
+      
+
+<div id="horizontalBar">
+
+    <div id="editor"></div>
+
+
+    <div id="ButtonsDiv">
+        <table id="ButtonsTable">
+            <tr>
+            <th></th>
+            </tr>
+            <tr>
+                <td><input type="button" id="LoadButton" value="Load File"></td>
+            </tr>
+            <tr>
+                <td><input type="button" id="RunButton"onclick="RunButtonOnClick()" value="Run Program"></td>
+            </tr>
+            <tr>
+                <td><input type="button" id="StepButton"onclick="StepButtonOnClick()" value="Single Step"></td>
+            </tr>
+        </table>
+    </div>
+
+        
+    <div id="RegistersDiv">
+        <table id="RegsTable">
+            <tr>
+            <th>Register</th>
+            <th>Value</th>
+            </tr>
+            <tr>
+                <td>x0 zero</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x1 ra</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x2 sp</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x3 gp</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x4 tp</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x5 t0</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x6 t1</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x7 t2</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x8 s0/fp</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x9 s1</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x10 a0</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x11 a1</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x12 a2</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x13 a3</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x14 a4</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x15 a5</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x17 a7</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x18 s2</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x19 s3</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x20 s4</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x21 s5</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x22 s6</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x23 s7</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x24 s8</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x25 s9</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x26 s10</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x27 s11</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x28 t3</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x29 t4</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x30 t5</td>
+                <td>value</td>
+            </tr>
+            <tr>
+                <td>x31 t6</td>
+                <td>value</td>
+            </tr>
+            </table> 
+    </div>
+
+    <div id="MemDiv">
+        <table id="RegsTableMem">
+            <tr>
+                <th>Addr</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>0x00000000</td>
+                <td>0xffffffff</td>
+            </tr>
+            <tr>
+                <td>0x00000000</td>
+                <td>0xffffffff</td>
+            </tr>
+            <tr>
+                <td>0x00000000</td>
+                <td>0xffffffff</td>
+            </tr>
+            <tr>
+                <td>0x00000000</td>
+                <td>0xffffffff</td>
+            </tr>
+            <tr>
+                <td>0x00000000</td>
+                <td>0xffffffff</td>
+            </tr>
+            <tr>
+                <td>0x00000000</td>
+                <td>0xffffffff</td>
+            </tr>
+            <tr>
+                <td><p></p></td>
+                <td><p></p></td>
+            </tr>
+            <tr>
+                <td><input type="text" id="AddrLabel" value="0x0000"></td>
+                <td> <input type="button" id="AddrButton" value="Go" onclick="goMemoryButtonClick()"> </td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<div id="TextAreaDiv">
+    <textarea  id="MyTextArea" name="message" rows="10" cols="80"></textarea>
+</div>
+
+<!-- It's hidden because we will trigger it with another button-->
+<input type="file" id="file-selector" style="display:none"> 
+
+</body>
+</html>

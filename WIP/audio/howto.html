@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>How to make a simple FM synthesizer</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+#pseudomainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+
+#tablewrapper {
+    display: inline-block;
+}
+#tablewrapperreg {
+    /*display: inline-block;*/
+    display: inline-block;
+}
+
+
+#docfooter {
+  /*background-color: red;*/
+}
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: center;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+.styled-table {
+    border-collapse: collapse;
+    margin-top: 5px;
+    margin-bottom: 25px;
+    margin-right: 0;
+    margin-left: 0px;
+    /*margin: 25px 0;*/
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.FigureText {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	color: black;
+	text-align: center;
+    margin-bottom: 0px;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+h2 {
+    font-size: 14pt;    
+}
+
+h1 {
+    font-size: 20pt;    
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+<section>
+
+    <h1>How to make a simple FM synthesizer</h1>
+
+    <br>
+
+    <h2>The final product</h2>
+    <p>
+        <a href="audio.html">This</a> is the simple FM synthesizer I made in javascript. Sure it lacks all the modern features commercial FM synthesizers have, but it's enough for a showcase.
+        The source code belongs to public domain, in case you need it.
+    </p>
+
+    <br>
+
+    <h2>The math behind the formulas</h2>
+    <p>
+        The maths I used are taken from <a href="fm_synthesis.pdf"> this </a> paper. All the variables are explained thoughly in the paper except for time <i>t</i> which is range [0..1].
+        
+        We will work with the final formula: <img src="finalformula.png" alt="finalformula.png"> 
+        <ul>
+            <li> <i>C</i> Carrier frequency or pitch or fundamental frequency</li>
+            <li> <i>D</i> Depth of modulation or modulation power</li>
+            <li> <i>M</i> Frequency of modulator</li>
+            <li> <i>t</i> Range [0..1]. I substitute <i>t</i> with <i>(i/sampleRate)</i> which gives the instant in seconds since start of the sound.</li>
+        </ul> 
+
+        This formula works perfectly for cases of a single modulator:<img src="algorithm1.png" alt="algorithm1.png"> 
+
+        <pre> 
+            <code>
+// Modulator M1 modulates C1    
+return formulaValues.A1*Math.sin( 2*Math.PI*formulaValues.C1*(i/sampleRate) + formulaValues.D1*Math.sin(2*Math.PI*formulaValues.M1*(i/sampleRate)) );
+            </code>
+        </pre>
+
+        The nested modulation (i.e. Modulator M2 modulates modulator M1 that modulates Carrier C1) is solved in the following way:
+        <img src="algorithm2.png" alt="algorithm2.png"> 
+
+        Look at formula y(t)=A*sin(2*PI*C*t + D*sin(2*PI*M*t)). The final part (D*sin(2*PI*M*t)) is the formula of the amplitude of a sinusoidal wave of frequency M. That means this is where we plug
+        the amplitude of M2 that is modulating M1.
+
+        <pre> 
+            <code>
+let M1Ampl= 1 * Math.sin( 2*Math.PI*formulaValues.M1*(i/sampleRate) + formulaValues.D2*Math.sin(2*Math.PI*formulaValues.M2*(i/sampleRate)) );
+return formulaValues.A1*Math.sin( 2*Math.PI*formulaValues.C1*(i/sampleRate) + (formulaValues.D1*M1Ampl) );
+            </code>
+        </pre>
+
+
+    </p>
+
+
+
+</section>
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>

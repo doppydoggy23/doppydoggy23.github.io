@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Calendario 2022</title>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+<style>
+
+body {
+  justify-content: center;
+  /*height: 100px;*/
+  font-family: 'Poppins', sans-serif;
+  /*font-family: Arial, Helvetica, sans-serif;*/
+  /*font-family: "Times New Roman", Times, serif;*/
+  
+}
+
+.calendar {
+  float:left;
+  width: 512px;
+  height: 612px;
+  /*background-color: #fff;*/
+  background-color: #DDDDDD;
+  box-sizing: border-box;
+  box-shadow: 0 5px 50px rgba(#000, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.calendar__picture {
+  position: relative;
+  height: 100px;
+  padding: 20px;
+  color: #fff;
+  /*background: #262626 url("https://images.unsplash.com/photo-1516912481808-3406841bd33c?ixlib=rb-0.3.5&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ&s=183f2924ba5a8429441804609b2d4f61") no-repeat center / cover;*/
+  text-shadow: 0 2px 2px rgba(#000, 0.2);
+  box-sizing: border-box;
+  background-color: #314397;
+}
+
+.calendar_month_name {
+	font-size: 35px;
+	text-align: center;
+}
+
+.calendar__date {
+  padding: 20px;
+  display: grid;
+  /*grid-template-columns: repeat(auto-fit, minmax(25px, 1fr));*/
+  grid-template-columns: auto auto auto auto auto auto auto;
+  grid-gap: 10px;
+  box-sizing: border-box;
+  font-size: 35px;
+  height: 512px;
+  
+}
+
+.calendar__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  font-weight: 600;
+  color: #262626;
+  font-size: 35px;  
+}
+
+.calendar__day_sun {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  font-weight: 600;
+  color: #ff685d;
+  font-size: 35px;
+}
+
+
+.calendar__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  color: #262626;  
+}
+
+.calendar__number_sun {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  color: #ff685d;
+  font-weight: 700;  
+}
+
+.calendar_mini {
+  position: relative;
+  width: 220px;
+  /*background-color: #fff;*/
+  background-color: #DDDDDD;
+  box-sizing: border-box;
+  box-shadow: 0 5px 50px rgba(#000, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.calendar__picture_mini {
+  position: relative;
+  height: 25px;
+  padding: 0px;
+  color: #fff;
+  /*background: #262626 url("https://images.unsplash.com/photo-1516912481808-3406841bd33c?ixlib=rb-0.3.5&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ&s=183f2924ba5a8429441804609b2d4f61") no-repeat center / cover;*/
+  background-color: #314397;
+  text-shadow: 0 2px 2px rgba(#000, 0.2);
+  box-sizing: border-box;
+ 
+}
+
+.calendar_month_name_mini {
+	font-size: 15px;
+	text-align: center;
+}
+
+.calendar__date_mini {
+  padding: 10px;
+  display: grid;
+  /*grid-template-columns: repeat(auto-fit, minmax(25px, 1fr));*/
+  grid-template-columns: auto auto auto auto auto auto auto;
+  grid-gap: 10px;
+  box-sizing: border-box;
+  font-size: 12px;
+  height: 150px;  
+}
+
+.calendar__day_mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 10px;
+  font-weight: 600;
+  color: #262626;
+  font-size: 12px;  
+}
+
+.calendar__day_sun_mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 10px;
+  font-weight: 600;
+  color: #ff685d;
+  font-size: 12px;
+}
+
+
+.calendar__number_mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 10px;
+  color: #262626;  
+}
+
+.calendar__number_sun_mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 10px;
+  color: #ff685d;
+  font-weight: 700;  
+}
+
+.whole_year_mini {
+  float:left;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-gap: 10px;
+  box-sizing: border-box;
+  font-size: 15px;
+  /*height: 170px;  */
+  width: 712px;
+  /*background-color: #0000EE;*/
+  justify-content: center;
+}
+
+.wholescreen {
+ /*width: 2000px;*/
+  /*background-color: #DD00EE;*/
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+h2{
+  /*color: MediumSeaGreen;*/
+  text-align: center;
+}
+
+</style>
+
+	<!--  <script src="cht1.js"></script> -->
+	<script src="cal2022.js"></script>	
+	
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5211848638374546"
+     crossorigin="anonymous"></script>
+
+
+</head>
+<body onload="initializeUI()">
+
+<header>
+  <h2>Calendario 2022</h2>
+</header>
+
+<section>
+
+<div class="wholescreen">
+
+	<div class="calendar" id="bigcalendar">
+	  <div class="calendar__picture">
+		<div class=calendar_month_name>Enero</div>
+		<!-- <h3>November</h3> -->
+	  </div>
+	  <div class="calendar__date">
+		<div class="calendar__day">Lu</div>
+		<div class="calendar__day">Ma</div>
+		<div class="calendar__day">Mi</div>
+		<div class="calendar__day">Ju</div>
+		<div class="calendar__day">Vi</div>
+		<div class="calendar__day">Sa</div>
+		<div class="calendar__day_sun">Do</div>
+		<div class="calendar__number"></div>
+		<div class="calendar__number"></div>
+		<div class="calendar__number"></div>
+		<div class="calendar__number"></div>
+		<div class="calendar__number"></div>
+		<div class="calendar__number">1</div>
+		<div class="calendar__number_sun">2</div>
+		<div class="calendar__number">3</div>
+		<div class="calendar__number">4</div>
+		<div class="calendar__number">5</div>
+		<div class="calendar__number">6</div>
+		<div class="calendar__number">7</div>
+		<div class="calendar__number">8</div>
+		<div class="calendar__number_sun">9</div>
+		<div class="calendar__number">10</div>
+		<div class="calendar__number">11</div>
+		<div class="calendar__number">12</div>
+		<div class="calendar__number">13</div>
+		<div class="calendar__number">14</div>
+		<div class="calendar__number">15</div>
+		<div class="calendar__number_sun">16</div>
+		<div class="calendar__number">17</div>
+		<div class="calendar__number">18</div>
+		<div class="calendar__number">19</div>
+		<div class="calendar__number">20</div>
+		<div class="calendar__number">21</div>
+		<div class="calendar__number">22</div>
+		<div class="calendar__number_sun">23</div>
+		<div class="calendar__number">24</div>
+		<div class="calendar__number">25</div>
+		<div class="calendar__number">26</div>
+		<div class="calendar__number">27</div>
+		<div class="calendar__number">28</div>
+		<div class="calendar__number">29</div>
+		<div class="calendar__number_sun">30</div>
+		<div class="calendar__number">31</div>
+	  </div>
+	</div>
+
+	<div class="whole_year_mini">
+
+		<div class="calendar_mini" id="minijanuary">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Enero</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__day_sun_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__day_sun_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__day_sun_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__day_sun_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__day_sun_mini">30</div>
+			<div class="calendar__number_mini">31</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="minifebruary">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Febrero</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__day_sun_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__day_sun_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__day_sun_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__day_sun_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="minimarch">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Marzo</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__day_sun_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__day_sun_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__day_sun_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__day_sun_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+			<div class="calendar__number_mini">31</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="miniapril">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Abril</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__day_sun_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__day_sun_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__day_sun_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__day_sun_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="minimay">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Mayo</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__day_sun_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__day_sun_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__day_sun_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__day_sun_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__day_sun_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+			<div class="calendar__number_mini">31</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="minijune">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Junio</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__day_sun_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__day_sun_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__day_sun_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__day_sun_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="minijuly">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Julio</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__day_sun_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__day_sun_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__day_sun_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__day_sun_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+			<div class="calendar__day_sun_mini">31</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="miniagust">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Agosto</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__day_sun_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__day_sun_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__day_sun_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__day_sun_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+			<div class="calendar__number_mini">31</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="miniseptember">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Septiembre</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__day_sun_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__day_sun_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__day_sun_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__day_sun_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="minioctober">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Octubre</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__day_sun_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__day_sun_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__day_sun_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__day_sun_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__day_sun_mini">30</div>
+			<div class="calendar__number_mini">31</div>
+		  </div>
+		</div>
+
+
+		<div class="calendar_mini" id="mininovember">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Noviembre</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__number_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__day_sun_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__number_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__day_sun_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__number_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__day_sun_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__number_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__day_sun_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+		  </div>
+		</div>
+
+		<div class="calendar_mini" id="minidicember">
+		  <div class="calendar__picture_mini">
+			<div class="calendar_month_name_mini">Diciembre</div>
+			<!-- <h3>November</h3> -->
+		  </div>
+		  <div class="calendar__date_mini">
+			<div class="calendar__day_mini">Lu</div>
+			<div class="calendar__day_mini">Ma</div>
+			<div class="calendar__day_mini">Mi</div>
+			<div class="calendar__day_mini">Ju</div>
+			<div class="calendar__day_mini">Vi</div>
+			<div class="calendar__day_mini">Sa</div>
+			<div class="calendar__day_sun_mini">Do</div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini"></div>
+			<div class="calendar__number_mini">1</div>
+			<div class="calendar__number_mini">2</div>
+			<div class="calendar__number_mini">3</div>
+			<div class="calendar__day_sun_mini">4</div>
+			<div class="calendar__number_mini">5</div>
+			<div class="calendar__number_mini">6</div>
+			<div class="calendar__number_mini">7</div>
+			<div class="calendar__number_mini">8</div>
+			<div class="calendar__number_mini">9</div>
+			<div class="calendar__number_mini">10</div>
+			<div class="calendar__day_sun_mini">11</div>
+			<div class="calendar__number_mini">12</div>
+			<div class="calendar__number_mini">13</div>
+			<div class="calendar__number_mini">14</div>
+			<div class="calendar__number_mini">15</div>
+			<div class="calendar__number_mini">16</div>
+			<div class="calendar__number_mini">17</div>
+			<div class="calendar__day_sun_mini">18</div>
+			<div class="calendar__number_mini">19</div>
+			<div class="calendar__number_mini">20</div>
+			<div class="calendar__number_mini">21</div>
+			<div class="calendar__number_mini">22</div>
+			<div class="calendar__number_mini">23</div>
+			<div class="calendar__number_mini">24</div>
+			<div class="calendar__day_sun_mini">25</div>
+			<div class="calendar__number_mini">26</div>
+			<div class="calendar__number_mini">27</div>
+			<div class="calendar__number_mini">28</div>
+			<div class="calendar__number_mini">29</div>
+			<div class="calendar__number_mini">30</div>
+			<div class="calendar__number_mini">31</div>
+		  </div>
+		</div>
+
+
+	</div>
+
+<div>
+</section>
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>
