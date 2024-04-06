@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ledcraft</title>
+<meta charset="utf-8">
+<style>
+  
+#leftmenu {
+  background-color: black;
+  width: 200px;
+  float: left;
+  text-align: center;
+  height: 550px;
+  }
+
+#centercanvas {
+  background-color: black;
+  width: 550px;
+  height: 550px;
+  float: left;
+}
+
+#centercanvasandarrows {
+  background-color: black;
+  width: 550px;
+  float: left;
+}
+
+#rightmenu {
+  background-color: black;
+  width: 200px;
+  height: 550px;
+  float: left;
+}
+  
+#lcrcontainer {
+  width: 950px;
+  height: 550px;
+  margin: auto;
+  background-color: black;
+}
+
+#allmenuscontainer {
+  background-color: black;
+  position: relative;
+}
+
+#bottommenu {
+  width: 550px;
+  background-color: black;
+  margin: auto;
+  text-align: center;
+  /*display: block;*/
+  /*display: none;*/
+}
+
+#uppermmenu {
+  width: 550px;
+  /*height: 150px;*/
+  background-color: black;
+  margin: auto;
+  text-align: center;
+}
+
+#leftArrowButton {
+  width: 50px;
+  float: left;
+  height: 50px;
+  }
+
+#currentPageLabel {
+  width: 450px;
+  margin: auto; /*center on screen*/
+  background-color: black;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  color: MediumSeaGreen;
+  /*padding: 20px 0px;*/
+  line-height: 50px;
+  font-size: 40px;
+  }
+
+#rightArrowButton {
+  width: 50px;
+  height: 50px;
+  float: right;
+  }
+
+#playButton {
+  width: 100px;
+  height: 50px;
+  /*margin: auto;
+  display: block;*/
+  margin-top: 40px; /* we center it with margins */
+  margin-bottom: 10px; /* we center it with margins */
+  margin-left: 50px; /* we center it with margins */
+  margin-right: 50px; /* we center it with margins */
+  }
+  
+#exportAsGIFButton {
+  width: 100px;
+  height: 50px;
+  /*margin: auto;
+  display: block;*/
+  margin-top: 10px; /* we center it with margins */
+  margin-bottom: 10px; /* we center it with margins */
+  margin-left: 50px; /* we center it with margins */
+  margin-right: 50px; /* we center it with margins */
+  }
+
+#SaveButton {
+  width: 100px;
+  height: 50px;
+  /*margin: auto;
+  display: block;*/
+  margin-top: 10px; /* we center it with margins */
+  margin-bottom: 10px; /* we center it with margins */
+  margin-left: 50px; /* we center it with margins */
+  margin-right: 50px; /* we center it with margins */
+  }
+
+#LoadButton {
+  width: 100px;
+  height: 50px;
+  /*margin: auto;
+  display: block;*/
+  margin-top: 10px; /* we center it with margins */
+  margin-bottom: 10px; /* we center it with margins */
+  margin-left: 50px; /* we center it with margins */
+  margin-right: 50px; /* we center it with margins */
+  }
+  
+#CopyButton {
+  width: 100px;
+  height: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 10px;
+  margin-right: 10px; 
+}
+
+#CutButton {
+  width: 100px;
+  height: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+}
+
+#PasteButton {
+  width: 100px;
+  height: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+}
+
+#ShiftUpButton {
+  width: 100px;
+  height: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+}
+
+#ShiftDownButton {
+  width: 100px;
+  height: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+}
+
+#ShiftLeftButton {
+  width: 100px;
+  height: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+}
+
+#ShiftRightButton {
+  width: 100px;
+  height: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 10px; 
+  margin-right: 10px; 
+}
+  
+#SaveLoadSlotSelectDIV {
+  background-color: black;  
+  margin: auto;
+  text-align: center;
+  /*width: 100px;
+  height: 50px;*/
+}
+
+#SaveLoadSlotSelect {
+  width: 100px;
+  height: 50px;
+  margin-top: 0px;  /*we center it with margins */
+  margin-bottom: 10px; /* we center it with margins */
+  margin-left: 50px; /* we center it with margins */
+  margin-right: 50px; /* we center it with margins */
+
+}
+  
+#ledsPaletteDIV {
+  width: 120px;
+  margin: auto;
+  background-color: black;
+  }
+
+#FPSSelDIV {
+  width: 120px;
+  margin: auto;
+  background-color: black;
+  }
+  
+#led0IMG {
+  /*border: 3px solid yellow;*/
+  border: 3px solid black;
+}
+
+#led1IMG {
+  border: 3px solid black;
+}
+  
+#led2IMG {
+  border: 3px solid black;
+}
+  
+#led3IMG {
+  border: 3px solid black;
+}
+  
+#led4IMG {
+  border: 3px solid black;
+}
+  
+#led5IMG {
+  border: 3px solid black;
+}
+  
+#led6IMG {
+  border: 3px solid black;
+}
+
+#bottommenuDIV1 {
+  width: 550px;
+  height: 50px;
+  background-color: blue;
+}
+
+#bottommenuDIV2 {
+  display: block;
+  /*display: none;*/
+}
+
+p {
+  color: MediumSeaGreen;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#FPSSelDIV { /* the radio buttons color has to be given to the containing div*/
+  color: MediumSeaGreen;
+}
+
+body {
+  background-color: black;
+}
+
+h2{
+  color: MediumSeaGreen;
+  text-align: center;
+}
+
+footer {
+  color: MediumSeaGreen;
+
+}
+</style>
+
+	<script src="Animated_GIF.js"></script>
+	<script src="LCUI.JS"></script>
+
+</head>
+<body onload="initializeUI()">
+
+<!-- Before header -->
+<!-- Before header -->
+
+<header>
+  <h2>Ledcraft</h2>
+</header>
+
+<div id="allmenuscontainer"> <!-- allmenuscontainer -->
+
+  <div id="uppermmenu"> <!-- uppermmenu -->
+      <button type="button" id="CopyButton"> Copy </button>
+	  <button type="button" id="CutButton"> Cut </button> 		
+	  <button type="button" id="PasteButton"> Paste </button> 		
+  </div> <!-- uppermmenu -->
+  
+  <div id ="lcrcontainer"> <!-- three colums with left menu, center canvas and right menu -->
+   	<div id="leftmenu"> <!-- left menu -->
+      <p>Palette</p>
+	  <div id="ledsPaletteDIV">
+	    <img src="led0.png" width="22" height="22" id="led0IMG"> 
+	    <img src="led1.png" width="22" height="22" id="led1IMG"> 
+	    <img src="led2.png" width="22" height="22" id="led2IMG"> 
+	    <img src="led3.png" width="22" height="22" id="led3IMG"> 
+	    <img src="led4.png" width="22" height="22" id="led4IMG"> 
+	    <img src="led5.png" width="22" height="22" id="led5IMG"> 
+	    <img src="led6.png" width="22" height="22" id="led6IMG"> 
+	  </div>
+	  <div id="FPSSelDIV">
+      <p>Play Speed</p>
+	    <input type="radio" id="RadioButton1FPS" name="FPS" value="1FPS" checked>1FPS<br>
+        <input type="radio" id="RadioButton2FPS" name="FPS" value="2FPS">2FPS<br>
+        <input type="radio" id="RadioButton5FPS" name="FPS" value="5FPS">5FPS<br>
+	  </div>
+      <button type="button" id="playButton"> Play </button>
+    </div> <!-- left menu -->
+	
+	<div id="centercanvasandarrows"> <!-- container of canvas and arrow keys-->
+      <div id="centercanvas"> <!-- center canvas -->
+       <canvas id="mainCanvas" width="550" height="550"></canvas>
+      </div> <!-- center canvas -->
+      <div id="arrows"> <!-- arrows -->
+      	<button type="button" id="leftArrowButton"> &larr; </button>
+	    <button type="button" id="rightArrowButton" > &rarr; </button> 		
+		<div id=currentPageLabel> 1000/1000</div>
+      </div> <!-- arrows -->
+	</div> <!-- container of canvas and arrow keys-->
+	
+    <div id="rightmenu"> <!-- right menu -->
+      <button type="button" id="exportAsGIFButton"> Export as GIF </button>
+	  <button type="button" id="SaveButton"> Save to Slot </button>
+	  <button type="button" id="LoadButton"> Load From Slot </button>
+	  <div id="SaveLoadSlotSelectDIV">
+	    <p>Save/Load Slot &num;</p>
+		<select id="SaveLoadSlotSelect">
+		<option value="Slot0">Slot 0</option>
+		<option value="Slot1">Slot 1</option>
+		<option value="Slot2">Slot 2</option>
+		<option value="Slot3">Slot 3</option>
+		<option value="Slot4">Slot 4</option>
+		<option value="Slot5">Slot 5</option>
+		<option value="Slot6">Slot 6</option>
+		<option value="Slot7">Slot 7</option>
+		<option value="Slot8">Slot 8</option>
+		<option value="Slot9">Slot 9</option>
+	    </select>
+	  </div>
+    </div> <!-- right menu -->
+  </div> <!-- three colums with left menu, center canvas and arrows, and right menu -->
+  
+  <div id="bottommenu"> <!-- bottommenu -->    
+    <div id="bottommenuDIV1">
+	</div>
+    <div id="bottommenuDIV2">
+      <button type="button" id="ShiftLeftButton"> Shift Left </button>
+      <button type="button" id="ShiftRightButton"> Shift Right </button>
+      <button type="button" id="ShiftUpButton"> Shift Up </button>
+      <button type="button" id="ShiftDownButton"> Shift Down </button>
+	</div>
+  </div> <!-- bottommenu -->
+
+  
+</div> <!-- allmenuscontainer -->
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>

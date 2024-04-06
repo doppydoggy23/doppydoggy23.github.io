@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Programmer's Return</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 900px;
+  position: relative; /* makes next element align vertically bellow this one*/
+  margin: auto; /*center horizontally*/
+  
+/*  outline-style: solid;
+  outline-color: black;
+  outline-width: 1px;*/
+}
+
+#horizBar{
+  background-color: grey;
+  width: 900px;
+  height: 50px;
+  
+  /*border: 2px solid red;*/
+  border-radius: 0px 30px; /* nice effect*/
+}
+
+#docfooter {
+  /*background-color: red;*/
+}
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: center;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  */
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+</style>
+
+	<!--  <script src="cht1.js"></script> -->
+
+</head>
+<body>
+
+<section>
+	<div id="mainDiv">
+			<h1 id="titleH">8 Android custom buttons example</h1>
+			<p> </p>
+			<p> 
+			Here I will show you different ways to create beautiful custom Android buttons. I made an example app showcase for the buttons which you can download <a href="ButtonsExampleFinal.zip">HERE</a>
+			</p> 
+			<p> </p>
+			<a href="ButtonsExampleFinal.zip"> <img src="screencapfullscr.png" alt="app full screen" width="30%" height="30%"> </a>
+			<p> </p>
+
+			<h2>Using PNGs.</h2>
+
+			<p> 
+			The first (and fastest) way to create a custom button is the case shown for button2, button10 and button9. 
+			You simply need the PNG images of the button when pressed/unpressed. 
+			Then you create a selector for the button. 
+			</p>
+			<p>
+			Tip: use PNG with transparent background to make your buttons fit any layer.
+			</p> 
+			
+			<img src="button2ex.png" alt="button2" width="30%" height="30%">
+			
+			<p>Here is the selector file for button2 (<span class="curierfont">button7selector.xml</span>):</p>
+			
+<pre><code>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+	&lt;item
+		android:drawable="@drawable/bluesba"
+		android:state_enabled="false"/>
+
+	&lt;item
+		android:drawable="@drawable/bluesbb"
+		android:state_pressed="true"
+		android:state_enabled="true"/>
+
+	&lt;item android:drawable="@drawable/bluesba"
+		android:state_focused="true"
+		android:state_enabled="true"/>
+
+	&lt;item android:drawable="@drawable/bluesba"
+		android:state_enabled="true"
+		android:state_pressed="false"
+		android:state_focused="false"/>
+&lt;/selector>
+</code></pre>
+			
+			<p>
+			As you can see you only have to indicate the drawable PNG file for every one of the button states and that's it.
+			</p> 
+			<p>And the layout XML code for button2 (in <span class="curierfont">activity_main.xml</span>) looks like this:
+			
+<pre><code>
+&lt;Button
+        android:id="@+id/button2"
+        android:layout_width="181dp"
+        android:layout_height="49dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/button7selector"
+        android:text="Button2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button10" />
+</code></pre>
+
+			<h2>Using shapes.</h2>
+			<p>
+			The second way I'd like to show you to create buttons in Android is with drawable XML files (shapes). That's the case of button3, button4, button5, and button6.
+			</p> 
+
+			<img src="button3ex.png" alt="button3" width="30%" height="30%">
+
+			<p>
+			Button 3 layout XML (in <span class="curierfont">activity_main.xml</span>) is a mere pointer to the button selector:
+			</p> 
+
+<pre><code>
+&lt;Button
+	android:id="@+id/button3"
+    style="@style/BlueButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="32dp"
+    android:background="@drawable/button_selector"
+    android:text="Button3"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.498"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+</code></pre>
+
+			<p>
+			And the selector itself (<span class="curierfont">button_selector.xml</span>), points to two drawable shapes XML files:
+			</p> 
+
+
+<pre><code>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:drawable="@drawable/button_gradiant_2" android:state_pressed="true" />
+
+    &lt;item android:drawable="@drawable/button_gradiant_1" />
+&lt;/selector>
+</code></pre>
+
+			<p>
+			<span class="curierfont">button_gradiant_1.xml</span> is:
+			</p> 
+
+<pre><code>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    &lt;corners android:radius="8dp" />
+    &lt;gradient
+        android:angle="90"
+        android:endColor="@color/colorAccentLight"
+        android:centerColor="@color/colorAccent"
+        android:startColor="@color/colorAccent" />
+&lt;/shape>
+</code></pre>
+
+			<p>
+			<span class="curierfont">button_gradiant_2.xml</span> is:
+			</p> 
+
+<pre><code>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    &lt;corners android:radius="8dp" />
+    &lt;gradient
+        android:angle="270"
+        android:endColor="@color/colorAccentLight"
+        android:centerColor="@color/colorAccent"
+        android:startColor="@color/colorAccent" />
+&lt;/shape>
+</code></pre>
+
+			<p>
+			I will omit button4, button5 and button6 selectors since they are very similar to the button3 selector, that is, 
+			a mere pointer to the shape XML files that will be drawn when they are pressed/unpressed, but I'll show their XML shape files to let you know how to draw eye-pleasant shapes:
+			</p> 
+
+			<img src="button4ex.png" alt="button4" width="30%" height="30%">
+
+
+			<p>
+			button4 when pressed/unpressed is made with these shapes (<span class="curierfont">buttonbg2.xml</span> and <span class="curierfont">buttonbg2s.xml</span>):
+			</p> 
+
+<pre><code>
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/listview_background_shape">
+    &lt;stroke android:width="2dp" android:color="@color/greenborder2" />
+    &lt;padding android:left="2dp"
+        android:top="2dp"
+        android:right="2dp"
+        android:bottom="2dp" />
+    &lt;corners android:radius="5dp" />
+    &lt;solid android:color="@color/greenbg2" />
+&lt;/shape>
+</code></pre>
+
+<pre><code>
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/listview_background_shape">
+    &lt;stroke android:width="2dp" android:color="@color/greenborder2" />
+    &lt;padding android:left="2dp"
+        android:top="2dp"
+        android:right="2dp"
+        android:bottom="2dp" />
+    &lt;corners android:radius="5dp" />
+    &lt;solid android:color="@color/greenbg2p" />
+&lt;/shape>
+</code></pre>
+
+			<img src="button5ex.png" alt="button5" width="30%" height="30%">
+
+			<p>
+			button5 looks the same pressed or unpressed (<span class="curierfont">roundedbutton1.xml</span>):
+			</p> 
+
+<pre><code>
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/roundedsquareshape">
+    &lt;!--
+    &lt;stroke android:width="2dp" android:color="@color/greenborder2" />
+    -->
+    &lt;padding android:left="2dp"
+        android:top="2dp"
+        android:right="2dp"
+        android:bottom="2dp" />
+    &lt;corners android:radius="50dp" />
+    &lt;solid android:color="@color/blue2" />
+&lt;/shape>
+</code></pre>
+
+			<img src="button6ex.png" alt="button6" width="30%" height="30%">
+
+			<p>
+			And finally, button6 is made with 2 shapes in 2 different layers (<span class="curierfont">button4bg.xml</span>). That is also possible as shown here:
+			</p> 
+
+<pre><code>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;!-- Bottom 15dp Shadow -->
+    &lt;item>
+        &lt;shape  android:shape="rectangle">
+            &lt;solid android:color="@color/grey1" />
+            &lt;corners android:radius="5dp" />
+        &lt;/shape>
+    &lt;/item>
+
+    &lt;!-- White Top color -->
+    &lt;item android:bottom="5px" android:right="5px">
+
+        &lt;shape>
+            &lt;stroke android:width="2px" android:color="@color/grey1" />
+            &lt;padding android:left="2dp"
+                android:top="2dp"
+                android:right="2dp"
+                android:bottom="2dp" />
+            &lt;corners android:radius="5dp" />
+            &lt;gradient
+                android:angle="90"
+                android:endColor="@color/grey3"
+                android:startColor="@color/grey2" />
+        &lt;/shape>
+
+    &lt;/item>
+
+&lt;/layer-list>
+</code></pre>
+
+			<h2>Using 9-patch PNGs.</h2>
+
+			<a href="button7.png"> <img src="button7.png" alt="button7" width="30%" height="30%"> </a>
+
+			<p>
+			Button7 is a special case of using a PNG file as a background. It uses a 9-patch file, which is a PNG file divided in 9 sections that allow it to be stretched without losing the shape.
+			</p> 
+
+			<!--<img src="white9p.png" alt="9-patch example" width="100%" height="100%"> -->
+			<a href="white9p.png"> <img src="white9p.png" alt="9-patch example full screen" width="100%" height="100%"> </a>
+
+			<p>
+			You can find plenty of information of 9-patch files in Internet but they are easy to create in Android Studio. Simply right click in a PNG file and select create 9-patch.
+			</p> 
+
+			<img src="howtc9p.png" alt="create 9-patch" width="50%" height="50%">
+
+			<p>
+			Here are the layout XML (in <span class="curierfont">activity_main.xml</span>) and the selector (<span class="curierfont">button5selector.xml</span>) XML files. As you can see, you can treat them as any other drawable.
+			</p> 
+
+
+<pre><code>
+&lt;Button
+    android:id="@+id/button7"
+    android:layout_width="144dp"
+    android:layout_height="48dp"
+    android:layout_marginTop="20dp"
+    android:background="@drawable/button5selector"
+    android:text="Button7"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.498"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/button6" />
+</code></pre>
+
+
+
+
+<pre><code>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item
+        android:drawable="@drawable/whiteba"
+        android:state_enabled="false"/>
+
+    &lt;item
+        android:drawable="@drawable/whitebb"
+        android:state_pressed="true"
+        android:state_enabled="true"/>
+
+    &lt;item android:drawable="@drawable/whiteba"
+        android:state_focused="true"
+        android:state_enabled="true"/>
+
+    &lt;item android:drawable="@drawable/whiteba"
+        android:state_enabled="true"
+        android:state_pressed="false"
+        android:state_focused="false"/>
+&lt;/selector>
+</code></pre>
+
+
+			<h2>Common problems.</h2>
+
+			<p>
+			<span class="bolded">Problem</span>: I can't change the background of my buttons. It doesn't matter what I try.
+			</p> 
+
+			<p>
+			<span class="bolded">Solution</span>: Default Android theme overlaps any button background. That's why you need to change the Android default theme for another one. Here's the app theme I used in the example (<span class="curierfont">themes.xml</span> in the <span class="curierfont">res</span> folder):
+			</p> 
+
+<pre><code>
+&lt;resources xmlns:tools="http://schemas.android.com/tools">
+    &lt;!-- Base application theme. -->
+    &lt;!-- substitute "Theme.MaterialComponents.DayNight.DarkActionBar" because it will override the custom background -->
+    &lt;style name="Theme.ButtonsExample1" parent="Theme.AppCompat.Light.NoActionBar">
+        &lt;!-- Primary brand color. -->
+        &lt;item name="colorPrimary">@color/purple_500&lt;/item>
+        &lt;item name="colorPrimaryVariant">@color/purple_700&lt;/item>
+        &lt;item name="colorOnPrimary">@color/white&lt;/item>
+        &lt;!-- Secondary brand color. -->
+        &lt;item name="colorSecondary">@color/teal_200&lt;/item>
+        &lt;item name="colorSecondaryVariant">@color/teal_700&lt;/item>
+        &lt;item name="colorOnSecondary">@color/black&lt;/item>
+        &lt;!-- Status bar color. -->
+        &lt;item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant&lt;/item>
+        &lt;!-- Customize your theme here. -->
+    &lt;/style>
+&lt;/resources>
+</code></pre>
+
+			<p>
+			<span class="bolded">Problem</span>: I can't get to display text in my buttons when I use a 9-patch.
+			</p> 
+
+			<p>
+			<span class="bolded">Solution</span>: Note that when you are defining the 9-patches regions you can also set vertical/horizontal paddings. Check if you modified the paddings by mistake.
+			</p> 
+
+			<img src="vertpad.png" alt="9-patch vertical padding" width="50%" height="50%">
+
+
+	</div>
+</section>
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>

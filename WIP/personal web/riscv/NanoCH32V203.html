@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NanoCH32V203 Example Projects</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 900px;
+  /*text-align: center;*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  margin: auto; /*center horizontally*/
+}
+
+#pseudomainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+
+#tablewrapper {
+    display: inline-block;
+}
+#tablewrapperreg {
+    /*display: inline-block;*/
+    display: inline-block;
+}
+
+
+#docfooter {
+  /*background-color: red;*/
+}
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: center;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+.styled-table {
+    border-collapse: collapse;
+    margin-top: 5px;
+    margin-bottom: 25px;
+    margin-right: 0;
+    margin-left: 0px;
+    /*margin: 25px 0;*/
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.FigureText {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	color: black;
+	text-align: center;
+    margin-bottom: 0px;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+h2 {
+    font-size: 14pt;    
+}
+
+h1 {
+    font-size: 20pt;    
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+<section>
+
+    <h1 style="text-align: center;">NanoCH32V203 Example Projects</h1>
+
+	<div id="mainDiv">
+
+        <div id="pseudomainDiv">
+        <p style="text-align: left">
+            Here I document my NanoCH32V203 Development Board personal projects.
+        </p>
+
+        <p style="text-align: left">
+            The NanoCH32V203 is a cheap RISC-V development board. You can get one in AliExpress with LCD Screen and USB cables for less than 10 dollars, which is a pretty good price IMO. The NanoCH32V203
+            is based around the CH32V203C8T6 microcontroller from QinHeng. It has 20KB of RAM, 64KB of programmable flash memory, and supports, among other things, the USB interface, which we will use
+            in many projects interfacing it with USB keyboards and mice.            
+        </p>
+
+        <p style="text-align: left">
+            You can find the IDE, programming tools, instructions and examples in <a href="https://github.com/wuxx/nanoCH32V203">their GitHub repository.</a>
+        </p>
+
+        <h2 style="text-align: center">Blinking LED</h2>
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/nCtQSAvF6fY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        
+        <p style="text-align: left">
+            My first project was the usual LED blinking test. The NanoCH32V203 incorporates a LED. Just a matter of setting up the pins to output and activating them every second. Pretty strightforward. 
+            You can download the example MounRiver Studio IDE project fie <a href="ledtest1.zip">HERE</a> or in <a href="https://github.com/doppydoggy23/NanoCH32V203">my GitHub repository</a>.
+        </p>
+
+        <h2 style="text-align: center">LCD Screen Demo</h2>
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/IjWtgz2_VBo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+        <p style="text-align: left">
+            My second project was a demostration of LCD usage. The program outputs a text (8x8 free font) to the screen and makes it bounce around it. 
+            You can download the example MounRiver Studio IDE project fie <a href="LCDTest1V1.zip">HERE</a> or in <a href="https://github.com/doppydoggy23/NanoCH32V203">my GitHub repository</a>.
+        </p>
+
+        <h2 style="text-align: center">Mouse Demo</h2>
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/fy-BVJv8lj8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+        <p style="text-align: left">
+            My third project was a Pong-like game using the USB conection to a standard USB mouse. Note that not all computer mice use the same protocol, so yours might not work like mine.
+            You can download the example MounRiver Studio IDE project fie <a href="MouseTestV1.zip">HERE</a> or in <a href="https://github.com/doppydoggy23/NanoCH32V203">my GitHub repository</a>.
+        </p>
+
+        <h2 style="text-align: center">Keyboard Demo</h2>        
+        
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/BSz-zq8W7Ec" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+        <p style="text-align: left">
+            The fourth project I made was a USB keyboard recognition program. It recognizes all letters and numbers. I thought it was enough for a demo, but it can be easily extended.
+            You can download the example MounRiver Studio IDE project fie <a href="KBTestV1.zip">HERE</a> or in <a href="https://github.com/doppydoggy23/NanoCH32V203">my GitHub repository</a>.
+        </p>
+
+        <h2 style="text-align: center">Pong in C and ASM</h2>        
+        
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/Zmp1mvWJ0lA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+        <p style="text-align: left">
+            The fifth project I made was a ball bouncing around the screen, but this time I programmed it mixing C code and RISC-V assembly language. As with the other projects you can download it
+             <a href="asmpongV1.zip">HERE</a> or in <a href="https://github.com/doppydoggy23/NanoCH32V203">my GitHub repository</a>.
+        </p>
+
+        <h2 style="text-align: center">Spinning 3D Cube + Timer</h2>        
+        
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/4rEGMfNBiSE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+        <p style="text-align: left">
+            The sixth project I made was a spinning 3D cube while the led blinks every second. This time the led blinking was made using a timer (Timer 3). I had troubles using math.h functions in
+            MounRiver Studio, so I had to use custom sin/cos functions. It was a bit of a mess. As with the other projects, you can download the MounRiver Project file and source code
+             <a href="cube3dV1.zip">HERE</a> or in <a href="https://github.com/doppydoggy23/NanoCH32V203">my GitHub repository</a>.
+        </p>
+
+        </div>
+
+	</div>
+
+
+
+</section>
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>

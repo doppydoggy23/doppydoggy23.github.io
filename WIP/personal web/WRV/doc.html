@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Web RISC-V Simulator Documentation & Examples</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+#pseudomainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+
+#tablewrapper {
+    display: inline-block;
+}
+#tablewrapperreg {
+    /*display: inline-block;*/
+    display: inline-block;
+}
+
+
+#docfooter {
+  /*background-color: red;*/
+}
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: center;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+
+table, th, td {
+  border: 1px solid black;
+}
+
+h2 {
+    font-size: 14pt;    
+}
+
+h1 {
+    font-size: 20pt;    
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+<section>
+
+    <h2>Examples</h2>
+    <div id="tablewrapperreg">
+
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Example</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td> <a href="namehello.S">namehello.S</a> </td>
+                    <td>Asks the user for a string. Then prints that string.</td>
+                </tr>
+                <tr>
+                    <td> <a href="countdown.S">countdown.S</a> </td>
+                    <td>Asks the user for a number. Then prints a countdown from that number.</td>
+                </tr>
+                <tr>
+                    <td> <a href="fibonacci.S">fibonacci.S</a> </td>
+                    <td>Asks the user for a number. Then prints that many fibonacci numbers.</td>
+                </tr>
+                <tr>
+                    <td> <a href="isprime.S">isprime.S</a> </td>
+                    <td>Asks the user for a number. Then prints if it's prime or not prime.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+
+
+    <h2>About</h2>
+    <p>
+        WRV is a toy. It was programmed with the hopes of providing people interested in learning RISC-V a medium to run their first test programs. 
+        My code itself (javascript and html) belongs to public domain, but this program uses also <a href="https://ace.c9.io/">https://ace.c9.io/</a> files that have their own license.
+    </p>
+
+
+    <h2>The RISC-V Virtual Machine</h2>
+    <p>
+        The program runs in a VM of 64KB with the following organisation:
+        <img src="VMmem.png" alt="VM memory" width="10%" height="10%">
+        The first (4*Number of program lines) bytes are reserved for future use. Currently it's only zeros, but future versions might populate them with code. Then it comes the contents of the data sections, 
+        which currently only allows .word and .asciiz, then the heap and then the stack. The stack pointer is always initialized to the top of the 64KB.
+    </p>
+
+    <h2>Bugs and ToDo list</h2>
+
+    <p>
+        A lot of concessions have been made to keep the project small and simple. My intention is to keep updating WRV sometime in the future. But beware of:
+        <ul>
+            <li>Program code must always include a space after the instruction mnemonic.</li>
+            <li>Not all pseudoinstructions are included</li>
+            <li>Data only accepts words and asciizs. Data section, if it exists, must come before the code.</li>
+            <li>Only the basic integer subset of instructions are implemented</li>
+            <li>ebreak is not implemented</li>
+            <li>Only 3000 lines of code can be run without the VM stopping. It's programmed like this to stop buggy neverending programs.</li>
+        </ul> 
+        
+    </p>
+
+    <h2>Syscalls</h2>
+    <p>
+        Print string: a0=0. a1=string addr.
+    </p>
+    <p>
+        Print number: a0=1. a1=number to print.
+    </p>
+    <p>
+        Ask the user for a number: a0=2. a1=string to ask the user. Returns the number in a0.
+    </p>
+    <p>
+        Ask the user for a string: a0=3. a1=string to ask the user. a2= address to store the string the user inputs.
+    </p>
+
+</section>
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Milk-V Duo Example Projects</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 900px;
+  /*text-align: center;*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  /*margin: auto;*/ /*center horizontally*/
+}
+
+#pseudomainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: left;
+}
+
+
+#tablewrapper {
+    display: inline-block;
+}
+#tablewrapperreg {
+    /*display: inline-block;*/
+    display: inline-block;
+}
+
+
+
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: left;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+.styled-table {
+    border-collapse: collapse;
+    margin-top: 5px;
+    margin-bottom: 25px;
+    margin-right: 0;
+    margin-left: 0px;
+    /*margin: 25px 0;*/
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.FigureText {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	color: black;
+	text-align: left;
+    margin-bottom: 0px;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+h2 {
+    font-size: 14pt;    
+}
+
+h1 {
+    font-size: 20pt;    
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+<section>
+
+    <h1 style="text-align: left;">Milk-V Duo Example Projects</h1>
+
+	<div id="mainDiv">
+
+        <div id="pseudomainDiv">
+        <p style="text-align: left">
+            Here I document my Milk-V Duo development board personal projects.
+        </p>
+
+        <p style="text-align: left">
+            The Milk-V Duo is a cheap RISC-V development board you can get for around 10 euros in AliExpress. It has a powerful 1GHz processor and it runs a custom linux, but it doesn't come video ports or free USB ports to attach devices to. 
+            Almost all interactions are done through SSH connections.
+        </p>
+
+        <p style="text-align: left">
+            Here are some places to start from when searching for information about this board:             
+        </p>
+        <ul>
+          <li><a href="https://milkv.io/docs/duo/">Official documentation for starters</a></li>
+          <li><a href="https://community.milkv.io/c/duo/5">Official forum </a> where everybody can post their questions and share information about their projects</li>
+          <li><a href="https://www.reddit.com/r/RISCV/">RISC-V Reddit </a> where you can post general or particular questions about RISC-V and its boards</li>
+        </ul> 
+
+        <p>&nbsp</p>
+
+        <h2 style="text-align: left">Blinking LEDs with shell scripts</h2>
+
+        <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/5GQauuhU0ow" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>-->
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/5GQauuhU0ow?si=7PUBUY70BD8eMZfO" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        
+        <p style="text-align: left">
+            My first project was the usual LED blinking test. It is a simple Bourne Shell (/bin/sh) script because the current linux distro at the time of writing doesn't use bash.
+            You can find it at <a href="https://github.com/doppydoggy23/milkvduo/">my GitHub repository</a>.
+            Here is the script code:
+<pre> <code>
+#!/bin/sh
+LED=440
+# Run GPIO-LED
+echo $LED > /sys/class/gpio/export
+# Setup GPIO-LED
+echo out > /sys/class/gpio/gpio$LED/direction
+            
+echo 1 > /sys/class/gpio/gpio$LED/value
+sleep 0.5
+echo 0 > /sys/class/gpio/gpio$LED/value
+sleep 0.5
+            
+# cleanup gpio
+echo $LED > /sys/class/gpio/unexport
+</code> </pre>
+        </p>
+
+
+        <p>&nbsp</p>
+
+        <h2 style="text-align: left">Ball boucing around the screen with LED blinking</h2>
+
+        <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/EhIMtalPCxg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>-->
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/EhIMtalPCxg?si=rv2G_BapKdxMymMF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+        <p style="text-align: left">
+            My second project was a shell script that bounces a character around the SSH screen. Remember it was written for /bin/sh and not /bin/bash, so some inconveniences had to be addressed, like
+            I couldn't read a key with a timeout to exit the program nicely and you are forced to use CTRL-C.
+            You can find it at <a href="https://github.com/doppydoggy23/milkvduo/">my GitHub repository</a>
+
+            Here is the script code:
+<pre> <code>
+    #!/bin/sh 
+
+    #limits of screen
+    MAXX=79 
+    MAXY=24
+    
+    #GPIO device
+    LED_GPIO=/sys/class/gpio/gpio440
+    
+    BALLX=1
+    BALLY=1
+    INCX=1
+    INCY=1
+    KBENTER=""
+    
+    printBallXY () {
+        local X=$1
+        local Y=$2
+        clear
+        printf "\033[${Y};${X}f O"
+    }
+    
+    blinkledOn () {
+        echo 1 > $LED_GPIO/value
+    }
+    
+    blinkledOff () {
+        echo 0 > $LED_GPIO/value
+    }
+    
+    #open device
+    echo 440 > /sys/class/gpio/export
+    echo out > $LED_GPIO/direction
+    
+    #the only way to stop the program is using CTRL-C
+    while true
+    do
+        printBallXY ${BALLX} ${BALLY}
+    
+        if [ $((BALLX)) -gt $((MAXX)) ]; then INCX=-1; blinkledOn; fi
+        if [ $((BALLY)) -gt $((MAXY)) ]; then INCY=-1; blinkledOn; fi
+        if [ $((BALLX)) -lt 0 ]; then INCX=1; blinkledOn; fi
+        if [ $((BALLY)) -lt 0 ]; then INCY=1; blinkledOn; fi
+    
+        BALLX=$(($BALLX+$INCX))
+        BALLY=$(($BALLY+$INCY))
+    
+        sleep 0.05
+        blinkledOff
+    done
+</code> </pre>
+        </p>
+
+        <p>&nbsp</p>
+        
+        <h2 style="text-align: left">Mixing C and Assembler code</h2>
+
+        <p style="text-align: left">
+            My third project was a small example of how to mix C language and Assembler code. You can find it at <a href="https://github.com/doppydoggy23/milkvduo/">my GitHub repository</a> 
+            under the helloasm directoy. The code is compiled using the <a href="https://github.com/milkv-duo/duo-examples">Milk-V Duo Examples SDK</a>. The documentation says you should install
+            it under ubuntu 20.04 but I installed it without problems in a Linux Mint 21.3 VirtualBox Linux machine. Remember that to compile the examples you need to set the system variables in the
+            current bash session doing the following commands:
+<pre> <code>
+cd duo-examples 
+source envsetup.sh
+</code> </pre>
+        </p>
+
+        <p>
+            Did you know that gcc can also compile assembler? I only needed to add the source assembler (.s files) to the SOURCE variable and gcc will compile them along with the .c files. Look at the following
+            makefile:
+
+<pre> <code>
+TARGET=helloasm
+
+ifeq (,$(TOOLCHAIN_PREFIX))
+$(error TOOLCHAIN_PREFIX is not set)
+endif
+
+ifeq (,$(CFLAGS))
+$(error CFLAGS is not set)
+endif
+
+ifeq (,$(LDFLAGS))
+$(error LDFLAGS is not set)
+endif
+
+CC = $(TOOLCHAIN_PREFIX)gcc
+
+CFLAGS += -I$(SYSROOT)/usr/include
+
+LDFLAGS += -L$(SYSROOT)/lib
+LDFLAGS += -L$(SYSROOT)/usr/lib
+
+SOURCE = $(wildcard *.c) $(wildcard *.s)
+OBJS = $(patsubst %.c,%.o,$(SOURCE))
+
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+.PHONY: clean
+clean:
+	@rm *.o -rf
+	@rm $(OBJS) -rf
+	@rm $(TARGET)
+</code> </pre>
+
+            Here is the assembler .s file with the code. Just three example functions that show how to deal with variables passed in functions:
+<pre> <code>
+.section .text
+.globl sumfunc, powfunc, add10func
+
+
+# sum function, adds two numbers
+sumfunc:
+    add a0, a0, a1
+    ret
+
+# power function, elevates a0 to the a1 power
+powfunc:
+    #
+pow1:
+    mv t0, a0
+    addi t1, a1, -1
+pow1loop:
+    #
+    mv t3, t0
+    addi t4, a0, -1
+mult1loop:
+    add t0, t0, t3
+    addi t4, t4, -1
+    bgt t4, zero, mult1loop    
+    #
+    addi t1, t1, -1
+    bgt t1, zero, pow1loop
+    mv a0, t0
+    ret
+
+#adds 10 to a variable. a0=pointer to variable
+add10func:
+    ld t0, 0(a0)
+    addi t0, t0, 10
+    sd t0, 0(a0)
+    ret
+</code> </pre>            
+
+            And here is the source .c file that calls the assembler functions and prints the result:
+<pre> <code>
+#include &#60;stdio.h>
+
+    //We use longs (8 bytes) and not ints (4 bytes) because the processor is 64 bit
+    extern long sumfunc (long a, long b); // adds 2 numbers
+    extern long powfunc (long a, long b); // elevates a to the b power
+    extern void add10func (long *a); // increments variable a in 10
+    
+    int main() {
+        printf("Hello, World!\n");
+    
+        printf("sumfunc(4,3)=%i\n", sumfunc(4, 3));
+        printf("powfunc(3,3)=%i\n", powfunc(3, 3));
+    
+        long mynumber=-110; 
+        printf ("mynumber before add10func: %i\n", mynumber);
+        add10func (&mynumber);
+        printf ("mynumber after add10func: %i\n", mynumber);
+    
+        return 0;
+    }
+</code> </pre>            
+
+        </p>
+
+        </div>
+
+	</div>
+
+
+
+</section>
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>

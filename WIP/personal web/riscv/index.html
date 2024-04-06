@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RISC-V Assembly Language Summary</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+#pseudomainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+
+#tablewrapper {
+    display: inline-block;
+}
+#tablewrapperreg {
+    /*display: inline-block;*/
+    display: inline-block;
+}
+
+
+#docfooter {
+  /*background-color: red;*/
+}
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: center;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+.styled-table {
+    border-collapse: collapse;
+    margin-top: 5px;
+    margin-bottom: 25px;
+    margin-right: 0;
+    margin-left: 0px;
+    /*margin: 25px 0;*/
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.FigureText {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	color: black;
+	text-align: center;
+    margin-bottom: 0px;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+h2 {
+    font-size: 14pt;    
+}
+
+h1 {
+    font-size: 20pt;    
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+<section>
+
+    <h1>Introduction</h1>
+    <p>
+    This text is a compilation of the notes I've taken while studying the RISC-V Architecture and assembly language. It probably has many errors and it's not meant as a substitution of the 
+    <a href="https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf"> official specs</a> or a 
+    <a href="http://riscvbook.com/spanish/guia-practica-de-risc-v-1.0.5.pdf">good book on the subject</a>. You can consider it a RISC-V assembly language mini-tutorial or gentle introduction into the RISC-V world.
+    </p>
+
+    <h1>Architecture</h1>
+    <p>
+        Only the RV32I subset of RISC-V is treated in this text. This is the most basic integer registers and operations. Enough for an introduction. Here there are the 32-bit integer, general purpose, registers,
+        and their intented function in assembly. Note that the function given is optional, since you can use any register anyway you want. The rightmost side indicates who is responsible of saving that
+        register in a call to a procedure. Again, this indication is optional and a mere convention.
+    </p>
+
+	<div id="mainDiv">
+
+        <div id="tablewrapperreg">
+            <p class="FigureText">Register List</p>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Register</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Saver</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>x0</td>
+                        <td>zero</td>
+                        <td>Always zero</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>x1</td>
+                        <td>ra</td>
+                        <td>Return Addres</td>
+                        <td>Caller</td>
+                    </tr>
+                    <tr>
+                        <td>x2</td>
+                        <td>sp</td>
+                        <td>Stack Pointer</td>
+                        <td>Callee</td>
+                    </tr>
+                    <tr>
+                        <td>x3</td>
+                        <td>gp</td>
+                        <td>Global Pointer</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>x4</td>
+                        <td>tp</td>
+                        <td>Thread Pointer</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>x5</td>
+                        <td>t0</td>
+                        <td>Temporary / Alternate Link Reg</td>
+                        <td>Caller</td>
+                    </tr>
+                    <tr>
+                        <td>x6-x7</td>
+                        <td>t1-t2</td>
+                        <td>Temporaries</td>
+                        <td>Caller</td>
+                    </tr>
+                    <tr>
+                        <td>x8</td>
+                        <td>s0 / fp</td>
+                        <td>Saved Register / Frame Pointer</td>
+                        <td>Callee</td>
+                    </tr>
+                    <tr>
+                        <td>x9</td>
+                        <td>s1 </td>
+                        <td>Saved Register</td>
+                        <td>Callee</td>
+                    </tr>
+                    <tr>
+                        <td>x10-x11</td>
+                        <td>a0-a1</td>
+                        <td>Function Arguments / Return Values</td>
+                        <td>Caller</td>
+                    </tr>
+                    <tr>
+                        <td>x12-x17</td>
+                        <td>a2-a7</td>
+                        <td>Function Arguments</td>
+                        <td>Caller</td>
+                    </tr>
+                    <tr>
+                        <td>x18-x27</td>
+                        <td>s2-s11</td>
+                        <td>Saved Registers</td>
+                        <td>Callee</td>
+                    </tr>
+                    <tr>
+                        <td>x28-x31</td>
+                        <td>t3-t6</td>
+                        <td>Temporaries</td>
+                        <td>Caller</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <p></p>
+
+        <h1 style="text-align: left;">Instructions</h1>
+
+        <p style="text-align: left;">Take into account that many integer instructions treat numbers as <a href="https://en.wikipedia.org/wiki/Two%27s_complement">two's complement</a> that have
+            the advantage of using the same circuitry/operations than normal unsigned integers. Instructions that treat numbers as unsigned integers are usually explicitly marked.
+        </p>
+        <p style="text-align: left;">
+            All instructions occupy the same, 32 bits, or 4 bytes long.
+        </p>
+        
+        <div id="tablewrapper">
+            <p class="FigureText">Instruction Table</p>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Instruction</th>
+                        <th>Name</th>
+                        <th>Format</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <!-- R TYPE INSTR BEGIN -->
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#addR">add rd, rs1, rs2</a></td> <!--<td>add rd, rs1, rs2</td> -->
+                        <td>ADD</td>
+                        <td>R</td>
+                        <td>rd=rs1+rs2</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#subR">sub rd, rs1, rs2</a></td> <!--<td>sub rd, rs1, rs2</td> -->
+                        <td>SUBSTRACT</td>
+                        <td>R</td>
+                        <td>rd=rs1-rs2</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#andR">and rd, rs1, rs2</a></td> <!--<td>and rd, rs1, rs2</td> -->
+                        <td>AND</td>
+                        <td>R</td>
+                        <td>rd=rs1 AND rs2</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#orR">or rd, rs1, rs2</a></td> <!--<td>or rd, rs1, rs2</td> -->
+                        <td>OR</td>
+                        <td>R</td>
+                        <td>rd=rs1 OR rs2</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#xorR">xor rd, rs1, rs2</a></td> <!--<td>xor rd, rs1, rs2</td> -->
+                        <td>XOR</td>
+                        <td>R</td>
+                        <td>rd=rs1 XOR rs2</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#sllR">sll rd, rs1, rs2</a></td> <!--<td>sll rd, rs1, rs2</td> -->
+                        <td>Shift Left Logical</td>
+                        <td>R</td>
+                        <td>rd=rs1 &#60;&#60; rs2</td>
+                        <!-- https://en.wikipedia.org/wiki/Logical_shift -->
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#srlR">srl rd, rs1, rs2</a></td> <!--<td>srl rd, rs1, rs2</td> -->
+                        <td>Shift Right Logical</td>
+                        <td>R</td>
+                        <td>rd=rs1 &#62;&#62; rs2</td>       
+                        <!-- https://en.wikipedia.org/wiki/Logical_shift -->
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#sraR">sra rd, rs1, rs2</a></td> <!--<td>sra rd, rs1, rs2</td> -->
+                        <td>Shift Right Arithmetical</td>
+                        <td>R</td>
+                        <td>rd=rs1 &#62;&#62; rs2 (signed)</td> <!-- explain this -->
+                        <!-- https://en.wikipedia.org/wiki/Arithmetic_shift -->
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#sltR">slt rd, rs1, rs2</a></td> <!--<td>slt rd, rs1, rs2</td> -->
+                        <td>Set Less Than</td>
+                        <td>R</td>
+                        <td>if (rs1&#60;rs2) rd=1 else rd=0; (signed) </td> <!-- explain this -->
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#sltuR">sltu rd, rs1, rs2</a></td> <!--<td>sltu rd, rs1, rs2</td> -->
+                        <td>Set Less Than Unsigned</td>
+                        <td>R</td>
+                        <td>if (rs1&#60;rs2) rd=1 else rd=0; (unsigned)</td> <!-- explain this -->
+                    </tr>
+                    <!-- R TYPE INSTR END -->
+
+                    <!-- I TYPE INSTR BEGIN -->
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#addi">addi rd, rs1, immediate</a></td>
+                    <td>ADD Immediate</td>
+                    <td>I</td>
+                    <td>rd=rs1+immediate</td>
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#andi">andi rd, rs1, immediate</a></td>
+                    <td>AND Immediate</td>
+                    <td>I</td>
+                    <td>rd=rs1 AND immediate</td>
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#ori">ori rd, rs1, immediate</a></td>
+                    <td>OR Immediate</td>
+                    <td>I</td>
+                    <td>rd=rs1 OR immediate</td>
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#xori">xori rd, rs1, immediate</a></td>
+                    <td>XOR Immediate</td>
+                    <td>I</td>
+                    <td>rd=rs1 XOR immediate</td>
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#slli">slli rd, rs1, immediate</a></td>
+                    <td>Shift Left Logical Immediate</td>
+                    <td>I</td>
+                    <td>rd=rs1 &#60;&#60; immediate</td>
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#srli">srl rd, rs1, immediate</a></td>
+                    <td>Shift Right Logical Immediate</td>
+                    <td>I</td>
+                    <td>rd=rs1 &#62;&#62; immediate</td>       
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#srai">srai rd, rs1, immediate</a></td>
+                    <td>Shift Right Arithmetical Immediate</td>
+                    <td>I</td>
+                    <td>rd=rs1 &#62;&#62; immediate (signed)</td>
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#slti">slti rd, rs1, immediate</a></td>
+                    <td>Set Less Than Immediate</td>
+                    <td>I</td>
+                    <td>if (rs1&#60;immediate) rd=1 else rd=0; (signed) </td>
+                    </tr>
+                    <tr>
+                    <td><a style="text-decoration: none; color: inherit;" href="#sltiu">sltiu rd, rs1, immediate</a></td>
+                    <td>Set Less Than Immediate Unsigned</td>
+                    <td>I</td>
+                    <td>if (rs1&#60;immediate) rd=1 else rd=0; (unsigned)</td>
+                    </tr>
+                    <!-- I TYPE INSTR END -->
+
+                    <!-- MEM TYPE INSTR END -->                    
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#lb">lb rd, offset(rs1)</a></td>
+                        <td>Load Byte</td>
+                        <td>I</td>
+                        <td>rd=sign_extend(Memory_byte[rs1+offset])</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#lh">lh rd, offset(rs1)</a></td>
+                        <td>Load Half</td>
+                        <td>I</td>
+                        <td>rd=sign_extend(Memory_halfword[rs1+offset])</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#lw">lw rd, offset(rs1)</a></td>
+                        <td>Load Word</td>
+                        <td>I</td>
+                        <td>rd=Memory[rs1+offset]</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#lbu">lbu rd, offset(rs1)</a></td>
+                        <td>Load Byte Unsigned</td>
+                        <td>I</td>
+                        <td>rd=zero_extend(Memory_byte[rs1+offset])</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#lhu">lhu rd, offset(rs1)</a></td>
+                        <td>Load Halfword Unsigned</td>
+                        <td>I</td>
+                        <td>rd=zero_extend(Memory_halfword[rs1+offset])</td>
+                    </tr>
+
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#sb">sb rs2, offset(rs1)</a></td>
+                        <td>Store Byte</td>
+                        <td>S</td>
+                        <td>Memory[rs1+immediate]=lower_byte(rs2)</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#sh">sh rs2, offset(rs1)</a></td>
+                        <td>Store Half</td>
+                        <td>S</td>
+                        <td>Memory[rs1+immediate]=lower_halfword(rs2)</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#sw">sw rs2, offset(rs1)</a></td>
+                        <td>Store Word</td>
+                        <td>S</td>
+                        <td>Memory[rs1+immediate]=rs2</td>
+                    </tr>
+                    <!-- MEM TYPE INSTR END -->
+
+
+                    <!-- CONTROL TANSFER INSTR END -->
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#beq">beq rs1, rs2, label</a></td>
+                        <td>Branch if Equal</td>
+                        <td>B</td>
+                        <td>if (rs1==rs2) PC=label;</td>
+                    </tr>
+
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#bne">bne rs1, rs2, label</a></td>
+                        <td>Branch if Not Equal</td>
+                        <td>B</td>
+                        <td>if (rs1!=rs2) PC=label;</td>
+                    </tr>
+
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#blt">blt rs1, rs2, label</a></td>
+                        <td>Branch if Less Than</td>
+                        <td>B</td>
+                        <td>if (rs1&#60;rs2) PC=label;</td>
+                    </tr>
+
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#bge">bge rs1, rs2, label</a></td>
+                        <td>Branch if Greater or Equal</td>
+                        <td>B</td>
+                        <td>if (rs1&#62;=rs2) PC=label;</td>
+                    </tr>
+
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#bltu">bltu rs1, rs2, label</a></td>
+                        <td>Branch if Less Than Unsigned</td>
+                        <td>B</td>
+                        <td>if (rs1&#60;rs2) PC=label; (unsigned)</td>
+                    </tr>
+
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#bgeu">bgeu rs1, rs2, label</a></td>
+                        <td>Branch if Greater or Equal Unsigned</td>
+                        <td>B</td>
+                        <td>if (rs1&#62;=rs2) PC=label; (unsigned)</td>
+                    </tr>
+                    <!-- CONTROL TANSFER INSTR END -->
+
+                    <!-- JUMP INSTR-->
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#jal">jal rd, label</a></td>
+                        <td>Jump And Link</td>
+                        <td>J</td>
+                        <td>rd=PC+4; PC=label</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#jalr">jalr rd, offset(rs1)</a></td>
+                        <td>Jump And Link Register</td>
+                        <td>I</td>
+                        <td>rd=PC+4; PC=rs1+offset</td>
+                    </tr>
+                    <!-- JUMP INSTR END -->
+
+                    <!-- U FORMAT INSTR -->
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#lui">lui rd, immediate</a></td>
+                        <td>Load Upper Immediate</td>
+                        <td>U</td>
+                        <td>rd=immediate&#60;&#60;12</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#auipc">auipc rd, immediate</a></td>
+                        <td>Add Upper Immediate to PC</td>
+                        <td>U</td>
+                        <td>rd=PC+(immediate&#60;&#60;12)</td>
+                    </tr>
+                    <!-- U FORMAT INSTR END -->
+
+                    <!-- ENV INSTR -->
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#ecall">ecall</a></td>
+                        <td>Environment Call</td>
+                        <td>I</td>
+                        <td>Transfer Control to the OS</td>
+                    </tr>
+                    <tr>
+                        <td><a style="text-decoration: none; color: inherit;" href="#ebreak">ebreak</a></td>
+                        <td>Environment break</td>
+                        <td>I</td>
+                        <td>Transfer Control to Debugger</td>
+                    </tr>
+                    <!-- ENV INSTR END -->
+                    
+                    
+                    <!-- and so on... -->
+                </tbody>
+            </table>
+        </div>
+
+
+	</div>
+
+
+    <!-- R-R TYPE INSTR BEGIN-->
+    <h2 id="addR">add rd, rs1, rs2</h2>
+    <p>Adds registers rs1 and rs2 and puts the result in rd.</p>
+
+    <h2 id="subR">sub rd, rs1, rs2</h2>
+    <p>Substracts rs2 from rs1 and puts the result in rd.</p>
+
+    <h2 id="andR">and rd, rs1, rs2</h2>
+    <p>Logically ANDs registers rs1 and rs2 and puts the result in rd.</p>
+
+    <h2 id="orR">or rd, rs1, rs2</h2>
+    <p>Logically ORs registers rs1 and rs2 and puts the result in rd.</p>
+
+    <h2 id="xorR">xor rd, rs1, rs2</h2>
+    <p>Logically XORs registers rs1 and rs2 and puts the result in rd.</p>
+
+    <h2 id="sllR">sll rd, rs1, rs2</h2>
+    <p>Shifts left rs1 by rs2 number of bits and puts the result in rd.</p>
+
+    <h2 id="srlR">srl rd, rs1, rs2</h2>
+    <p>Shifts right rs1 by rs2 number of bits and puts the result in rd.</p>
+
+    <h2 id="sraR">sra rd, rs1, rs2</h2>
+    <p>Shifts right arithmetically rs1 by rs2 number of bits and puts the result in rd.
+       if you need more info about arithmetic shift try  <a href="https://en.wikipedia.org/wiki/Arithmetic_shift">https://en.wikipedia.org/wiki/Arithmetic_shift</a>
+    </p>
+
+    <h2 id="sltR">slt rd, rs1, rs2</h2>
+    <p>Sets rd to 1 if rs1 is less than rs2, else it sets rd to 0.</p>
+
+    <h2 id="sltuR">sltu rd, rs1, rs2</h2>
+    <p>Sets rd to 1 if rs1 is less than rs2 using unsigned number comparison, else it sets rd to 0.</p>
+    <!-- R-R TYPE INSTR END-->
+
+    <!-- R-I TYPE INSTR BEGIN-->
+    <h2 id="addi">addi rd, rs1, immediate</h2>
+    <p>Adds register rs1 and a sign-extended 12-bit immediate value and puts the result in rd.</p>
+
+    <h2 id="andi">andi rd, rs1, immediate</h2>
+    <p>Logically ANDs register rs1 and a sign-extended 12-bit immediate value and puts the result in rd.</p>
+
+    <h2 id="ori">ori rd, rs1, immediate</h2>
+    <p>Logically ORs register rs1 and a sign-extended 12-bit immediate value and puts the result in rd.</p>
+
+    <h2 id="xori">xori rd, rs1, immediate</h2>
+    <p>Logically XORs registers r1 and a sign-extended 12-bit immediate value and puts the result in rd.</p>
+
+    <h2 id="slli">slli rd, rs1, immediate</h2>
+    <p>Shifts left r1 by a 5-bit immediate and puts the result in rd.</p>
+
+    <h2 id="srli">srli rd, rs1, immediate</h2>
+    <p>Shifts right r1 by a 5-bit immediate value and puts the result in rd.</p>
+
+    <h2 id="srai">srai rd, rs1, immediate</h2>
+    <p>Shifts right arithmetically r1 by immediate (5-bit) value and puts the result in rd.
+       if you need more info about arithmetic shift try  <a href="https://en.wikipedia.org/wiki/Arithmetic_shift">https://en.wikipedia.org/wiki/Arithmetic_shift</a>
+    </p>
+
+    <h2 id="slti">slti rd, rs1, immediate</h2>
+    <p>Sets rd to 1 if rs1 is less than immediate (12-bit value), else it sets rd to 0.</p>
+
+    <h2 id="sltiu">sltiu rd, rs1, immediate</h2>
+    <p>Sets rd to 1 if rs1 is less than immediate (12-bit value) using unsigned number comparison, else it sets rd to 0.</p>
+    <!-- R-I TYPE INSTR END-->
+
+    <!-- MEM TYPE INSTR BEGIN-->
+    <h2 id="lb">lb rd, offset(rs1)</h2>
+    <p>Loads a byte from the memory position rs1+offset, sign extends it, and writes it to rd. Offset is 12 bits signed.
+    if you need more info about sign extension try <a href="https://en.wikipedia.org/wiki/Sign_extension">https://en.wikipedia.org/wiki/Sign_extension</a>
+    </p>
+
+    <h2 id="lh">lh rd, offset(rs1)</h2>
+    <p>Loads a half word from the memory position rs1+offset, sign extends it, and writes it to rd. Offset is 12 bits signed.
+    if you need more info about sign extension try <a href="https://en.wikipedia.org/wiki/Sign_extension">https://en.wikipedia.org/wiki/Sign_extension</a>
+    </p>
+
+    <h2 id="lw">lw rd, offset(rs1)</h2>
+    <p>Loads a word from the memory position rs1+offset, and writes it to rd. Offset is 12 bits signed.
+    </p>
+
+    <h2 id="lbu">lbu rd, offset(rs1)</h2>
+    <p>Loads a byte from the memory position rs1+offset, zero extends it, and writes it to rd. Offset is 12 bits signed.
+    if you need more info about zero extension try <a href="https://en.wikipedia.org/wiki/Sign_extension">https://en.wikipedia.org/wiki/Sign_extension</a>
+    </p>
+
+    <h2 id="lhu">lhu rd, offset(rs1)</h2>
+    <p>Loads a half word from the memory position rs1+offset, zero extends it, and writes it to rd. Offset is 12 bits signed.
+    if you need more info about zero extension try <a href="https://en.wikipedia.org/wiki/Sign_extension">https://en.wikipedia.org/wiki/Sign_extension</a>
+    </p>
+
+    <h2 id="sb">sb rs2, offset(rs1)</h2>
+    <p>Writes the bits 0 to 7 (byte) of register rs2 to the memory position rs1+offset. Offset is 12 bits signed.
+    </p>
+
+    <h2 id="sh">sh rs2, offset(rs1)</h2>
+    <p>Writes the bits 0 to 15 (half word) of register rs2 to the memory position rs1+offset. Offset is 12 bits signed.
+    </p>
+
+    <h2 id="sw">sw rs2, offset(rs1)</h2>
+    <p>Writes the content of register rs2 to the memory position rs1+offset. Offset is 12 bits signed.
+    </p>
+    <!-- MEM TYPE INSTR END-->
+
+    <!-- CONTROL TRANSFER TYPE INSTR END-->
+    <h2 id="beq">beq rs1, rs2, label</h2>
+    <p>Jumps to label if rs1 and rs2 are equal. Internally, at instruction level, this is implemented has a signed 12 bit value shifted left once, that is added to the PC, thus giving a 4KB jump range.
+    </p>
+
+    <h2 id="bne">bne rs1, rs2, label</h2>
+    <p>Jumps to label if rs1 and rs2 are not equal. Internally, at instruction level, this is implemented has a signed 12 bit value shifted left once, that is added to the PC, thus giving a 4KB jump range.
+    </p>
+
+    <h2 id="blt">blt rs1, rs2, label</h2>
+    <p>Jumps to label if rs1 is less than rs2. Internally, at instruction level, this is implemented has a signed 12 bit value shifted left once, that is added to the PC, thus giving a 4KB jump range.
+    </p>
+
+    <h2 id="bge">bge rs1, rs2, label</h2>
+    <p>Jumps to label if rs1 is greater than or equal to rs2. Internally, at instruction level, this is implemented has a signed 12 bit value shifted left once, that is added to the PC, thus giving a 4KB jump range.
+    </p>
+
+    <h2 id="bltu">bltu rs1, rs2, label</h2>
+    <p>Jumps to label if rs1 is less than rs2 using unsigned number comparision. Internally, at instruction level, this is implemented has a signed 12 bit value shifted left once, that is added to the PC, thus giving a 4KB jump range.
+    </p>
+
+    <h2 id="bgeu">bgeu rs1, rs2, label</h2>
+    <p>Jumps to label if rs1 is greater than or equal to rs2 using unsigned number comparision. Internally, at instruction level, this is implemented has a signed 12 bit value shifted left once, that is added to the PC, thus giving a 4KB jump range.
+    </p>
+    <!-- CONTROL TRANSFER TYPE INSTR END-->
+
+    <!-- JUMP TYPE INSTR -->
+    <h2 id="jal">jal rd, label</h2>
+    <p>Stores the address of the next instruction in register rd and jumps to label. Internally, at instruction level, this is implemented has a signed 20 bit value shifted left once, that is added to the PC, thus giving a 1MB jump range.
+    </p>
+
+    <h2 id="jalr">jalr rd, offset(rs1)</h2>
+    <p>Stores the address of the next instruction in register rd and jumps to rs1+offset. Internally, at instruction level, offset is a signed 12 bit value that is added to the register rs1 and the least significant bit is set to 0.
+        This instruction is made so that the program can jump to any 32-bit address since any arbitrary value can be loaded into rs1.
+    </p>
+    <!-- JUMP INSTR END-->
+
+    <!-- U FORMAT INSTR -->
+
+    <h2 id="lui">lui rd, immediate</h2>
+    <p>Replaces the upper 20 bits of rd with immediate and fills the rest with zeros. This instruction is made to work in pairs with addi to fill the lower 12 bits, effective loading a 32 bits constant. Consider the following example:
+        <pre><code>
+            lui a0, %hi(PRIMESTRING)      # this loads the top 20 bits 
+            addi a0, a0, %lo(PRIMESTRING) # this loads the bottom 12 bits
+        </code></pre> 
+        You might think there is an error here since addi takes a signed extended 12 bit immediate to be added to the upper 20 bits of the address, but there is not. The answer it that the compiler macros <span class="curierfont">%hi</span> and <span class="curierfont">%lo</span>
+         are made to be used in pairs and already take into account the sign extension of the addi instruction when they return the upper 20 bits value, to make both instructions give the correct address of <span class="curierfont">PRIMESTRING</span>.
+         The alternative is using the la (Load Address) pseudoinstruction.
+    </p>
+
+    <h2 id="auipc">auipc rd, immediate</h2>
+    <p>Stores the address of the current instruction in register rd and and adds sets the upper 20 bits with immediate, filling the rest with zeros.
+        This instruction is made so that addresses relative to PC can be loaded. Consider the following code:
+        <pre><code>
+    1:
+    auipc	a0, %pcrel_hi(msg)
+    addi	a0, a0, %pcrel_lo(1b)
+        </code></pre>
+
+    In this code, <span class="curierfont">%pcrel_hi(msg)</span> returns the upper 20 bits of msg relative to the PC, while %<span class="curierfont">pcrel_lo(1b)</span> returns the lower 12 bits of msg relative to the auipc instruction before. This is so because %pcrel_lo() is designed to be paired with %pcrel_hi(). The compiler does the magic.
+    Take a look to <a href="https://sourceware.org/binutils/docs/as/RISC_002dV_002dModifiers.html">https://sourceware.org/binutils/docs/as/RISC_002dV_002dModifiers.html</a> or <a href="https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md">https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md</a> for more information.
+    </p>
+    <p>
+        The following code makes an infinite loop, since ra is loaded with the PC for the auipc instruction, and the jalr jumps to it.
+    <pre><code>
+    auipc	ra,0x0      
+    jalr	ra,0(ra)
+    </code></pre> 
+    </p>
+    <!-- U FORMAT INSTR END -->
+
+    <!-- ENV INSTR -->
+    <h2 id="ecall">ecall</h2>
+    <p>Transfers control to the Operating System. The exact functioning of this instruction depends on the machine/environment running the program.
+    </p>
+    <h2 id="ebreak">ebreak</h2>
+    <p>Transfers control to the debugger. The exact functioning of this instruction depends on the machine/environment running the program.
+    </p>
+    <!-- ENV INSTR END -->
+
+    <p></p>
+
+
+    <h1>Pseudoinstructions</h1>
+
+
+    <div id="pseudomainDiv">
+
+        <div id="tablewrapperreg">
+        <p class="FigureText">Pseudoinstruction Table</p>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Pseudoinstruction</th>
+                    <th>Base Instructions</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>la rd, symbol</td>
+                    <td><p>auipc rd, delta[31 : 12] + delta[11]</p> addi rd, rd, delta[11:0]</td>
+                    <td>Load Absolute Address <p>where delta = (symbol − PC)</p></td>
+                </tr>
+                <tr>
+                    <td>l{b|h|w|d} rd, symbol</td>
+                    <td><p>auipc rd, (delta[31 : 12] + delta[11]) </p> l{b|h|w|d} rd, delta[11:0] (rd)</td>
+                    <td>Load byte/halfword/word/double from any 32bit addr</td>
+                </tr>
+                <tr>
+                    <td>s{b|h|w|d} rd, symbol, rt</td>
+                    <td><p>auipc rt, (delta[31 : 12] + delta[11]) </p> s{b|h|w|d} rd, delta[11:0] (rt)</td>
+                    <td>Store byte/halfword/word/double to any 32bit addr</td>
+                </tr>
+                <tr>
+                    <td>nop</td>
+                    <td>addi x0, x0, 0</td>
+                    <td>No Operation</td>
+                </tr>
+                <tr>
+                    <td>li rd, immediate</td>
+                    <td><p>lui rd, (immediate[31 : 12] + immediate[11]) </p> addi rd, immediate[11:0]</td>
+                    <td>Load 32bit immediate</td>
+                </tr>
+                <tr>
+                    <td>mv rd, rs</td>
+                    <td>addi rd, rs, 0</td>
+                    <td>Move Register</td>
+                </tr>
+                <tr>
+                    <td>not rd, rs</td>
+                    <td>xori rd, rs, -1</td>
+                    <td>Not Register/One’s complement</td>
+                <tr>
+                    <td>neg rd, rs</td>
+                    <td>sub rd, x0, rs</td>
+                    <td>Negate Register/Two’s complement</td>
+                </tr>
+                <tr>
+                    <td>seqz rd, rs</td>
+                    <td>sltiu rd, rs, 1</td>
+                    <td>Set if = zero</td>
+                </tr>
+                <tr>
+                    <td>snez rd, rs</td>
+                    <td>sltu rd, x0, rs</td>
+                    <td>Set if &#60; &#62; zero</td>
+                </tr>
+                <tr>
+                    <td>sltz rd, rs</td>
+                    <td>slt rd, rs, x0</td>
+                    <td>Set if &#60; zero</td>
+                </tr>
+                <tr>
+                    <td>sgtz rd, rs</td>
+                    <td>slt rd, x0, rs</td>
+                    <td>Set if &#62; zero</td>
+                </tr>
+                <tr>
+                    <td>beqz rs, label</td>
+                    <td>beq rs, x0, offset</td>
+                    <td>Branch if = zero</td>
+                </tr>
+                <tr>
+                    <td>bnez rs, label</td>
+                    <td>bne rs, x0, offset</td>
+                    <td>Branch if &#60;&#62; zero</td>
+                </tr>
+                <tr>
+                    <td>blez rs, label</td>
+                    <td>bge x0, rs, offset</td>
+                    <td>Branch if &#60;= zero</td>
+                </tr>
+                <tr>
+                    <td>bgez rs, label</td>
+                    <td>bge rs, x0, offset</td>
+                    <td>Branch if &#62;= zero</td>
+                </tr>
+                <tr>
+                    <td>bltz rs, label</td>
+                    <td>blt rs, x0, offset</td>
+                    <td>Branch if &#60; zero</td>
+                </tr>
+                <tr>
+                    <td>bgtz rs, label</td>
+                    <td>blt x0, rs, offset</td>
+                    <td>Branch if &#62; zero</td>
+                </tr>
+                <tr>
+                    <td>bgt rs, rt, offset</td>
+                    <td>blt rt, rs, offset</td>
+                    <td>Branch if &#62;</td>
+                </tr>
+                <tr>
+                    <td>ble rs, rt, offset</td>
+                    <td>bge rt, rs, offset</td>
+                    <td>Branch if &#60;=</td>
+                </tr>
+                <tr>
+                    <td>bgtu rs, rt, offset</td>
+                    <td>bltu rt, rs, offset</td>
+                    <td>Branch if &#62;= (unsigned comp.)</td>
+                </tr>
+                <tr>
+                    <td>bleu rs, rt, offset</td>
+                    <td>bgeu rt, rs, offset</td>
+                    <td>Branch if &#60;= (unsigned comp.)</td>
+                </tr>
+                <tr>
+                    <td>j label</td>
+                    <td>jal x0, label</td>
+                    <td>Jump</td>
+                </tr>
+                <tr>
+                    <td>jal label</td>
+                    <td>jal x1, label</td>
+                    <td>Jump And Link</td>
+                </tr>
+                <tr>
+                    <td>jr rs</td>
+                    <td>jalr x0, 0(rs)</td>
+                    <td>Jump Register</td>
+                </tr>
+                <tr>
+                    <td>jalr rs</td>
+                    <td>jalr x1, 0(rs)</td>
+                    <td>Jump And Link Register</td>
+                </tr>
+                <tr>
+                    <td>ret</td>
+                    <td>jalr x0, 0(x1)</td>
+                    <td>Return from subroutine</td>
+                </tr>
+                <tr>
+                    <td>call label</td>
+                    <td><p>auipc x1, delta[31 : 12] + delta[11] </p>jalr x1, delta[11:0](x1)</td>
+                    <td>Call far-away subroutine<p>where delta = (label − PC)</p></td>
+                </tr>
+                <tr>
+                    <td>tail label</td>
+                    <td><p>auipc x6, delta[31 : 12] + delta[11] </p>jalr x1, delta[11:0](x6)</td>
+                    <td>Tail call far-away subroutine<p>where delta = (label − PC)</p></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+    </div>
+
+    <p> Many of these pseudoinstructions involve using two instructions to load a 32 bit value. If you have problems visualizing it, consider the following example. </p> 
+    <p>You want to load the 32 bit value 0ff0fff0:</p>
+    <p>1. Divide the value into the upper 20 bits (0ff0f) and the lower 12 bits (ff0).</p>
+    <p>2. Add 1 to the upper 20 bits, since the lower 12 are negative (the sign bit is 1). You get ff10.</p>
+    <p>3. Upload that value to the register you want with the lui/auipc instructions. That way you get the value ff10000 in that register.</p>
+    <p>4. Get the lower 12 bits and sign extend them since they will be added via addi/jalr. You get (fffffff0). </p>
+    <p>5. Add the sign-extended 12 bits (fffffff0) to the value already in the register (ff10000) and you get the value you wanted (ff0fff0).</p>
+
+    <h1>Examples</h1>
+
+    <p>
+        To run these examples I used the <a href="https://ascslab.org/research/briscv/simulator/simulator.html">BRISC-V simulator</a>. I chose it because you don't need to install anything to 
+        run your RISC-V assembly programs. You simply load and run them in its web. <a href="https://ascslab.org/research/briscv/simulator/manual.html"> Here</a> you can find a compilation of examples and
+        all the system calls it supports. But It also has problems. BRISC-V doesn't support all the directives other more complex assemblers have, so you need to be
+        careful of how your programs are structured.
+    </p>
+
+    <p> <a href="test1.S">The first example is here</a> :</p>
+<pre> <code>
+        #here it goes the kernel code
+#it setups the stack pointer
+	addi	zero,zero,0 
+kernel:             
+	addi	sp,zero,1536
+	call	main        
+	addi	zero,zero,0 
+	mv      s1,a0   
+	addi	zero,zero,0 
+	addi	zero,zero,0 
+	auipc	ra,0x0      
+	jalr	ra,0(ra)    
+	addi	zero,zero,0 
+	addi	zero,zero,0 
+
+    #here it goes the read only data
+    .rodata
+.HELLO:
+    # .string "Hello World!\n\0" in reverse split in words
+    .word 0x6C6C6548
+    .word 0x6F57206F
+    .word 0x21646C72
+    .word 0x0000000D
+
+    #here it goes the code
+    .text
+main:
+    # print the string .HELLO
+    addi t0, zero, 3         # this is the string printing syscall 
+    lui a0, %hi(.HELLO)      # this loads the top 20 bits 
+                             # of .HELLO address into a0
+    addi a0, a0, %lo(.HELLO) # this loads the bottom 12 bits
+    addi a1, zero, 13         # length of the string
+    ecall
+
+    #ask the user for a number 
+    addi t0, zero, 4
+    ecall
+
+    #now a0 containts the number
+    #do a countdown
+
+countdown:
+    # print the number
+    addi t0, zero, 1
+    ecall 
+
+    #iterate until a0 is negative
+    addi a0, a0, -1 		
+    bge a0, zero, countdown 
+</code></pre>
+
+    <p>
+        For my first program went easy. I print the string "Hello World", ask for a number, and print a countdown to zero. Note that BRISC-V doesn't support the asciiz directive, so we need to specify
+        the words that made the string. The rest is pretty strightforward, simply make the calls to the simulator using the ecall instructions. You can ignore the first chunk of code. It's just some
+        code that goes there to initialize the stack pointer and call the main function.
+    </p>
+
+    <p>
+        <a href="test2.S">The second example</a> is a bit more complex:
+    </p>
+
+<pre> <code>
+#here it goes the kernel code
+#it setups the stack pointer
+	addi	zero,zero,0 
+kernel:             
+	addi	sp,zero,1536
+	call	main        
+	addi	zero,zero,0 
+	mv      s1,a0   
+	addi	zero,zero,0 
+	addi	zero,zero,0 
+	auipc	ra,0x0      
+	jalr	ra,0(ra)    
+	addi	zero,zero,0 
+	addi	zero,zero,0 
+
+    #here it goes the read only data
+    .rodata
+PRIMESTRING:
+    .word 0x4D495250
+    .word 0x00000D45
+NOTPRIMESTRING:
+    .word 0x20544F4E
+    .word 0x4D495250
+    .word 0x00000D45
+
+    #here it goes the code
+    .text
+main:
+
+    addi a0, zero, 2
+    addi t0, zero, 1 	#number print service
+    ecall 			#call OS, print the number in a0
+    call isprime 		#check if it's prime
+    addi a0, zero, 5
+    addi t0, zero, 1 	#number print service
+    ecall 			#call OS, print the number in a0
+    call isprime 		#check if it's prime
+    addi a0, zero, 4
+    addi t0, zero, 1 	#number print service
+    ecall 			#call OS, print the number in a0
+    call isprime 		#check if it's prime
+    addi a0, zero, 10
+    addi t0, zero, 1 	#number print service
+    ecall 			#call OS, print the number in a0
+    call isprime 		#check if it's prime
+    addi a0, zero, 11
+    addi t0, zero, 1 	#number print service
+    ecall 			#call OS, print the number in a0
+    call isprime 		#check if it's prime
+    addi a0, zero, 43
+    addi t0, zero, 1 	#number print service
+    ecall 			#call OS, print the number in a0
+    call isprime 		#check if it's prime
+    addi a0, zero, 44
+    addi t0, zero, 1 	#number print service
+    ecall 			#call OS, print the number in a0
+    call isprime 		#check if it's prime
+    j programexit
+
+# subroutine divide
+# divides a0 (dividend) by a1 (divisor)
+# returns a0 (remainder), a1 (quotient)
+# uses t registers
+divide:
+	addi t0, zero, 0 #reset temporary quotient
+divideloop:
+	blt a0, a1, divideexit 	#exit if dividend less than divisor
+	sub a0, a0, a1
+	addi t0, t0, 1 		#add 1 to quotient
+	jal zero, divideloop 	#pseudoinstruction j
+divideexit:
+	addi a1, t0, 0
+	jalr zero, ra, 0 	#pseudoinstruction ret
+
+
+# subroutine isprime
+# prints "prime" or "NOT Prime" according to a number passed in a0
+isprime:
+	addi	sp,sp,-16
+	sw	ra,0(sp) 	#save return address
+	#
+	addi t6, zero, 2
+	addi t5, a0, -1
+	#
+isprimeloop:
+	blt t5, t6, isprimeprintprime
+	# save t registers used
+	sw t5, 4(sp)
+	sw t6, 8(sp)
+	sw a0, 12(sp)
+	#
+	# a0 contains the initial argument
+	mv a1, t5
+	jal ra, divide 		#pseudoinstruction call, we call subroutine divide
+	beq a0, zero, isprimeprintnotprime 	# if remainder is zero, we have a divisor
+	# restore t registers used
+	lw t5, 4(sp)
+	lw t6, 8(sp)
+	lw a0, 12(sp)
+	#
+	addi t5, t5, -1
+	j isprimeloop
+	#
+isprimeprintprime:
+    	addi t0, zero, 3         # this is the string printing syscall 
+    	lui a0, %hi(PRIMESTRING)      # this loads the top 20 bits 
+	addi a0, a0, %lo(PRIMESTRING) # this loads the bottom 12 bits
+    	addi a1, zero, 6         # length of the string
+    	ecall
+	j isprimeexit
+isprimeprintnotprime:
+    	addi t0, zero, 3         # this is the string printing syscall 
+    	lui a0, %hi(NOTPRIMESTRING)      # this loads the top 20 bits 
+	addi a0, a0, %lo(NOTPRIMESTRING) # this loads the bottom 12 bits
+    	addi a1, zero, 10         # length of the string
+    	ecall
+	j isprimeexit
+isprimeexit:
+	lw	ra,0(sp) 	#restore return address
+	addi	sp,sp,16
+	ret
+
+#
+# program exit point
+programexit:
+</code> </pre>
+
+    <p>
+        It checks whether a number is prime or not and prints a message accordingly. It has two subroutines, isprime, that checks if the number passed int a0 is prime, that instead, supports in the 
+        subroutine divide to check the divisors or a given number.
+    </p>
+
+    <p>
+        Reecently I found a better online RISC-V assembly simulator called <a href="https://venus.cs61c.org/">VENUS</a>. It's much more complete than other toys on the internet. I recommend it to you.
+        <a href="https://github.com/61c-teach/venus/wiki"> Here</a> you can find its documentation.
+    </p>
+
+    <p>
+        I wrote another example more for <a href="https://venus.cs61c.org/">VENUS </a>. This time it prints a given number of fibonacci numbers.
+    </p>
+
+    <p> <a href="fibonacci.S">VENUS example is here</a> :</p>
+
+<pre> <code>
+    .data
+
+    carrret:
+        .asciiz "\n"
+    seed0:
+        .word 0
+    seed1:
+        .word 1
+    spacestr:
+        .asciiz " "
+    
+    .text
+        li s0, 5        #number of fibonacci numbers to print
+                        #https://github.com/61c-teach/venus/wiki/Environmental-Calls
+    
+        lw a0, seed0	#load the first two numbers
+        lw a1, seed1
+    fiboloop:
+        ble s0, zero, programexit
+        call fibonacci
+        addi s0, s0, -1
+        j fiboloop
+    
+    #prints the next fibonacci number
+    # a0 and a1 contains the two previous fibonacci numbers
+    #returns the next two fibonacci numbers in a0 and a1 too
+    fibonacci:
+        add t0, a0, a1
+        add a0, a1, zero
+        add a1, t0, zero
+        #
+        addi sp, sp, -8
+        # save the numbers in a0, a1
+        sw a0, 0(sp)
+        sw a1, 4(sp)
+        # print the number in a1
+        addi a0, zero, 1
+        ecall
+        # print space
+        li a0, 4        #print space string
+        la a1, spacestr	#asciiz string addr
+        ecall
+        # restorethe numbers in a0, a1
+        lw a0, 0(sp)
+        lw a1, 4(sp)
+        addi sp, sp, 8
+        ret	
+    
+    programexit:
+        li a0, 4        #print string carriage return 
+        la a1, carrret 	#asciiz string addr
+        ecall       
+</code> </pre>
+
+</section>
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>

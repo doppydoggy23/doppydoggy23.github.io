@@ -1,0 +1,306 @@
+    let testProgram1=	
+    "addi t0, zero, -0x23"+ "\n"+
+	"   andi t0, t0, -0xf"+"\n"+
+    "             \n"+
+	"addi t0, t0, 0xA0"+"\n"+
+	    // ilegal operands: "addi t9, t0, 0xA0"+"\n"+
+    "addi t2, zero, -0x13"+"\n"+
+    "sw t2, 0(zero)  "+"\n"+
+    "lw t1, 0(zero)  ";
+
+    let testProgram2=
+    "addi t0, zero, 0\n"+
+    "addi t1, zero, 5\n"+
+    "incloop:\n"+
+    "addi t0, t0, 1\n"+
+    "blt t0, t1, incloop\n"+
+    "programExit:";
+
+    let testProgram3=
+    "   addi t0, zero, 0 \n"+
+    "   jal ra, a10 \n"+
+    "    jal zero, programexit \n"+
+    "    addi t0, zero, zero \n"+
+    "     a10:   \n"+
+    "   addi t0, t0, 10 \n"+
+    "   jalr a0, 0(ra) \n"+
+    " programexit:    ";
+
+    let testProgram4=
+    `.data
+    dataword1:
+        .word 0x12345678
+    string1:\n
+        .asciiz "Hello World!\\n" \n
+    dataword2:\n
+        .word 0xABCDEF01\n
+             
+    string2:\n
+        .asciiz "This is string 2\\n"\n
+    \n
+        #here it goes the code\n
+        .text\n
+        \n
+    main:\n
+    \n
+    la a0, dataword2    
+        la a1, programexit    
+        la a3, dataword1
+    li t0, 0x12345678 
+    lw t1, 0(a3)
+    lw t2, 0(a0)
+    
+        jal zero, programexit\n
+                \n
+    #\n
+    # program exit point\n
+    programexit:`;
+
+    let testProgramSyscalls1=
+    `
+    .data
+    helloString:
+        .asciiz "Hello World!\\n"
+    .text
+    li a0, 0            #print string syscall
+    la a1, helloString  #asciiz string addr
+    ecall
+    `;
+
+    let testProgramSyscalls2=
+    `
+    li a0, 1      #print number syscall
+    li a1, 12345  #number to print
+    ecall
+    `;
+
+    let testProgramSyscalls3=
+    `
+    .data 
+    userp:
+    .asciiz "Please, enter a number"
+
+    .text
+    li a0, 2        #prompt the user for a number
+    la a1, userp    #string to print
+                    #returns the number in a0
+    ecall
+    `;
+
+    let testProgramSyscalls4=
+    `
+    .data 
+    userp:
+    .asciiz "Please, enter a your name"
+    heapStartsHere:
+
+    .text
+    li a0, 3                #prompt the user for text
+    la a1, userp            #string to print
+    la a2, heapStartsHere   #at this address, the string will be written
+        \t         \t           #returns the string at the address in a2                            
+    ecall
+                            #now, we print the string given
+    li a0, 0
+    la a1, heapStartsHere
+    ecall
+    `;
+
+    let testProgram5=`
+    .data
+    word1:
+        .word -12345678
+    heap:
+    .text
+    li t0, -12345678
+    la a0, word1
+    lw t1, 0(a0)
+    sw t0, 4(a0)
+    lw t2, 4(a0)
+    `;
+
+    let testProgram6=`
+    .text
+         li t0, -12345678
+              andi t0, t0, -1234
+       \t\t      \t\t      \t\t      li t1, -12345678
+    ori t1, t1, -1234
+    li t2, -12345678
+    xori t2, t2, -1234
+    li t3, -12345678
+    li t4, 0xABCDEF12
+    add t3, t3, t4
+    sub t4, t4, t2
+    and a0, t3, t4
+    or a1, t4, t3
+    xor a2, t4, t3
+    `;
+
+    let testProgram7=`
+    addi t0, zero, -1
+    addi t1, zero, 0
+    addi t2, zero, 1
+
+    addi a0, zero, 0
+    addi a1, zero, 0
+    
+    beq t0, t0, sig1
+    addi a0, a0, 1
+sig1:
+    bne t0, t1, sig2
+    addi a0, a0, 1
+sig2:
+    blt t1, t2, sig3
+    addi a0, a0, 1
+sig3:
+    bge t2, t0, sig4
+    addi a0, a0, 1
+
+sig4:
+    beq t0, t1, sig5
+    addi a1, a1, 1
+sig5:
+    bne t0, t0, sig6
+    addi a1, a1, 1
+sig6:
+    blt t2, t1, sig7
+    addi a1, a1, 1
+sig7:
+    bge t0, t1, sig8
+    addi a1, a1, 1
+sig8:
+    `;
+
+    let testProgram8=`
+    addi t0, zero, -1
+    addi t1, zero, 0
+    addi t2, zero, 1
+
+    addi a0, zero, 0
+    addi a1, zero, 0
+    
+    bgt t2, t1, sig1
+    addi a0, a0, 1
+sig1:
+    ble t0, t1, sig2
+    addi a0, a0, 1
+sig2:
+
+    bgt t0, t1, sig1
+    addi a1, a1, 1    
+sig3:
+    bgt t0, t2, sig1
+    addi a1, a1, 1    
+sig4:`;
+
+    let testProgram9=`
+    main:
+
+    addi t0, zero, 0
+    call add10
+    j programexit
+    addi t0, zero, -1
+    
+add10:
+    addi t0, t0, 10
+    ret
+            
+#
+# program exit point
+programexit:`;
+
+    let testProgram10=`
+    li t0, 0xABCD1234
+    li t1, -12345678
+    li t2, -12345678
+    li t3, 6
+    sll t0, t0, t3
+    srl t1, t1, t3
+    sra t2, t2, t3
+    
+    li a0, 0xABCD1234
+    li a1, -12345678
+    li a2, -12345678
+    slli a0, a0, 6
+    srli a1, a1, 6
+    srai a2, a2, 6
+    `;
+
+    let testProgram11=`
+    li t0, 0
+    li t1, -1
+    li t2, 1
+    slt a0, t1, t0
+    slt a1, t2, t1
+    sltu a3, t2, t1
+    sltu a4, t1, t0
+
+    slti a5, t1, 0
+    slti a6, t2, 0
+    sltiu s0, t2, 10
+    sltiu s1, t1, -10
+
+    li t3, -100
+    sltiu s2, t3, -10
+    `;
+
+    let testProgram12=`
+    lui t0, 0xABCDE
+    auipc t1, 0xABCDE`;
+
+    let testProgram13=`
+    li t0, 0
+    li t1, -1
+    li t2, -2
+    li a0, 0
+    li a1, 0
+    
+    bltu t0, t1, sig1
+    addi a0, a0, 10
+sig1:
+    bgeu t1, t2, sig2
+    addi a0, a0, 10
+sig2:
+
+    bltu t1, t2, sig3
+    addi a1, a1, 1
+sig3:
+    bgeu t2, t1, sig4
+    addi a1, a1, 1
+sig4:
+    `;
+
+    let testProgram14=`
+    .data
+    dataword1:
+
+    .text
+    la a0, dataword1
+    li t0, -10
+    
+    sb t0, 0(a0)
+    lb t1, 0(a0)
+    lbu t2, 0(a0)
+    
+    li t3, -1234
+    sh t3, 0(a0)
+    lh t4, 0(a0)
+    lhu t5, 0(a0)
+    `;
+
+    let testProgram15=`
+    .data
+    dataword1:
+    .text
+    li t0, -1234567
+    sw t0, dataword1, a0
+    lw t1, dataword1
+
+    li t2, -10
+    sb t2, dataword1, a1
+    lw t3, dataword1
+
+    li t4, -1234
+    sh t4, dataword1, a2
+    lh t5, dataword1
+    `;

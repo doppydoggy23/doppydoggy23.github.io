@@ -1,0 +1,2 @@
+parámetro a cambiar para la linea activa
+ace_active-line {\n  background: rgba(255, 0, 0, 0.27)
