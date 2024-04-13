@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MiniSampler</title>
+<style>
+
+#canvasDiv {
+  background-color: white;
+  width: 550px;
+  height: 550px;
+  position: relative; /* makes next element align vertically bellow this one*/
+  margin: auto; /*center horizontally*/
+  
+  outline-style: solid;
+  outline-color: black;
+  outline-width: 1px;
+}
+
+#docfooter {
+  background-color: red;
+}
+</style>
+
+
+<script src="mini.js"></script>
+
+</head>
+
+<audio id="bamboosound" src="Bamboo.wav" preload></audio>
+
+<body onload="initializeUI()">
+
+<!-- Before header -->
+<p> mini minisampler</p>
+<p> press a key to play sound. </p>
+<!-- Before header -->
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>
