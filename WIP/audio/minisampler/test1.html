@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MiniSampler</title>
+<style>
+
+#canvasDiv {
+  background-color: white;
+  width: 550px;
+  height: 550px;
+  position: relative; /* makes next element align vertically bellow this one*/
+  margin: auto; /*center horizontally*/
+  
+  outline-style: solid;
+  outline-color: black;
+  outline-width: 1px;
+}
+
+#upperMenuBar {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  /*background-color: red;*/
+  width: 800px;
+  height: 100px;
+  margin: auto;
+  /*text-align: left;*/
+  display: flex; 
+  flex-direction: row; /* display all in a row*/
+  justify-content: center;
+  align-items: center;
+}
+
+#PlayButton {
+  padding: 10px;
+}
+#StopButton {
+  padding: 10px;
+}
+#SpeedRange {
+  width: 200px;
+  padding: 10px;
+  /*font-family: Arial; */
+  font-family: sans-serif, Verdana, Geneva, Tahoma;
+}
+#PatternLengthRange {
+  width: 200px;
+  padding: 10px;
+  /*font-family: Arial; */
+  font-family: sans-serif, Verdana, Geneva, Tahoma;
+}
+</style>
+
+
+<script src="test1.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+
+</head>
+
+<!-- <audio id="bamboosound" src="Bamboo.wav" preload></audio> -->
+
+<body onload="initializeUI()">
+
+  <div id="upperMenuBar">
+    <sl-button id="PlayButton">Play</sl-button>
+    <sl-button id="StopButton">Stop</sl-button>
+
+    <sl-range id="SpeedRange" label="Speed" min="0" max="100" help-text="Play Speed" tooltip="bottom" ></sl-range>
+    
+    <sl-range id="PatternLengthRange" label="Pattern Length" min="0" max="100" help-text="Play Length" tooltip="bottom"></sl-range>
+    
+
+    <!--
+    <input type="range">
+    -->
+  </div>
+
+
+</body>
+</html>
