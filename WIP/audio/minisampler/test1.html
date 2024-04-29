@@ -84,6 +84,25 @@
   padding: 10px;
 }
 
+#tabsDiv {
+  width: 800px;
+  height: 300px;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  margin: auto; /*center horizontally*/
+}
+
+#SoundsGroup1Div {
+  /*justify-content: center;
+  align-items: center;*/
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 10px;
+}
 </style>
 
 
@@ -185,6 +204,40 @@
     </div>
   </div>
 
+  <div id="tabsDiv">
+    <sl-tab-group>
+      <sl-tab slot="nav" panel="SoundsGroup1">Sounds Group 1</sl-tab>
+      <sl-tab slot="nav" panel="SoundsGroup2">Sounds Group 2</sl-tab>
+      <sl-tab slot="nav" panel="SoundsGroup3">Sounds Group 3</sl-tab>
+    
+      <sl-tab-panel name="SoundsGroup1">
+        <div id="SoundsGroup1Div">
+          <sl-button id="Sound1Button">Sound 1 Button</sl-button>
+          <sl-button id="Sound2Button">Sound 2 Button</sl-button>
+          <sl-button id="Sound3Button">Sound 3 Button</sl-button>
+          <sl-button id="Sound4Button">Sound 4 Button</sl-button>
+          <sl-button id="Sound5Button">Sound 5 Button</sl-button>
+          <sl-button id="Sound6Button">Sound 6 Button</sl-button>
+          <sl-button id="Sound7Button">Sound 7 Button</sl-button>
+          <sl-button id="Sound8Button">Sound 8 Button</sl-button>
+          <sl-button id="Sound9Button">Sound 9 Button</sl-button>
+          <sl-button id="Sound10Button">Sound 10 Button</sl-button>
+          <sl-button id="Sound11Button">Sound 11 Button</sl-button>
+          <sl-button id="Sound12Button">Sound 12 Button</sl-button>
+          <sl-button id="Sound13Button">Sound 13 Button</sl-button>
+          <sl-button id="Sound14Button">Sound 14 Button</sl-button>
+          <sl-button id="Sound15Button">Sound 15 Button</sl-button>
+          <sl-button id="Sound16Button">Sound 16 Button</sl-button>
+          <sl-button id="Sound17Button">Sound 17 Button</sl-button>
+          <sl-button id="Sound18Button">Sound 18 Button</sl-button>
+          <sl-button id="Sound19Button">Sound 19 Button</sl-button>
+          <sl-button id="Sound20Button">Sound 20 Button</sl-button>
+        </div>
+      </sl-tab-panel>
+      <sl-tab-panel name="SoundsGroup2">This is the SoundsGroup2 tab panel.</sl-tab-panel>
+      <sl-tab-panel name="SoundsGroup3">This is the SoundsGroup3 tab panel.</sl-tab-panel>
+    </sl-tab-group>
+  </div>
 
 </body>
 </html>
