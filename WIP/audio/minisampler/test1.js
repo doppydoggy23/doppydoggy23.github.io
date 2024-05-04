@@ -28,3 +28,10 @@ function keyPressed(keyCode) {
 async function keyReleased(keyCode) {
     //console.log("keyReleased :"+keyCode)  
 }
+
+function SoundButtonClick(soundNumber) {
+    //console.log("Sound1ButtonClick("+soundNumber+")");
+    //console.log ("Should Play:"+ "sound"+soundNumber);
+    let soundNode=document.getElementById("sound"+soundNumber).cloneNode();
+    soundNode.play();
+}
