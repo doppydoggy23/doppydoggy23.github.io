@@ -4,18 +4,6 @@
 <title>MiniSampler</title>
 <style>
 
-#canvasDiv {
-  background-color: white;
-  width: 550px;
-  height: 550px;
-  position: relative; /* makes next element align vertically bellow this one*/
-  margin: auto; /*center horizontally*/
-  
-  outline-style: solid;
-  outline-color: black;
-  outline-width: 1px;
-}
-
 #upperMenuBar {
   border-style: solid;
   border-width: 1px;
@@ -71,8 +59,6 @@
 }
 
 #myCanvas {
-  width: 550px;
-  height: 500px;
   background-color: white;
   border-style: solid;
   border-width: 1px;
@@ -136,7 +122,7 @@
   </div>
 
   <div id="middleComponents">
-    <canvas id="myCanvas"> </canvas> 
+    <canvas id="myCanvas" width="550" height="500"> </canvas> 
 
     <div id="middleSelectorDiv">
       <sl-select id="Selector1" class="SelectorClass" value="sound1" label="Instrument 1">
