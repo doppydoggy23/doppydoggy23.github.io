@@ -34,12 +34,12 @@ function initializeUI() {
       }
 
       //ToDo: delete
-      Globals.musicPattern[0][0]=1;
+      /*Globals.musicPattern[0][0]=1;
       Globals.musicPattern[0][1]=1;
       Globals.musicPattern[0][9]=1;
       Globals.musicPattern[3][2]=1;
       Globals.musicPattern[2][5]=1;
-      Globals.musicPattern[4][24]=1;
+      Globals.musicPattern[4][24]=1;*/
 
       //attach to the range controller its change event handler
       document.getElementById("PatternLengthRange").addEventListener('sl-change', event => {
@@ -137,4 +137,27 @@ function drawRoundButton(ctx, x, y, width, height, arcsize) {
     ctx.lineTo(x+arcsize, y);
     ctx.stroke();
     ctx.fill();
+}
+
+function canvasClick(event) {
+    //console.log(event.offsetX+ " "+event.offsetY);
+    let canvas = document.getElementById('myCanvas');
+    let ctx = canvas.getContext("2d");
+    let canvasWidth = canvas.width;
+    let canvasHeight = canvas.height;
+
+    let patternLength=document.getElementById("PatternLengthRange").value;
+    let squareSide=Math.floor(canvasWidth/patternLength);
+
+    let xSquare=Math.floor(event.offsetX/squareSide);
+    let ySquare=Math.floor(event.offsetY/squareSide);
+
+    //console.log(xSquare+ " "+ ySquare);
+    if (Globals.musicPattern[ySquare][xSquare]==0) {
+        Globals.musicPattern[ySquare][xSquare]=1;
+    } else {
+        Globals.musicPattern[ySquare][xSquare]=0;
+    }
+
+    drawMusicPattern();
 }

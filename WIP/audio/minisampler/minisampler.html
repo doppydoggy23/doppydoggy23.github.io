@@ -116,6 +116,15 @@
 <audio id="sound11" src="sounds/chord/waterGong.mp3" preload></audio>
 <audio id="sound12" src="sounds/chord/whompSynth.mp3" preload></audio>
 
+<!-- claps-->
+<audio id="sound13" src="sounds/claps/clap1.mp3" preload></audio>
+<audio id="sound14" src="sounds/claps/CLAP2.mp3" preload></audio>
+<audio id="sound15" src="sounds/claps/Clap3.mp3" preload></audio>
+<audio id="sound16" src="sounds/claps/CrispClap.mp3" preload></audio>
+<audio id="sound17" src="sounds/claps/Lug.mp3" preload></audio>
+
+<!-- cymbals-->
+
 
 <body onload="initializeUI()">
 
@@ -133,7 +142,7 @@
   </div>
 
   <div id="middleComponents">
-    <canvas id="myCanvas" width="550" height="500"> </canvas> 
+    <canvas id="myCanvas" width="550" height="500" onclick="canvasClick(event)"> </canvas> 
 
     <div id="middleSelectorDiv">
       <sl-select id="Selector1" class="SelectorClass" value="sound1" label="Instrument 1">
@@ -205,7 +214,7 @@
     <sl-tab-group>
       <sl-tab slot="nav" panel="SoundsGroup1">bells</sl-tab>
       <sl-tab slot="nav" panel="SoundsGroup2">chord</sl-tab>
-      <sl-tab slot="nav" panel="SoundsGroup3">Sounds Group 3</sl-tab>
+      <sl-tab slot="nav" panel="SoundsGroup3">claps</sl-tab>
     
       <sl-tab-panel name="SoundsGroup1">
         <div class="SoundsGroupDiv">
@@ -228,7 +237,15 @@
           <sl-button id="Sound12Button" onclick="SoundButtonClick(12)">whomp synth</sl-button>
         </div>        
       </sl-tab-panel>
-      <sl-tab-panel name="SoundsGroup3">This is the SoundsGroup3 tab panel.</sl-tab-panel>
+      <sl-tab-panel name="SoundsGroup3">
+        <div class="SoundsGroupDiv">
+          <sl-button id="Sound13Button" onclick="SoundButtonClick(13)">clap 1</sl-button>
+          <sl-button id="Sound14Button" onclick="SoundButtonClick(14)">clap 2</sl-button>
+          <sl-button id="Sound15utton" onclick="SoundButtonClick(15)">clap 3</sl-button>
+          <sl-button id="Sound16utton" onclick="SoundButtonClick(16)">crisp clap</sl-button>
+          <sl-button id="Sound17utton" onclick="SoundButtonClick(17)">lug</sl-button>
+        </div>        
+      </sl-tab-panel>
     </sl-tab-group>
   </div>
 
