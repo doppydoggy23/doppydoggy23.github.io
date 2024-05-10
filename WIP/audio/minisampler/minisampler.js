@@ -4,6 +4,7 @@ let Globals = {
     numInstruments: 5,
     musicPattern: null,
     maxMusicPatternLength: 25, // should match or be larger than <sl-range> PatternLengthRange
+    internalTimerFPS: 10,
     //
     currentColumn: 0,
     isPlaying: false,
@@ -74,7 +75,7 @@ function PlayButtonClick() {
     Globals.internalFrames=0;
 	// start from the first frame
     Globals.currentColumn=0;
-	let myTimerID=setInterval(() => {playTimerFunc();}, (1000/10));
+	let myTimerID=setInterval(() => {playTimerFunc();}, (1000/Globals.internalTimerFPS));
 	Globals.timerID=myTimerID;
 }
 
@@ -90,7 +91,7 @@ function StopButtonClick() {
 function playTimerFunc()
 {
     // check if counter Globals.internalFrames overflowed as per SpeedRange control
-    let howManyIFWeMustCount=10-document.getElementById("SpeedRange").value;
+    let howManyIFWeMustCount=Globals.internalTimerFPS-document.getElementById("SpeedRange").value;
 
     if (Globals.internalFrames>=howManyIFWeMustCount) {
         soundPatternStep();
