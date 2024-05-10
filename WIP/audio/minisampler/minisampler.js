@@ -6,17 +6,19 @@ let Globals = {
     maxMusicPatternLength: 25, // should match or be larger than <sl-range> PatternLengthRange
     //
     currentColumn: 0,
-
+    isPlaying: false,
+    timerID: null,
+    internalFrames: 0,
 };
 
 function initializeUI() {
 
-    document.addEventListener("keydown", (event) => {
+/*    document.addEventListener("keydown", (event) => {
         if (event.repeat) // avoid repeated keystrokes
             return;
         keyPressed(event.keyCode);
         // do something
-      });
+      });*/
 /*    document.addEventListener("keyup", (event) => {
         if (event.repeat)
             return;
@@ -58,6 +60,44 @@ function keyPressed(keyCode) {
     //soundNode.play();
     soundPatternStep();
 
+}
+
+function PlayButtonClick() {
+    //console.log ("PlayButtonClick()");
+    if (Globals.isPlaying)
+	{
+		StopButtonClick();
+		return;
+	}
+	
+    Globals.isPlaying=true;
+    Globals.internalFrames=0;
+	// start from the first frame
+    Globals.currentColumn=0;
+	let myTimerID=setInterval(() => {playTimerFunc();}, (1000/10));
+	Globals.timerID=myTimerID;
+}
+
+function StopButtonClick() {
+	Globals.isPlaying=false;
+	if (Globals.timerID!=null) {
+		clearInterval(Globals.timerID);
+    }
+    Globals.timerID=null;
+    drawMusicPattern(false);
+}
+
+function playTimerFunc()
+{
+    // check if counter Globals.internalFrames overflowed as per SpeedRange control
+    let howManyIFWeMustCount=10-document.getElementById("SpeedRange").value;
+
+    if (Globals.internalFrames>=howManyIFWeMustCount) {
+        soundPatternStep();
+        Globals.internalFrames=0;
+    } else {
+        Globals.internalFrames++;
+    }
 }
 
 function soundPatternStep() {
