@@ -3,19 +3,21 @@
 let Globals = {
     numInstruments: 5,
     musicPattern: null,
-    maxMusicPatternLength: 25 // should match or be larger than <sl-range> PatternLengthRange
+    maxMusicPatternLength: 25, // should match or be larger than <sl-range> PatternLengthRange
+    //
+    currentColumn: 0,
 
 };
 
 function initializeUI() {
 
-/*    document.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", (event) => {
         if (event.repeat) // avoid repeated keystrokes
             return;
         keyPressed(event.keyCode);
         // do something
       });
-    document.addEventListener("keyup", (event) => {
+/*    document.addEventListener("keyup", (event) => {
         if (event.repeat)
             return;
         keyReleased(event.keyCode);
@@ -51,14 +53,53 @@ function initializeUI() {
 
 function keyPressed(keyCode) {
     //document.getElementById("bamboosound").play();
-    let soundNode=document.getElementById("bamboosound").cloneNode();
+    //let soundNode=document.getElementById("bamboosound").cloneNode();
     //soundNode.volume=volume;
-    soundNode.play();
+    //soundNode.play();
+    soundPatternStep();
+
 }
+
+function soundPatternStep() {
+    //console.log(document.getElementById("Selector1").value);
+    let instruments=[];
+    for (let i=0; i<Globals.numInstruments; i++) {
+        instruments[i]=document.getElementById("Selector"+(i+1)).value;
+
+    }
+
+    drawMusicPattern(true);
+    
+/*    for (let i=0; i<Globals.numInstruments; i++)
+    console.log(instruments[i]);*/
+    for (let i=0; i<Globals.numInstruments; i++) {
+          if (Globals.musicPattern[i][Globals.currentColumn]>0) {
+            playSound(instruments[i]);
+          }
+    }
+
+    Globals.currentColumn++;
+    let patternLength=document.getElementById("PatternLengthRange").value;
+    if (Globals.currentColumn>=patternLength) {
+        Globals.currentColumn=0;
+    }
+
+    //console.log(Globals.currentColumn);
+    // draw an index of current sound column
+    //drawCurrentPatterColumnMarker();
+    
+}
+
 
 async function keyReleased(keyCode) {
     //console.log("keyReleased :"+keyCode)  
 }
+
+function playSound(sound) {
+    let soundNode=document.getElementById(sound).cloneNode();
+    soundNode.play();
+}
+
 
 function SoundButtonClick(soundNumber) {
     //console.log("Sound1ButtonClick("+soundNumber+")");
@@ -72,7 +113,7 @@ function patternLengthOnChange() {
     drawMusicPattern();
 }
 
-function drawMusicPattern() {
+function drawMusicPattern(drawColumnMarker) {
     let canvas = document.getElementById('myCanvas');
     let ctx = canvas.getContext("2d");
     let canvasWidth = canvas.width;
@@ -95,6 +136,13 @@ function drawMusicPattern() {
 
     //
     let squareSide=Math.floor(canvasWidth/patternLength);
+
+    if (drawColumnMarker==true) {
+        ctx.fillStyle = "grey";
+        //ctx.fillRect(Globals.currentColumn*squareSide, 0, squareSide, canvasHeight-1);
+        ctx.fillRect(Globals.currentColumn*squareSide, 0, squareSide, canvasHeight-1);    
+    }
+
     for (let ii=0; ii<numInstruments; ii++) {        
         
         let ypos=(ii*squareSide)+Math.floor(squareSide/2);
@@ -124,6 +172,7 @@ function drawPoint(ctx, x, y, radius) {
 }
 
 function drawRoundButton(ctx, x, y, width, height, arcsize) {
+    ctx.fillStyle = "black";
     ctx.beginPath();
     ctx.moveTo(x+arcsize, y);
     ctx.lineTo(x+width-arcsize, y);
