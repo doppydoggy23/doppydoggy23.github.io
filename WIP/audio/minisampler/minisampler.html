@@ -124,6 +124,13 @@
 <audio id="sound17" src="sounds/claps/Lug.mp3" preload></audio>
 
 <!-- cymbals-->
+<audio id="sound18" src="sounds/cymbals/CLANK01.mp3" preload></audio>
+<audio id="sound19" src="sounds/cymbals/CrashBIG.mp3" preload></audio>
+<audio id="sound20" src="sounds/cymbals/CRASHHard.mp3" preload></audio>
+<audio id="sound21" src="sounds/cymbals/DustyShaker.mp3" preload></audio>
+<audio id="sound22" src="sounds/cymbals/hat1.mp3" preload></audio>
+<audio id="sound23" src="sounds/cymbals/OpenHat.mp3" preload></audio>
+<audio id="sound24" src="sounds/cymbals/TightCym.mp3" preload></audio>
 
 
 <body onload="initializeUI()">
@@ -165,6 +172,14 @@
         <sl-option value="sound15">clap 3</sl-option>
         <sl-option value="sound16">crisp clap</sl-option>
         <sl-option value="sound17">lug</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound18">clank01</sl-option>
+        <sl-option value="sound19">crash big</sl-option>
+        <sl-option value="sound20">crash hard</sl-option>
+        <sl-option value="sound21">dusty shaker</sl-option>
+        <sl-option value="sound22">hat 1</sl-option>
+        <sl-option value="sound23">open hat</sl-option>
+        <sl-option value="sound24">tight cym</sl-option>        
       </sl-select>
       <sl-select id="Selector2" class="SelectorClass" label="Instrument 2" value="sound5">
         <sl-option value="sound1">bell 1</sl-option>
@@ -186,6 +201,14 @@
         <sl-option value="sound15">clap 3</sl-option>
         <sl-option value="sound16">crisp clap</sl-option>
         <sl-option value="sound17">lug</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound18">clank01</sl-option>
+        <sl-option value="sound19">crash big</sl-option>
+        <sl-option value="sound20">crash hard</sl-option>
+        <sl-option value="sound21">dusty shaker</sl-option>
+        <sl-option value="sound22">hat 1</sl-option>
+        <sl-option value="sound23">open hat</sl-option>
+        <sl-option value="sound24">tight cym</sl-option>        
       </sl-select>
       <sl-select id="Selector3" class="SelectorClass" label="Instrument 3" value="sound8">
         <sl-option value="sound1">bell 1</sl-option>
@@ -207,6 +230,14 @@
         <sl-option value="sound15">clap 3</sl-option>
         <sl-option value="sound16">crisp clap</sl-option>
         <sl-option value="sound17">lug</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound18">clank01</sl-option>
+        <sl-option value="sound19">crash big</sl-option>
+        <sl-option value="sound20">crash hard</sl-option>
+        <sl-option value="sound21">dusty shaker</sl-option>
+        <sl-option value="sound22">hat 1</sl-option>
+        <sl-option value="sound23">open hat</sl-option>
+        <sl-option value="sound24">tight cym</sl-option>        
       </sl-select>
       <sl-select id="Selector4" class="SelectorClass" label="Instrument 4" value="sound13">
         <sl-option value="sound1">bell 1</sl-option>
@@ -228,6 +259,14 @@
         <sl-option value="sound15">clap 3</sl-option>
         <sl-option value="sound16">crisp clap</sl-option>
         <sl-option value="sound17">lug</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound18">clank01</sl-option>
+        <sl-option value="sound19">crash big</sl-option>
+        <sl-option value="sound20">crash hard</sl-option>
+        <sl-option value="sound21">dusty shaker</sl-option>
+        <sl-option value="sound22">hat 1</sl-option>
+        <sl-option value="sound23">open hat</sl-option>
+        <sl-option value="sound24">tight cym</sl-option>        
       </sl-select>
       <sl-select id="Selector5" class="SelectorClass" label="Instrument 5" value="sound16">
         <sl-option value="sound1">bell 1</sl-option>
@@ -249,6 +288,14 @@
         <sl-option value="sound15">clap 3</sl-option>
         <sl-option value="sound16">crisp clap</sl-option>
         <sl-option value="sound17">lug</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound18">clank01</sl-option>
+        <sl-option value="sound19">crash big</sl-option>
+        <sl-option value="sound20">crash hard</sl-option>
+        <sl-option value="sound21">dusty shaker</sl-option>
+        <sl-option value="sound22">hat 1</sl-option>
+        <sl-option value="sound23">open hat</sl-option>
+        <sl-option value="sound24">tight cym</sl-option>        
       </sl-select>
     </div>
   </div>
@@ -258,6 +305,7 @@
       <sl-tab slot="nav" panel="SoundsGroup1">bells</sl-tab>
       <sl-tab slot="nav" panel="SoundsGroup2">chord</sl-tab>
       <sl-tab slot="nav" panel="SoundsGroup3">claps</sl-tab>
+      <sl-tab slot="nav" panel="SoundsGroup4">cymbals</sl-tab>
     
       <sl-tab-panel name="SoundsGroup1">
         <div class="SoundsGroupDiv">
@@ -280,6 +328,7 @@
           <sl-button id="Sound12Button" onclick="SoundButtonClick(12)">whomp synth</sl-button>
         </div>        
       </sl-tab-panel>
+
       <sl-tab-panel name="SoundsGroup3">
         <div class="SoundsGroupDiv">
           <sl-button id="Sound13Button" onclick="SoundButtonClick(13)">clap 1</sl-button>
@@ -287,6 +336,18 @@
           <sl-button id="Sound15utton" onclick="SoundButtonClick(15)">clap 3</sl-button>
           <sl-button id="Sound16utton" onclick="SoundButtonClick(16)">crisp clap</sl-button>
           <sl-button id="Sound17utton" onclick="SoundButtonClick(17)">lug</sl-button>
+        </div>        
+      </sl-tab-panel>
+
+      <sl-tab-panel name="SoundsGroup4">
+        <div class="SoundsGroupDiv">
+          <sl-button id="Sound18Button" onclick="SoundButtonClick(18)">clank01</sl-button>
+          <sl-button id="Sound19Button" onclick="SoundButtonClick(19)">crash big</sl-button>
+          <sl-button id="Sound20utton" onclick="SoundButtonClick(20)">crash hard</sl-button>
+          <sl-button id="Sound21utton" onclick="SoundButtonClick(21)">dusty shaker</sl-button>
+          <sl-button id="Sound22utton" onclick="SoundButtonClick(22)">hat 1</sl-button>
+          <sl-button id="Sound23Button" onclick="SoundButtonClick(23)">open hat</sl-button>
+          <sl-button id="Sound24Button" onclick="SoundButtonClick(24)">tight cym</sl-button>
         </div>        
       </sl-tab-panel>
     </sl-tab-group>
