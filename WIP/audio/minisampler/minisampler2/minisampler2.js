@@ -12,13 +12,25 @@ let Globals = {
     internalFrames: 0, // counter that counts how many ticks before playing the next note
 };
 
+//let howlerSound;
+
 function initializeUI() {
+
+/*    howlerSound = new Howl({
+        src: ['sounds/bells/bell1.mp3']
+      });*/
+      
+      
 
 /*    document.addEventListener("keydown", (event) => {
         if (event.repeat) // avoid repeated keystrokes
             return;
-        keyPressed(event.keyCode);
+        keyPressed(event.keyCode);        
         // do something
+        //let id=howlerSound.play();
+        //howlerSound.rate(0.5);
+        //howlerSound.play();
+        //howlerSound.play();
       });*/
 /*    document.addEventListener("keyup", (event) => {
         if (event.repeat)
@@ -138,8 +150,6 @@ async function keyReleased(keyCode) {
 
 function playSound(sound) {
     let soundNode=document.getElementById(sound).cloneNode();
-    //soundNode.playbackRate.value=2;
-    //soundNode.detune.value=299;
     soundNode.play();
 }
 

@@ -253,3 +253,38 @@ function canvasClick(event) {
 
     drawMusicPattern();
 }
+
+
+function SaveButtonClick() {
+    //create or obtain the file's content
+    let sampleOBJ= {
+        mytext: "hello mytext",
+        sampleArray: [1, 2, 3, 4]
+    }
+    let content=JSON.stringify(sampleOBJ);
+    //let content = 'This is a text'; //original
+  
+    //create a file and put the content, name and type
+    //let file = new File(["\ufeff"+content], 'myFile.txt', {type: "text/plain:charset=UTF-8"}); // original
+    let file = new File([content], 'myFile.txt', {type: "text/plain:charset=UTF-8"});
+  
+    //create a ObjectURL in order to download the created file
+    let url = window.URL.createObjectURL(file);
+  
+    //create a hidden link and set the href and click it
+    var a = document.createElement("a");
+    a.style = "display: none";
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    //
+    //var obj = {a: 123, b: "4 5 6"};
+    //var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
+}
+
+function LoadButtonClick() {
+    
+}
+
