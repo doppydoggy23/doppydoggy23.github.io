@@ -284,7 +284,31 @@ function SaveButtonClick() {
     //var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
 }
 
-function LoadButtonClick() {
-    
+function LoadButtonClick(event) {
+    //let file = event.target.files[0];   
+
+/*    let fr=new FileReader();
+        fr.onload=function(){
+        txt.value=fr.result;
+    };
+
+    fr.readAsText(event.target.files[0]);*/
+    document.getElementById('my_file').onchange = function (e) {
+
+        //console.log (""+document.getElementById("my_file").files[0]);
+        var file = e.target.files[0]; 
+
+        // setting up the reader
+        var reader = new FileReader();
+        reader.readAsText(file,'UTF-8');
+
+        reader.onload = readerEvent => {
+            var content = readerEvent.target.result; // this is the content!
+            console.log( content );
+         }
+    }
+
+    document.getElementById('my_file').click();
+
 }
 
