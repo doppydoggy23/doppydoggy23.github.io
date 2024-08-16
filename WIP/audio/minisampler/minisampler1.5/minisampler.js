@@ -262,12 +262,26 @@ function SaveButtonClick() {
         //sampleArray: [1, 2, 3, 4]
         magic: "MSFF",
         instruments: [],
+        pattern:[],
+        patternLength: 0,
+        speed:0,
     }
-    //let instruments=[];
+    //save instruments
     for (let i=0; i<Globals.numInstruments; i++) {
         savingOBJ.instruments[i]=document.getElementById("Selector"+(i+1)).value;
     }
-
+    //save pattern
+    let soP=0;
+    for (let i=0; i<Globals.numInstruments; i++) {
+      for (let x=0; x<Globals.maxMusicPatternLength; x++) {
+        savingOBJ.pattern[soP]=Globals.musicPattern[i][x];
+        soP++;
+      }
+    }
+    //save pattern length and speed
+    savingOBJ.patternLength=document.getElementById("PatternLengthRange").value;
+    savingOBJ.speed=document.getElementById("SpeedRange").value;
+    //console.log ("" + savingOBJ.patternLength+  " "+ savingOBJ.speed);
 
 
     let content=JSON.stringify(savingOBJ);
@@ -323,7 +337,23 @@ function LoadButtonClick(event) {
             // set all the saved instruments
             for (let i=0; i<Globals.numInstruments; i++) {
                 document.getElementById("Selector"+(i+1)).value=loadingOBJ.instruments[i];
-            }        
+            }
+
+            //recover the pattern
+            let soP=0;
+            for (let i=0; i<Globals.numInstruments; i++) {
+            for (let x=0; x<Globals.maxMusicPatternLength; x++) {
+                Globals.musicPattern[i][x]=loadingOBJ.pattern[soP];
+                soP++;
+                }
+            }
+
+            //load pattern length and speed
+            //console.log ("" + loadingOBJ.patternLength+  " "+ loadingOBJ.speed);
+            document.getElementById("PatternLengthRange").value=loadingOBJ.patternLength;
+            document.getElementById("SpeedRange").value=loadingOBJ.speed;
+
+            drawMusicPattern(); //refresh pattern on screen
          }
     }
 
