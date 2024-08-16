@@ -256,12 +256,21 @@ function canvasClick(event) {
 
 
 function SaveButtonClick() {
-    //create or obtain the file's content
-    let sampleOBJ= {
-        mytext: "hello mytext",
-        sampleArray: [1, 2, 3, 4]
+    //create saving object with all the needed info
+    let savingOBJ= {
+        //mytext: "hello mytext",
+        //sampleArray: [1, 2, 3, 4]
+        magic: "MSFF",
+        instruments: [],
     }
-    let content=JSON.stringify(sampleOBJ);
+    //let instruments=[];
+    for (let i=0; i<Globals.numInstruments; i++) {
+        savingOBJ.instruments[i]=document.getElementById("Selector"+(i+1)).value;
+    }
+
+
+
+    let content=JSON.stringify(savingOBJ);
     //let content = 'This is a text'; //original
   
     //create a file and put the content, name and type
@@ -282,6 +291,8 @@ function SaveButtonClick() {
     //
     //var obj = {a: 123, b: "4 5 6"};
     //var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
+    //console.log(""+document.getElementById("Selector1").value);
+    //document.getElementById("Selector1").value="sound5";
 }
 
 function LoadButtonClick(event) {
@@ -304,7 +315,15 @@ function LoadButtonClick(event) {
 
         reader.onload = readerEvent => {
             var content = readerEvent.target.result; // this is the content!
-            console.log( content );
+            //console.log( content );
+
+            let loadingOBJ=JSON.parse(content);
+            //console.log (loadingOBJ.magic);
+
+            // set all the saved instruments
+            for (let i=0; i<Globals.numInstruments; i++) {
+                document.getElementById("Selector"+(i+1)).value=loadingOBJ.instruments[i];
+            }        
          }
     }
 
