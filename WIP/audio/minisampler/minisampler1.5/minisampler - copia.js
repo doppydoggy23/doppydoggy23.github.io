@@ -4,13 +4,12 @@ let Globals = {
     numInstruments: 5,
     musicPattern: null, // array that holds the music pattern
     maxMusicPatternLength: 25, // should match or be larger than <sl-range> PatternLengthRange
-    //internalTimerFPS: 10, // max value of internalFrames. Should be equal than <SpeedRange> max
+    internalTimerFPS: 10, // max value of internalFrames. Should be equal than <SpeedRange> max
     //
     currentColumn: 0,
     isPlaying: false,
     timerID: null,
-    //internalFrames: 0, // counter that counts how many ticks before playing the next note
-    saveFileName: "MyRythm.json",
+    internalFrames: 0, // counter that counts how many ticks before playing the next note
 };
 
 function initializeUI() {
@@ -47,14 +46,9 @@ function initializeUI() {
       Globals.musicPattern[2][5]=1;
       Globals.musicPattern[4][24]=1;*/
 
-      //attach to the track length range controller its change event handler
+      //attach to the range controller its change event handler
       document.getElementById("PatternLengthRange").addEventListener('sl-change', event => {
         patternLengthOnChange();
-      });
-
-      //attach to the speed range controller its change event handler
-      document.getElementById("SpeedRange").addEventListener('sl-change', event => {
-        speedRangeOnChange();
       });
 
       drawMusicPattern();
@@ -78,11 +72,10 @@ function PlayButtonClick() {
 	}
 	
     Globals.isPlaying=true;
-    //Globals.internalFrames=0;
+    Globals.internalFrames=0;
 	// start from the first frame
     Globals.currentColumn=0;
-    let myInterval=1000-document.getElementById("SpeedRange").value;
-	let myTimerID=setInterval(() => {playTimerFunc();}, myInterval);
+	let myTimerID=setInterval(() => {playTimerFunc();}, (1000/Globals.internalTimerFPS));
 	Globals.timerID=myTimerID;
 }
 
@@ -97,17 +90,15 @@ function StopButtonClick() {
 
 function playTimerFunc()
 {
-    soundPatternStep();
-}
+    // check if counter Globals.internalFrames overflowed as per SpeedRange control
+    let howManyIFWeMustCount=Globals.internalTimerFPS-document.getElementById("SpeedRange").value;
 
-function speedRangeOnChange() {
-	if ((Globals.timerID!=null)&&(Globals.isPlaying==true)) {
-		clearInterval(Globals.timerID);
-        let myInterval=1000-document.getElementById("SpeedRange").value;
-        let myTimerID=setInterval(() => {playTimerFunc();}, myInterval);
-        Globals.timerID=myTimerID;
+    if (Globals.internalFrames>=howManyIFWeMustCount) {
+        soundPatternStep();
+        Globals.internalFrames=0;
+    } else {
+        Globals.internalFrames++;
     }
-
 }
 
 function soundPatternStep() {
@@ -298,7 +289,7 @@ function SaveButtonClick() {
   
     //create a file and put the content, name and type
     //let file = new File(["\ufeff"+content], 'myFile.txt', {type: "text/plain:charset=UTF-8"}); // original
-    let file = new File([content], Globals.saveFileName, {type: "text/plain:charset=UTF-8"});
+    let file = new File([content], 'myFile.txt', {type: "text/plain:charset=UTF-8"});
   
     //create a ObjectURL in order to download the created file
     let url = window.URL.createObjectURL(file);
