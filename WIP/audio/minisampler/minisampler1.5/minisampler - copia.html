@@ -216,12 +216,7 @@
     <canvas id="myCanvas" width="550" height="500" onclick="canvasClick(event)"> </canvas> 
 
     <div id="middleSelectorDiv">
-      
-      <sl-tooltip content="Click this and then a sample button to change instrument">
-        <sl-button id="Instrument1Button">Instrument 1</sl-button>
-      </sl-tooltip>
-
-      <sl-select id="Selector1" class="SelectorClass" value="sound1" >
+      <sl-select id="Selector1" class="SelectorClass" value="sound1" label="Instrument 1">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -303,12 +298,7 @@
         <sl-option value="sound73">synth 13</sl-option>
         <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-
-      <sl-tooltip content="Click this and then a sample button to change instrument">
-        <sl-button id="Instrument2Button">Instrument 2</sl-button>
-      </sl-tooltip>
-
-      <sl-select id="Selector2" class="SelectorClass" value="sound5">
+      <sl-select id="Selector2" class="SelectorClass" label="Instrument 2" value="sound5">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -390,12 +380,7 @@
         <sl-option value="sound73">synth 13</sl-option>
         <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-
-      <sl-tooltip content="Click this and then a sample button to change instrument">
-        <sl-button id="Instrument3Button">Instrument 3</sl-button>
-      </sl-tooltip>
-
-      <sl-select id="Selector3" class="SelectorClass" value="sound8">
+      <sl-select id="Selector3" class="SelectorClass" label="Instrument 3" value="sound8">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -477,12 +462,7 @@
         <sl-option value="sound73">synth 13</sl-option>
         <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-
-      <sl-tooltip content="Click this and then a sample button to change instrument">
-        <sl-button id="Instrument4Button">Instrument 4</sl-button>
-      </sl-tooltip>
-
-      <sl-select id="Selector4" class="SelectorClass" value="sound13">
+      <sl-select id="Selector4" class="SelectorClass" label="Instrument 4" value="sound13">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -564,12 +544,7 @@
         <sl-option value="sound73">synth 13</sl-option>
         <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-
-      <sl-tooltip content="Click this and then a sample button to change instrument">
-        <sl-button id="Instrument5Button">Instrument 5</sl-button>
-      </sl-tooltip>
-
-      <sl-select id="Selector5" class="SelectorClass" value="sound16">
+      <sl-select id="Selector5" class="SelectorClass" label="Instrument 5" value="sound16">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -775,17 +750,6 @@
 
     </sl-tab-group>
   </div>
-
-  <!-- <div style="width: 800px; margin: auto; background-color: white; display: flex; flex-direction: row; justify-content: center; align-items: center;"> -->
-  
-  <!--
-  <div style="width:500px; position: fixed; margin: auto; bottom:0px" >
-  <sl-alert open>
-    <sl-icon slot="icon" name="info-circle"></sl-icon>
-    Click on a sample button above to set the matching instrument.
-  </sl-alert>
-  </div>
-  -->
 
 </body>
 </html>
