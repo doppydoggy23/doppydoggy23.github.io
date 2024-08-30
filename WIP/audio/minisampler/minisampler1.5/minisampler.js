@@ -11,6 +11,7 @@ let Globals = {
     timerID: null,
     //internalFrames: 0, // counter that counts how many ticks before playing the next note
     saveFileName: "MyRythm.json",
+    instrumentButtonSelected: null,
 };
 
 function initializeUI() {
@@ -70,6 +71,7 @@ function keyPressed(keyCode) {
 }
 
 function PlayButtonClick() {
+    Globals.instrumentButtonSelected=null;
     //console.log ("PlayButtonClick()");
     if (Globals.isPlaying)
 	{
@@ -87,6 +89,8 @@ function PlayButtonClick() {
 }
 
 function StopButtonClick() {
+    Globals.instrumentButtonSelected=null;
+
 	Globals.isPlaying=false;
 	if (Globals.timerID!=null) {
 		clearInterval(Globals.timerID);
@@ -101,6 +105,8 @@ function playTimerFunc()
 }
 
 function speedRangeOnChange() {
+    Globals.instrumentButtonSelected=null;
+
 	if ((Globals.timerID!=null)&&(Globals.isPlaying==true)) {
 		clearInterval(Globals.timerID);
         let myInterval=1000-document.getElementById("SpeedRange").value;
@@ -158,9 +164,16 @@ function SoundButtonClick(soundNumber) {
     //console.log ("Should Play:"+ "sound"+soundNumber);
     let soundNode=document.getElementById("sound"+soundNumber).cloneNode();
     soundNode.play();
+
+    //check if user has an instrument selected
+    if (Globals.instrumentButtonSelected!=null) {
+        document.getElementById("Selector"+Globals.instrumentButtonSelected).value="sound"+soundNumber;
+        Globals.instrumentButtonSelected=null;
+    }
 }
 
 function patternLengthOnChange() {
+    Globals.instrumentButtonSelected=null;
     //console.log(document.getElementById("PatternLengthRange").value);
     drawMusicPattern();
 }
@@ -265,6 +278,8 @@ function canvasClick(event) {
 
 
 function SaveButtonClick() {
+    Globals.instrumentButtonSelected=null;
+
     //create saving object with all the needed info
     let savingOBJ= {
         //mytext: "hello mytext",
@@ -319,6 +334,8 @@ function SaveButtonClick() {
 }
 
 function LoadButtonClick(event) {
+    Globals.instrumentButtonSelected=null;
+
     //let file = event.target.files[0];   
 
 /*    let fr=new FileReader();
@@ -370,3 +387,18 @@ function LoadButtonClick(event) {
 
 }
 
+function Instrument1ButtonClick() {
+    Globals.instrumentButtonSelected=1;
+}
+function Instrument2ButtonClick() {
+    Globals.instrumentButtonSelected=2;    
+}
+function Instrument3ButtonClick() {
+    Globals.instrumentButtonSelected=3;    
+}
+function Instrument4ButtonClick() {
+    Globals.instrumentButtonSelected=4;
+}
+function Instrument5ButtonClick() {
+    Globals.instrumentButtonSelected=5;
+}
