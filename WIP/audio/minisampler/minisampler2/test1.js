@@ -2,7 +2,6 @@
 
 
 let globals = {
-  audioContext: null,
   allSamples:[],
 }
 
@@ -29,8 +28,6 @@ function initializeUI() {
 */
       //console.log ("initializeUI()");
 
-      const context = new AudioContext();
-      globals.audioContext=context;
 
       loadSamples();
       
@@ -38,39 +35,45 @@ function initializeUI() {
 
 function loadSamples () {
 
-  fetch("bell1.mp3")
-  .then(response => response.arrayBuffer())
-  .then(buffer => globals.audioContext.decodeAudioData(buffer))
-  .then(myBuffer => globals.allSamples[0]=myBuffer);
+  //list of mp3 samples
+  const MP3files=["bell1.mp3", "elec1.mp3"];
 
-  fetch("elec1.mp3")
-  .then(response => response.arrayBuffer())
-  .then(buffer => globals.audioContext.decodeAudioData(buffer))
-  .then(myBuffer => globals.allSamples[1]=myBuffer);
+  //mark buffers as null
+  for (let i=0; i<MP3files.length; i++) {
+    globals.allSamples[i]=null;
+  }
 
+  const audioContext = new AudioContext();
+
+  for (let i=0; i<MP3files.length; i++) {
+    fetch(MP3files[i])
+    .then(response => response.arrayBuffer())
+    .then(buffer => audioContext.decodeAudioData(buffer))
+    .then(myBuffer => globals.allSamples[i]=myBuffer);
+    
+  }
+}
+
+function playSampleByNumber(number, pitchShift=1.0, volume=1) {
+
+  if ((globals.allSamples==null)||(globals.allSamples[number]==null)) {
+    return;
+  }
+
+  const audioContext = new AudioContext();
+
+  const source = audioContext.createBufferSource();
+  source.buffer = globals.allSamples[number];
+  source.playbackRate.value = pitchShift;
+  source.connect(audioContext.destination);
+  source.start(0);
 }
 
 function PlayBellButtonClick() {
-  const context = new AudioContext();
-  globals.audioContext=context;
-
-  const source = globals.audioContext.createBufferSource();
-  source.buffer = globals.allSamples[0];
-  source.playbackRate.value = 1.0;
-  source.connect(globals.audioContext.destination);
-  source.start(0);
-
-  
+  playSampleByNumber(0);
 }
 function PlayElec1ButtonClick() {
-  const context = new AudioContext();
-  globals.audioContext=context;
-
-  const source = globals.audioContext.createBufferSource();
-  source.buffer = globals.allSamples[1];
-  source.playbackRate.value = 1.0;
-  source.connect(globals.audioContext.destination);
-  source.start(0);
+  playSampleByNumber(1);
 }
 
 function keyPressed(keyCode) {
