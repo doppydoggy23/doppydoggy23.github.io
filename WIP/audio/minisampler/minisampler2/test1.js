@@ -29,8 +29,26 @@ function initializeUI() {
       //console.log ("initializeUI()");
 
 
-      loadSamples();
+  loadSamples();
+
+  //attach to the track length range controller its change event handler
+  document.getElementById("NoteRange").addEventListener('sl-change', event => {
+    let relfreq=getNoteRelativeFrequency(document.getElementById("NoteRange").value);
+    playSampleByNumber(0, relfreq);
+    //console.log("val:"+document.getElementById("NoteRange").value);
+  });
       
+}
+
+function getNoteRelativeFrequency(rangePosition) {
+  let negativeRelFreqs=[415/440, 392/440, 369/440, 349/440, 329/440, 311/440, 293/440, 277/440, 261/440];
+  let positiveRelFreqs=[466/440, 493/440, 523/440, 554/440, 587/440, 622/440, 659/440, 698/440, 739/440];
+  if (rangePosition==0)
+    return 1;
+  if (rangePosition<0)
+    return negativeRelFreqs[(rangePosition*-1)-1];
+  if (rangePosition>0)
+    return positiveRelFreqs[rangePosition-1];
 }
 
 function loadSamples () {
