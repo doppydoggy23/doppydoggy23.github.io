@@ -34,7 +34,8 @@ function initializeUI() {
   //attach to the track length range controller its change event handler
   document.getElementById("NoteRange").addEventListener('sl-change', event => {
     let relfreq=getNoteRelativeFrequency(document.getElementById("NoteRange").value);
-    playSampleByNumber(0, relfreq);
+    let volume=document.getElementById("VolumeRange").value;
+    playSampleByNumber(0, relfreq, volume);
     //console.log("val:"+document.getElementById("NoteRange").value);
   });
       
@@ -83,7 +84,13 @@ function playSampleByNumber(number, pitchShift=1.0, volume=1) {
   const source = audioContext.createBufferSource();
   source.buffer = globals.allSamples[number];
   source.playbackRate.value = pitchShift;
-  source.connect(audioContext.destination);
+
+  const myGainNode = audioContext.createGain();
+  myGainNode.gain.value = volume;
+
+  source.connect(myGainNode);
+  myGainNode.connect(audioContext.destination);
+
   source.start(0);
 }
 
