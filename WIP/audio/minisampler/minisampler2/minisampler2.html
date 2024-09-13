@@ -90,85 +90,43 @@
   row-gap: 10px;
 }
 
+#middleMenuBar {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  /*background-color: red;*/
+  width: 800px;
+  height: 100px;
+  margin: auto;
+  /*text-align: left;*/
+  display: flex; 
+  flex-direction: row; /* display all in a row*/
+  justify-content: center;
+  align-items: center;
+}
+
+#NoteRange {
+  width: 350px;
+  padding: 10px;
+  /*font-family: Arial; */
+  font-family: sans-serif, Verdana, Geneva, Tahoma;
+}
+
+#VolumeRange {
+  width: 100px;
+  padding: 10px;
+  /*font-family: Arial; */
+  font-family: sans-serif, Verdana, Geneva, Tahoma;
+}
 </style>
 
 
 <script src="minisampler2.js"></script>
-<!--<script src="howler.js"></script>-->
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
 <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
 
 </head>
-
-<!-- bells-->
-<audio id="sound1" src="sounds/bells/bell1.mp3" preload></audio>
-<audio id="sound2" src="sounds/bells/cowbell1.mp3" preload></audio>
-<audio id="sound3" src="sounds/bells/cowbell2.mp3" preload></audio>
-<audio id="sound4" src="sounds/bells/woodPerc.mp3" preload></audio>
-
-<!-- chord-->
-<audio id="sound5" src="sounds/chord/chordSteelDr.mp3" preload></audio>
-<audio id="sound6" src="sounds/chord/ChordWhomp.mp3" preload></audio>
-<audio id="sound7" src="sounds/chord/ChordWoodPerc.mp3" preload></audio>
-<audio id="sound8" src="sounds/chord/flangeGuitar.mp3" preload></audio>
-<audio id="sound9" src="sounds/chord/piano1.mp3" preload></audio>
-<audio id="sound10" src="sounds/chord/StringedPluck.mp3" preload></audio>
-<audio id="sound11" src="sounds/chord/waterGong.mp3" preload></audio>
-<audio id="sound12" src="sounds/chord/whompSynth.mp3" preload></audio>
-
-<!-- claps-->
-<audio id="sound13" src="sounds/claps/clap1.mp3" preload></audio>
-<audio id="sound14" src="sounds/claps/CLAP2.mp3" preload></audio>
-<audio id="sound15" src="sounds/claps/Clap3.mp3" preload></audio>
-<audio id="sound16" src="sounds/claps/CrispClap.mp3" preload></audio>
-<audio id="sound17" src="sounds/claps/Lug.mp3" preload></audio>
-
-<!-- cymbals-->
-<audio id="sound18" src="sounds/cymbals/CLANK01.mp3" preload></audio>
-<audio id="sound19" src="sounds/cymbals/CrashBIG.mp3" preload></audio>
-<audio id="sound20" src="sounds/cymbals/CRASHHard.mp3" preload></audio>
-<audio id="sound21" src="sounds/cymbals/DustyShaker.mp3" preload></audio>
-<audio id="sound22" src="sounds/cymbals/hat1.mp3" preload></audio>
-<audio id="sound23" src="sounds/cymbals/OpenHat.mp3" preload></audio>
-<audio id="sound24" src="sounds/cymbals/TightCym.mp3" preload></audio>
-
-<!-- drum-->
-<audio id="sound25" src="sounds/drum/ANALOGSNARE.mp3" preload></audio>
-<audio id="sound26" src="sounds/drum/ATTACKKICK.mp3" preload></audio>
-<audio id="sound27" src="sounds/drum/BEEFSTOMPA.mp3" preload></audio>
-<audio id="sound28" src="sounds/drum/BoomyAMS.mp3" preload></audio>
-<audio id="sound29" src="sounds/drum/BOWSERNAT.mp3" preload></audio>
-<audio id="sound30" src="sounds/drum/HARDKICK.mp3" preload></audio>
-<audio id="sound31" src="sounds/drum/LoFiRimshot.mp3" preload></audio>
-<audio id="sound32" src="sounds/drum/MaterialDRY.mp3" preload></audio>
-<audio id="sound33" src="sounds/drum/Percussion01.mp3" preload></audio>
-<audio id="sound34" src="sounds/drum/ROOMSTOMP.mp3" preload></audio>
-<audio id="sound35" src="sounds/drum/ROTOLOWNAT.mp3" preload></audio>
-<audio id="sound36" src="sounds/drum/RuffKick.mp3" preload></audio>
-<audio id="sound37" src="sounds/drum/SHORTSNARE.mp3" preload></audio>
-<audio id="sound38" src="sounds/drum/TIGHTSNAPPY.mp3" preload></audio>
-<audio id="sound39" src="sounds/drum/Tom1BIG.mp3" preload></audio>
-<audio id="sound40" src="sounds/drum/TonalPerc.mp3" preload></audio>
-<audio id="sound41" src="sounds/drum/TRAPPYsnare.mp3" preload></audio>
-<audio id="sound42" src="sounds/drum/WARMKNOCKER.mp3" preload></audio>
-<audio id="sound43" src="sounds/drum/WOOD1.mp3" preload></audio>
-
-<!-- electronic -->
-<audio id="sound44" src="sounds/electronic/elec1.mp3" preload></audio>
-<audio id="sound45" src="sounds/electronic/elec2.mp3" preload></audio>
-<audio id="sound46" src="sounds/electronic/elec3.mp3" preload></audio>
-<audio id="sound47" src="sounds/electronic/elec4.mp3" preload></audio>
-<audio id="sound48" src="sounds/electronic/elec5.mp3" preload></audio>
-<audio id="sound49" src="sounds/electronic/elec6.mp3" preload></audio>
-<audio id="sound50" src="sounds/electronic/elec7.mp3" preload></audio>
-<audio id="sound51" src="sounds/electronic/elec8.mp3" preload></audio>
-<audio id="sound52" src="sounds/electronic/elec9.mp3" preload></audio>
-<audio id="sound53" src="sounds/electronic/elec10.mp3" preload></audio>
-<audio id="sound54" src="sounds/electronic/elec11.mp3" preload></audio>
-<audio id="sound55" src="sounds/electronic/elec12.mp3" preload></audio>
-<audio id="sound56" src="sounds/electronic/elec13.mp3" preload></audio>
-<audio id="sound57" src="sounds/electronic/elec14.mp3" preload></audio>
 
 
 
@@ -179,9 +137,16 @@
     <sl-button id="PlayButton" onclick="PlayButtonClick()">Play</sl-button>
     <sl-button id="StopButton" onclick="StopButtonClick()">Stop</sl-button>
 
-    <sl-range id="SpeedRange" label="Speed" min="1" max="10" step="1" help-text="Play Speed" tooltip="bottom" ></sl-range>
+    <sl-range id="SpeedRange" label="Speed" min="500" max="900" step="1" help-text="Play Speed" tooltip="bottom"></sl-range>
     
     <sl-range id="PatternLengthRange" label="Pattern Length" min="6" max="25" step="1" help-text="Play Length" tooltip="bottom"></sl-range>    
+
+    <sl-button id="SaveButton" onclick="SaveButtonClick()">Save</sl-button>
+    <sl-button id="LoadButton" onclick="LoadButtonClick()">Load</sl-button>
+    <input type="file" id="my_file" style="display: none;">
+    <!-- <input type="file" id="file-selector"> -->
+
+
 
     <!--
     <input type="range">
@@ -192,7 +157,12 @@
     <canvas id="myCanvas" width="550" height="500" onclick="canvasClick(event)"> </canvas> 
 
     <div id="middleSelectorDiv">
-      <sl-select id="Selector1" class="SelectorClass" value="sound1" label="Instrument 1">
+      
+      <sl-tooltip content="Click this and then a sample button to change instrument">
+        <sl-button id="Instrument1Button" onclick="Instrument1ButtonClick()">Instrument 1</sl-button>
+      </sl-tooltip>
+
+      <sl-select id="Selector1" class="SelectorClass" value="sound1" >
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -255,8 +225,31 @@
         <sl-option value="sound55">elec12</sl-option>
         <sl-option value="sound56">elec13</sl-option>
         <sl-option value="sound57">elec14</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound58">909 snr</sl-option>
+        <sl-option value="sound59">909 1</sl-option>
+        <sl-option value="sound60">bass 34</sl-option>
+        <sl-option value="sound61">bass drm 1</sl-option>
+        <sl-option value="sound62">bass drum 505</sl-option>
+        <sl-option value="sound63">bass hi 1</sl-option>
+        <sl-option value="sound64">cgm 3</sl-option>
+        <sl-option value="sound65">ebullet</sl-option>
+        <sl-option value="sound66">elec kick 1</sl-option>
+        <sl-option value="sound67">fsb 2</sl-option>
+        <sl-option value="sound68">kick 91</sl-option>
+        <sl-option value="sound69">nov bas 3</sl-option>
+        <sl-option value="sound70">rx15 clap</sl-option>
+        <sl-option value="sound71">sh2 accor</sl-option>
+        <sl-option value="sound72">sy note 13</sl-option>
+        <sl-option value="sound73">synth 13</sl-option>
+        <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-      <sl-select id="Selector2" class="SelectorClass" label="Instrument 2" value="sound5">
+
+      <sl-tooltip content="Click this and then a sample button to change instrument">
+        <sl-button id="Instrument2Button" onclick="Instrument2ButtonClick()">Instrument 2</sl-button>
+      </sl-tooltip>
+
+      <sl-select id="Selector2" class="SelectorClass" value="sound5">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -319,8 +312,31 @@
         <sl-option value="sound55">elec12</sl-option>
         <sl-option value="sound56">elec13</sl-option>
         <sl-option value="sound57">elec14</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound58">909 snr</sl-option>
+        <sl-option value="sound59">909 1</sl-option>
+        <sl-option value="sound60">bass 34</sl-option>
+        <sl-option value="sound61">bass drm 1</sl-option>
+        <sl-option value="sound62">bass drum 505</sl-option>
+        <sl-option value="sound63">bass hi 1</sl-option>
+        <sl-option value="sound64">cgm 3</sl-option>
+        <sl-option value="sound65">ebullet</sl-option>
+        <sl-option value="sound66">elec kick 1</sl-option>
+        <sl-option value="sound67">fsb 2</sl-option>
+        <sl-option value="sound68">kick 91</sl-option>
+        <sl-option value="sound69">nov bas 3</sl-option>
+        <sl-option value="sound70">rx15 clap</sl-option>
+        <sl-option value="sound71">sh2 accor</sl-option>
+        <sl-option value="sound72">sy note 13</sl-option>
+        <sl-option value="sound73">synth 13</sl-option>
+        <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-      <sl-select id="Selector3" class="SelectorClass" label="Instrument 3" value="sound8">
+
+      <sl-tooltip content="Click this and then a sample button to change instrument">
+        <sl-button id="Instrument3Button" onclick="Instrument3ButtonClick()">Instrument 3</sl-button>
+      </sl-tooltip>
+
+      <sl-select id="Selector3" class="SelectorClass" value="sound8">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -383,8 +399,31 @@
         <sl-option value="sound55">elec12</sl-option>
         <sl-option value="sound56">elec13</sl-option>
         <sl-option value="sound57">elec14</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound58">909 snr</sl-option>
+        <sl-option value="sound59">909 1</sl-option>
+        <sl-option value="sound60">bass 34</sl-option>
+        <sl-option value="sound61">bass drm 1</sl-option>
+        <sl-option value="sound62">bass drum 505</sl-option>
+        <sl-option value="sound63">bass hi 1</sl-option>
+        <sl-option value="sound64">cgm 3</sl-option>
+        <sl-option value="sound65">ebullet</sl-option>
+        <sl-option value="sound66">elec kick 1</sl-option>
+        <sl-option value="sound67">fsb 2</sl-option>
+        <sl-option value="sound68">kick 91</sl-option>
+        <sl-option value="sound69">nov bas 3</sl-option>
+        <sl-option value="sound70">rx15 clap</sl-option>
+        <sl-option value="sound71">sh2 accor</sl-option>
+        <sl-option value="sound72">sy note 13</sl-option>
+        <sl-option value="sound73">synth 13</sl-option>
+        <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-      <sl-select id="Selector4" class="SelectorClass" label="Instrument 4" value="sound13">
+
+      <sl-tooltip content="Click this and then a sample button to change instrument">
+        <sl-button id="Instrument4Button" onclick="Instrument4ButtonClick()">Instrument 4</sl-button>
+      </sl-tooltip>
+
+      <sl-select id="Selector4" class="SelectorClass" value="sound13">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -447,8 +486,31 @@
         <sl-option value="sound55">elec12</sl-option>
         <sl-option value="sound56">elec13</sl-option>
         <sl-option value="sound57">elec14</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound58">909 snr</sl-option>
+        <sl-option value="sound59">909 1</sl-option>
+        <sl-option value="sound60">bass 34</sl-option>
+        <sl-option value="sound61">bass drm 1</sl-option>
+        <sl-option value="sound62">bass drum 505</sl-option>
+        <sl-option value="sound63">bass hi 1</sl-option>
+        <sl-option value="sound64">cgm 3</sl-option>
+        <sl-option value="sound65">ebullet</sl-option>
+        <sl-option value="sound66">elec kick 1</sl-option>
+        <sl-option value="sound67">fsb 2</sl-option>
+        <sl-option value="sound68">kick 91</sl-option>
+        <sl-option value="sound69">nov bas 3</sl-option>
+        <sl-option value="sound70">rx15 clap</sl-option>
+        <sl-option value="sound71">sh2 accor</sl-option>
+        <sl-option value="sound72">sy note 13</sl-option>
+        <sl-option value="sound73">synth 13</sl-option>
+        <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
-      <sl-select id="Selector5" class="SelectorClass" label="Instrument 5" value="sound16">
+
+      <sl-tooltip content="Click this and then a sample button to change instrument">
+        <sl-button id="Instrument5Button" onclick="Instrument5ButtonClick()">Instrument 5</sl-button>
+      </sl-tooltip>
+
+      <sl-select id="Selector5" class="SelectorClass" value="sound16">
         <sl-option value="sound1">bell 1</sl-option>
         <sl-option value="sound2">cowbell 1</sl-option>
         <sl-option value="sound3">cowbell 2</sl-option>
@@ -511,9 +573,49 @@
         <sl-option value="sound55">elec12</sl-option>
         <sl-option value="sound56">elec13</sl-option>
         <sl-option value="sound57">elec14</sl-option>
+        <sl-divider></sl-divider>
+        <sl-option value="sound58">909 snr</sl-option>
+        <sl-option value="sound59">909 1</sl-option>
+        <sl-option value="sound60">bass 34</sl-option>
+        <sl-option value="sound61">bass drm 1</sl-option>
+        <sl-option value="sound62">bass drum 505</sl-option>
+        <sl-option value="sound63">bass hi 1</sl-option>
+        <sl-option value="sound64">cgm 3</sl-option>
+        <sl-option value="sound65">ebullet</sl-option>
+        <sl-option value="sound66">elec kick 1</sl-option>
+        <sl-option value="sound67">fsb 2</sl-option>
+        <sl-option value="sound68">kick 91</sl-option>
+        <sl-option value="sound69">nov bas 3</sl-option>
+        <sl-option value="sound70">rx15 clap</sl-option>
+        <sl-option value="sound71">sh2 accor</sl-option>
+        <sl-option value="sound72">sy note 13</sl-option>
+        <sl-option value="sound73">synth 13</sl-option>
+        <sl-option value="sound74">winvadr2</sl-option>
       </sl-select>
     </div>
   </div>
+
+  <div id="middleMenuBar">
+    <sl-range id="NoteRange" label="Note" min="-9" max="+9" step="1" ></sl-range>
+    <sl-range id="VolumeRange" label="Volume" min="0" max="1" step="0.1"  value="1"></sl-range>
+    <sl-select id="SampleSelector" class="SelectorClass" value="sound1" style="width:200px">
+      <sl-option value="sound1">bell 1</sl-option>
+      <sl-option value="sound2">cowbell 1</sl-option>
+      <sl-option value="sound3">cowbell 2</sl-option>
+      <sl-option value="sound4">wood perc</sl-option>
+      <sl-divider></sl-divider>
+      <sl-option value="sound5">chord steel dr</sl-option>
+      <sl-option value="sound6">chord womp</sl-option>
+      <sl-option value="sound7">chord wood perc</sl-option>
+      <sl-option value="sound8">flange guitar</sl-option>
+      <sl-option value="sound9">piano 1</sl-option>
+      <sl-option value="sound10">stringed pluck</sl-option>
+      <sl-option value="sound11">water gong</sl-option>
+      <sl-option value="sound12">whomp synth</sl-option>
+    </sl-select>
+
+  </div>
+
 
   <div id="tabsDiv">
     <sl-tab-group>
@@ -523,6 +625,7 @@
       <sl-tab slot="nav" panel="SoundsGroup4">cymbals</sl-tab>
       <sl-tab slot="nav" panel="SoundsGroup5">drum</sl-tab>
       <sl-tab slot="nav" panel="SoundsGroup6">electronic</sl-tab>
+      <sl-tab slot="nav" panel="SoundsGroup7">techno</sl-tab>
     
       <sl-tab-panel name="SoundsGroup1">
         <div class="SoundsGroupDiv">
@@ -611,8 +714,51 @@
         </div>        
       </sl-tab-panel>
 
+      <sl-tab-panel name="SoundsGroup7">
+        <div class="SoundsGroupDiv">
+          <sl-button id="Sound58Button" onclick="SoundButtonClick(58)">909 snr</sl-button>
+          <sl-button id="Sound59Button" onclick="SoundButtonClick(59)">909 1</sl-button>
+          <sl-button id="Sound60Button" onclick="SoundButtonClick(60)">bass 34</sl-button>
+          <sl-button id="Sound61Button" onclick="SoundButtonClick(61)">bass drm 1</sl-button>
+          <sl-button id="Sound62Button" onclick="SoundButtonClick(62)">bass drum 505</sl-button>
+          <sl-button id="Sound63Button" onclick="SoundButtonClick(63)">bass hi 1</sl-button>
+          <sl-button id="Sound64Button" onclick="SoundButtonClick(64)">cgm 3</sl-button>
+          <sl-button id="Sound65Button" onclick="SoundButtonClick(65)">ebullet</sl-button>
+          <sl-button id="Sound66Button" onclick="SoundButtonClick(66)">elec kick 1</sl-button>
+          <sl-button id="Sound67Button" onclick="SoundButtonClick(67)">fsb 2</sl-button>
+          <sl-button id="Sound68Button" onclick="SoundButtonClick(68)">kick 91</sl-button>
+          <sl-button id="Sound69Button" onclick="SoundButtonClick(69)">nov bas 3</sl-button>
+          <sl-button id="Sound70Button" onclick="SoundButtonClick(70)">rx15 clap</sl-button>
+          <sl-button id="Sound71Button" onclick="SoundButtonClick(71)">sh2 accor</sl-button>
+          <sl-button id="Sound72Button" onclick="SoundButtonClick(72)">sy note 13</sl-button>
+          <sl-button id="Sound73Button" onclick="SoundButtonClick(73)">synth 13</sl-button>
+          <sl-button id="Sound74Button" onclick="SoundButtonClick(74)">winvadr2</sl-button>
+        </div>        
+      </sl-tab-panel>
+
     </sl-tab-group>
   </div>
+
+  <!-- <div style="width: 800px; margin: auto; background-color: white; display: flex; flex-direction: row; justify-content: center; align-items: center;"> -->
+  
+  <!--
+  <div style="width:500px; position: fixed; margin: auto; bottom:0px" >
+  <sl-alert open>
+    <sl-icon slot="icon" name="info-circle"></sl-icon>
+    Click on a sample button above to set the matching instrument.
+  </sl-alert>
+  </div>
+  -->
+
+  <h1>Minisampler</h1>
+  <h2>What is this web?</h2>
+  <p>Minisampler is a web tool intended to allow musicians to create basic rythms and tunes using samples.</p>
+  <h2>how do I use it?</h2>
+  <p>
+    This tool is very simple. First select the samples you want as instruments, you can do this by selecting the sample name in the dropdown list of the matching instrument, 
+    or click the instrument button in the middle right block and the click the sample button in the samples tab list at the bottom. Both methods will link a sample to a track.
+    Next, select which instrument should play and at what time in the pattern matrix in the middle left block. Play with the speed and track length and that's it.
+  </p>
 
 </body>
 </html>
