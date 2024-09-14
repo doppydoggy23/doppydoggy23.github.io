@@ -12,9 +12,12 @@ let Globals = {
     //internalFrames: 0, // counter that counts how many ticks before playing the next note
     saveFileName: "MyRythm.json",
     instrumentButtonSelected: null,
+    allSamples:[],
 };
 
 function initializeUI() {
+
+    loadSamples();
 
 /*    document.addEventListener("keydown", (event) => {
         if (event.repeat) // avoid repeated keystrokes
@@ -58,7 +61,50 @@ function initializeUI() {
         speedRangeOnChange();
       });
 
-      drawMusicPattern();
+      //drawMusicPattern();
+      setTimeout( ()=> { drawMusicPattern(); }, 1000); // FF will allow you to draw right after body.onload, but Chrome doesn't
+}
+
+function loadSamples () {
+
+    //list of mp3 samples
+    const MP3files=["sounds/bells/bell1.mp3", "sounds/bells/cowbell1.mp3", "sounds/bells/cowbell2.mp3", "sounds/bells/woodPerc.mp3"];
+  
+    //mark buffers as null
+    for (let i=0; i<MP3files.length; i++) {
+      Globals.allSamples[i]=null;
+    }
+  
+    const audioContext = new AudioContext();
+  
+    for (let i=0; i<MP3files.length; i++) {
+      fetch(MP3files[i])
+      .then(response => response.arrayBuffer())
+      .then(buffer => audioContext.decodeAudioData(buffer))
+      .then(myBuffer => Globals.allSamples[i]=myBuffer);
+      
+    }
+}
+
+function playSampleByNumber(number, pitchShift=1.0, volume=1) {
+
+    if ((Globals.allSamples==null)||(Globals.allSamples[number]==null)) {
+      return;
+    }
+  
+    const audioContext = new AudioContext();
+  
+    const source = audioContext.createBufferSource();
+    source.buffer = Globals.allSamples[number];
+    source.playbackRate.value = pitchShift;
+  
+    const myGainNode = audioContext.createGain();
+    myGainNode.gain.value = volume;
+  
+    source.connect(myGainNode);
+    myGainNode.connect(audioContext.destination);
+  
+    source.start(0);
 }
 
 function keyPressed(keyCode) {
@@ -120,7 +166,7 @@ function soundPatternStep() {
     //console.log(document.getElementById("Selector1").value);
     let instruments=[];
     for (let i=0; i<Globals.numInstruments; i++) {
-        instruments[i]=document.getElementById("Selector"+(i+1)).value;
+        instruments[i]=(document.getElementById("Selector"+(i+1)).value.slice(5) -1); // remove the "sound" label
 
     }
 
@@ -130,7 +176,8 @@ function soundPatternStep() {
     console.log(instruments[i]);*/
     for (let i=0; i<Globals.numInstruments; i++) {
           if (Globals.musicPattern[i][Globals.currentColumn]>0) {
-            playSound(instruments[i]);
+            //playSound(instruments[i]);
+            playSampleByNumber(instruments[i]);
           }
     }
 
@@ -151,19 +198,21 @@ async function keyReleased(keyCode) {
     //console.log("keyReleased :"+keyCode)  
 }
 
-function playSound(sound) {
+/*function playSound(sound) {
     let soundNode=document.getElementById(sound).cloneNode();
     //soundNode.playbackRate.value=2;
     //soundNode.detune.value=299;
     soundNode.play();
-}
+}*/
 
 
 function SoundButtonClick(soundNumber) {
+
+    playSampleByNumber(soundNumber-1);
     //console.log("Sound1ButtonClick("+soundNumber+")");
     //console.log ("Should Play:"+ "sound"+soundNumber);
-    let soundNode=document.getElementById("sound"+soundNumber).cloneNode();
-    soundNode.play();
+    //let soundNode=document.getElementById("sound"+soundNumber).cloneNode();
+    //soundNode.play();
 
     //check if user has an instrument selected
     if (Globals.instrumentButtonSelected!=null) {
@@ -225,7 +274,6 @@ function drawMusicPattern(drawColumnMarker) {
         }
     }
     //
-
 }
 
 function drawPoint(ctx, x, y, radius) {
