@@ -40,7 +40,7 @@
 
 #middleComponents {
   width: 1000px;
-  height: 500px;
+  height: 550px;
   margin: auto;
   background-color: red;
   display: flex; 
@@ -50,8 +50,8 @@
 }
 
 #middleSelectorDiv {
-  width: 250px;
-  height: 500px;
+  width: 190px;
+  height: 550px;
   background-color: white;
   border-style: solid;
   border-width: 1px;
@@ -68,6 +68,7 @@
 .SelectorClass {
   font-family: sans-serif, Verdana, Geneva, Tahoma;
   padding: 10px;
+  width: 190px;
 }
 
 #tabsDiv {
@@ -96,7 +97,7 @@
   border-color: black;
   /*background-color: red;*/
   width: 1000px;
-  height: 100px;
+  height: 60px;
   margin: auto;
   /*text-align: left;*/
   display: flex; 
@@ -139,7 +140,7 @@
 
     <sl-range id="SpeedRange" label="Speed" min="500" max="900" step="1" help-text="Play Speed" tooltip="bottom"></sl-range>
     
-    <sl-range id="PatternLengthRange" label="Pattern Length" min="6" max="25" step="1" help-text="Play Length" tooltip="bottom"></sl-range>    
+    <sl-range id="PatternLengthRange" label="Pattern Length" min="6" max="35" step="1" help-text="Play Length" tooltip="bottom"></sl-range>    
 
     <sl-button id="SaveButton" onclick="SaveButtonClick()">Save</sl-button>
     <sl-button id="LoadButton" onclick="LoadButtonClick()">Load</sl-button>
@@ -154,7 +155,7 @@
   </div>
 
   <div id="middleComponents">
-    <canvas id="myCanvas" width="750" height="500" onclick="canvasClick(event)"> </canvas> 
+    <canvas id="myCanvas" width="810" height="550" onclick="canvasClick(event)"> </canvas> 
 
     <div id="middleSelectorDiv">
       

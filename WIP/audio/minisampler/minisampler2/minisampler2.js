@@ -3,7 +3,7 @@
 let Globals = {
     numInstruments: 5,
     musicPattern: null, // array that holds the music pattern
-    maxMusicPatternLength: 25, // should match or be larger than <sl-range> PatternLengthRange
+    maxMusicPatternLength: 35, // should match or be larger than <sl-range> PatternLengthRange
     //internalTimerFPS: 10, // max value of internalFrames. Should be equal than <SpeedRange> max
     //
     currentColumn: 0,
