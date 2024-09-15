@@ -68,7 +68,40 @@ function initializeUI() {
 function loadSamples () {
 
     //list of mp3 samples
-    const MP3files=["sounds/bells/bell1.mp3", "sounds/bells/cowbell1.mp3", "sounds/bells/cowbell2.mp3", "sounds/bells/woodPerc.mp3"];
+    const MP3files=[
+        // bells
+        "sounds/bells/bell1.mp3", "sounds/bells/cowbell1.mp3", "sounds/bells/cowbell2.mp3", "sounds/bells/woodPerc.mp3",
+
+        //chord
+        "sounds/chord/chordSteelDr.mp3", "sounds/chord/ChordWhomp.mp3", "sounds/chord/ChordWoodPerc.mp3", "sounds/chord/flangeGuitar.mp3",
+        "sounds/chord/piano1.mp3", "sounds/chord/StringedPluck.mp3", "sounds/chord/waterGong.mp3", "sounds/chord/whompSynth.mp3",
+
+        //claps
+        "sounds/claps/clap1.mp3", "sounds/claps/CLAP2.mp3", "sounds/claps/Clap3.mp3", "sounds/claps/CrispClap.mp3", "sounds/claps/Lug.mp3",
+
+        // cymbals
+        "sounds/cymbals/CLANK01.mp3", "sounds/cymbals/CrashBIG.mp3", "sounds/cymbals/CRASHHard.mp3", "sounds/cymbals/DustyShaker.mp3",
+        "sounds/cymbals/hat1.mp3", "sounds/cymbals/OpenHat.mp3", "sounds/cymbals/TightCym.mp3",
+
+        //drum
+        "sounds/drum/ANALOGSNARE.mp3", "sounds/drum/ATTACKKICK.mp3", "sounds/drum/BEEFSTOMPA.mp3", "sounds/drum/BoomyAMS.mp3",
+        "sounds/drum/BOWSERNAT.mp3", "sounds/drum/HARDKICK.mp3", "sounds/drum/LoFiRimshot.mp3", "sounds/drum/MaterialDRY.mp3",
+        "sounds/drum/Percussion01.mp3", "sounds/drum/ROOMSTOMP.mp3", "sounds/drum/ROTOLOWNAT.mp3", "sounds/drum/RuffKick.mp3",
+        "sounds/drum/SHORTSNARE.mp3", "sounds/drum/TIGHTSNAPPY.mp3", "sounds/drum/Tom1BIG.mp3", "sounds/drum/TonalPerc.mp3", 
+        "sounds/drum/TRAPPYsnare.mp3", "sounds/drum/WARMKNOCKER.mp3", "sounds/drum/WOOD1.mp3",
+
+        //electronic
+        "sounds/electronic/elec1.mp3", "sounds/electronic/elec2.mp3", "sounds/electronic/elec3.mp3", "sounds/electronic/elec4.mp3",
+        "sounds/electronic/elec5.mp3", "sounds/electronic/elec6.mp3", "sounds/electronic/elec7.mp3", "sounds/electronic/elec8.mp3",
+        "sounds/electronic/elec9.mp3", "sounds/electronic/elec10.mp3", "sounds/electronic/elec11.mp3", "sounds/electronic/elec12.mp3",
+        "sounds/electronic/elec13.mp3", "sounds/electronic/elec14.mp3",
+
+        //techno 
+        "sounds/tecno/909SNR.mp3", "sounds/tecno/9091.mp3", "sounds/tecno/bass34.mp3", "sounds/tecno/BASSDRM1.mp3", "sounds/tecno/bassdrum505.mp3",
+        "sounds/tecno/BASSHI1.mp3", "sounds/tecno/cgm3.mp3", "sounds/tecno/ebullet.mp3", "sounds/tecno/ElecKick1.mp3", "sounds/tecno/FSB2.mp3",
+        "sounds/tecno/KICK1.mp3", "sounds/tecno/NOVBAS3.mp3", "sounds/tecno/RX15Clap.mp3", "sounds/tecno/SH2ACCOR.mp3", "sounds/tecno/SYNOTE13.mp3",
+        "sounds/tecno/SYNTH3.mp3", "sounds/tecno/winvadr2.mp3"
+    ];
   
     //mark buffers as null
     for (let i=0; i<MP3files.length; i++) {
@@ -166,7 +199,7 @@ function soundPatternStep() {
     //console.log(document.getElementById("Selector1").value);
     let instruments=[];
     for (let i=0; i<Globals.numInstruments; i++) {
-        instruments[i]=(document.getElementById("Selector"+(i+1)).value.slice(5) -1); // remove the "sound" label
+        instruments[i]=(document.getElementById("Selector"+(i+1)).value.slice(5) -1); // remove the "sound" label and adjust the sample number
 
     }
 
