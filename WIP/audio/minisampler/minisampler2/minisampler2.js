@@ -13,6 +13,7 @@ let Globals = {
     saveFileName: "MyRythm.json",
     instrumentButtonSelected: null,
     allSamples:[],
+    myAudioContext: null,
 };
 
 function initializeUI() {
@@ -125,17 +126,19 @@ function playSampleByNumber(number, pitchShift=1.0, volume=1) {
       return;
     }
   
-    const audioContext = new AudioContext();
-  
-    const source = audioContext.createBufferSource();
+    if (Globals.myAudioContext==null) {
+        Globals.myAudioContext = new AudioContext();
+    }
+
+    const source = Globals.myAudioContext.createBufferSource();
     source.buffer = Globals.allSamples[number];
     source.playbackRate.value = pitchShift;
   
-    const myGainNode = audioContext.createGain();
+    const myGainNode = Globals.myAudioContext.createGain();
     myGainNode.gain.value = volume;
   
     source.connect(myGainNode);
-    myGainNode.connect(audioContext.destination);
+    myGainNode.connect(Globals.myAudioContext.destination);
   
     source.start(0);
 }
