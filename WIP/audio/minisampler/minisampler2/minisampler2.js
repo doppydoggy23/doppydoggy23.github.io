@@ -154,7 +154,12 @@ function playSampleByNumber(number, pitchShift=1.0, volume=1) {
   
     const myGainNode = Globals.myAudioContext.createGain();
     myGainNode.gain.value = volume;
-  
+
+    source.onended = function() { // send to garbage collect
+        myGainNode.disconnect();
+        //console.log("fdfdfdssdfdfs"+Math.random);
+      };
+
     source.connect(myGainNode);
     myGainNode.connect(Globals.myAudioContext.destination);
   
