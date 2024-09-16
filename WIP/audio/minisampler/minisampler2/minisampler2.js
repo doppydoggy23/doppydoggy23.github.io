@@ -10,10 +10,11 @@ let Globals = {
     isPlaying: false,
     timerID: null,
     //internalFrames: 0, // counter that counts how many ticks before playing the next note
-    saveFileName: "MyRythm.json",
-    instrumentButtonSelected: null,
-    allSamples:[],
-    myAudioContext: null,
+    saveFileName: "MyRythm.json", // name of the save file
+    instrumentButtonSelected: null, // if an instrument selection button is pressed
+    allSamples:[], // all the samples ready to be player here
+    myAudioContext: null, //global audio context. Chrome causes trouble if you need to create more than one
+    currentlySelectedSlot: null, // currently selected (X, Y) square of screen
 };
 
 function initializeUI() {
@@ -40,7 +41,7 @@ function initializeUI() {
       for (let i=0; i<Globals.numInstruments; i++) {
         Globals.musicPattern[i]=new Array(Globals.maxMusicPatternLength);
         for (let x=0; x<Globals.maxMusicPatternLength; x++) {
-            Globals.musicPattern[i][x]=0;
+            Globals.musicPattern[i][x]=null;
         }
       }
 
@@ -61,6 +62,23 @@ function initializeUI() {
       document.getElementById("SpeedRange").addEventListener('sl-change', event => {
         speedRangeOnChange();
       });
+
+      //attach to the track length range controller its change event handler
+    document.getElementById("NoteRange").addEventListener('sl-change', event => {
+        //let relfreq=getNoteRelativeFrequency(document.getElementById("NoteRange").value);
+        //let volume=document.getElementById("VolumeRange").value;
+        //playSampleByNumber(0, relfreq, volume);
+        //console.log("val:"+document.getElementById("NoteRange").value);
+        if (Globals.currentlySelectedSlot!=null) {
+            Globals.musicPattern[Globals.currentlySelectedSlot.ySquare][Globals.currentlySelectedSlot.xSquare]= 
+            { note: document.getElementById("NoteRange").value, volume: document.getElementById("VolumeRange").value};
+
+            let relfreq=getNoteRelativeFrequency(document.getElementById("NoteRange").value);
+            let volume=document.getElementById("VolumeRange").value;
+            let sampleNum=(document.getElementById("Selector"+(Globals.currentlySelectedSlot.ySquare+1)).value.slice(5) -1); // remove the "sound" label and adjust the sample number        
+            playSampleByNumber(sampleNum, relfreq, volume);
+        }
+    });
 
       //drawMusicPattern();
       setTimeout( ()=> { drawMusicPattern(); }, 1000); // FF will allow you to draw right after body.onload, but Chrome doesn't
@@ -198,6 +216,17 @@ function speedRangeOnChange() {
 
 }
 
+function getNoteRelativeFrequency(rangePosition) {
+    let negativeRelFreqs=[415/440, 392/440, 369/440, 349/440, 329/440, 311/440, 293/440, 277/440, 261/440];
+    let positiveRelFreqs=[466/440, 493/440, 523/440, 554/440, 587/440, 622/440, 659/440, 698/440, 739/440];
+    if (rangePosition==0)
+      return 1;
+    if (rangePosition<0)
+      return negativeRelFreqs[(rangePosition*-1)-1];
+    if (rangePosition>0)
+      return positiveRelFreqs[rangePosition-1];
+}
+
 function soundPatternStep() {
     //console.log(document.getElementById("Selector1").value);
     let instruments=[];
@@ -211,9 +240,10 @@ function soundPatternStep() {
 /*    for (let i=0; i<Globals.numInstruments; i++)
     console.log(instruments[i]);*/
     for (let i=0; i<Globals.numInstruments; i++) {
-          if (Globals.musicPattern[i][Globals.currentColumn]>0) {
+          if (Globals.musicPattern[i][Globals.currentColumn]!=null) {
             //playSound(instruments[i]);
-            playSampleByNumber(instruments[i]);
+            let playobj=Globals.musicPattern[i][Globals.currentColumn];
+            playSampleByNumber(instruments[i], getNoteRelativeFrequency(playobj.note), playobj.volume);
           }
     }
 
@@ -226,7 +256,6 @@ function soundPatternStep() {
     //console.log(Globals.currentColumn);
     // draw an index of current sound column
     //drawCurrentPatterColumnMarker();
-    
 }
 
 
@@ -351,10 +380,20 @@ function canvasClick(event) {
     let ySquare=Math.floor(event.offsetY/squareSide);
 
     //console.log(xSquare+ " "+ ySquare);
-    if (Globals.musicPattern[ySquare][xSquare]==0) {
-        Globals.musicPattern[ySquare][xSquare]=1;
+    if (Globals.musicPattern[ySquare][xSquare]==null) {
+
+        //reset note and volume values
+        document.getElementById("NoteRange").value=0;
+        document.getElementById("VolumeRange").value=1;
+
+        Globals.musicPattern[ySquare][xSquare]= { note: document.getElementById("NoteRange").value, volume: document.getElementById("VolumeRange").value};
+        Globals.currentlySelectedSlot= {xSquare, ySquare};
     } else {
-        Globals.musicPattern[ySquare][xSquare]=0;
+        Globals.musicPattern[ySquare][xSquare]=null;
+        Globals.currentlySelectedSlot=null;
+
+        document.getElementById("NoteRange").value=0;
+        document.getElementById("VolumeRange").value=1;
     }
 
     drawMusicPattern();
