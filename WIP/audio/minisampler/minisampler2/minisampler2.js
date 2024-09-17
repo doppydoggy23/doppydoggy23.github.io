@@ -64,12 +64,36 @@ function initializeUI() {
       });
 
       //attach to the track length range controller its change event handler
-    document.getElementById("NoteRange").addEventListener('sl-change', event => {
+      document.getElementById("NoteRange").addEventListener('sl-change', event => {
         //let relfreq=getNoteRelativeFrequency(document.getElementById("NoteRange").value);
         //let volume=document.getElementById("VolumeRange").value;
         //playSampleByNumber(0, relfreq, volume);
         //console.log("val:"+document.getElementById("NoteRange").value);
         if (Globals.currentlySelectedSlot!=null) {
+            if (Globals.currentlySelectedSlot==null)
+                return;
+            
+            Globals.musicPattern[Globals.currentlySelectedSlot.ySquare][Globals.currentlySelectedSlot.xSquare]= 
+            { note: document.getElementById("NoteRange").value, volume: document.getElementById("VolumeRange").value};
+
+            let relfreq=getNoteRelativeFrequency(document.getElementById("NoteRange").value);
+            let volume=document.getElementById("VolumeRange").value;
+            let sampleNum=(document.getElementById("Selector"+(Globals.currentlySelectedSlot.ySquare+1)).value.slice(5) -1); // remove the "sound" label and adjust the sample number        
+            playSampleByNumber(sampleNum, relfreq, volume);
+        }
+    });
+
+    //ToDo: I should probably mix these two events calling a single function, since they're the same.
+
+    document.getElementById("VolumeRange").addEventListener('sl-change', event => {
+        //let relfreq=getNoteRelativeFrequency(document.getElementById("NoteRange").value);
+        //let volume=document.getElementById("VolumeRange").value;
+        //playSampleByNumber(0, relfreq, volume);
+        //console.log("val:"+document.getElementById("NoteRange").value);
+        if (Globals.currentlySelectedSlot!=null) {
+            if (Globals.currentlySelectedSlot==null)
+                return;
+            
             Globals.musicPattern[Globals.currentlySelectedSlot.ySquare][Globals.currentlySelectedSlot.xSquare]= 
             { note: document.getElementById("NoteRange").value, volume: document.getElementById("VolumeRange").value};
 
@@ -222,8 +246,8 @@ function speedRangeOnChange() {
 }
 
 function getNoteRelativeFrequency(rangePosition) {
-    let negativeRelFreqs=[415/440, 392/440, 369/440, 349/440, 329/440, 311/440, 293/440, 277/440, 261/440];
-    let positiveRelFreqs=[466/440, 493/440, 523/440, 554/440, 587/440, 622/440, 659/440, 698/440, 739/440];
+    let negativeRelFreqs=[415/440, 392/440, 369/440, 349/440, 329/440, 311/440, 293/440, 277/440, 261/440, 246/440, 233/440, 220/440];
+    let positiveRelFreqs=[466/440, 493/440, 523/440, 554/440, 587/440, 622/440, 659/440, 698/440, 739/440, 784/440, 830/440, 880/440];
     if (rangePosition==0)
       return 1;
     if (rangePosition<0)
