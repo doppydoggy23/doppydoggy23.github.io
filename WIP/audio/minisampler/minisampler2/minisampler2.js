@@ -325,12 +325,12 @@ function patternLengthOnChange() {
 
 function drawMusicPattern(drawColumnMarker) {
     const positiveNotesRGBs= [
-        {R: 10, G:10, B:10},{R: 210, G:130, B:17}, {R: 13, G:160, B:20}, {R: 30, G:30, B:30}, {R: 130, G:220, B:130}, {R: 105, G:210, B:50}, 
-        {R: 40, G:50, B:0},{R: 10, G:230, B:127}, {R: 139, G:60, B:50}, {R: 40, G:20, B:10}, {R: 30, G:20, B:130}, {R: 105, G:110, B:50}, 
+        {R: 0xe6, G:0xc2, B:0x29},{R: 0xf1, G:0x71, B:0x05}, {R: 0xd1, G:0x11, B:0x49}, {R: 0x66, G:0x10, B:0xf2}, {R: 0x1a, G:0x8f, B:0xe3}, {R: 0x30, G:0x36, B:0x33}, 
+        {R: 0x61, G:0xe2, B:0x94},{R: 0x2e, G:0x86, B:0xab}, {R: 0xf2, G:0x42, B:0x36}, {R: 0x23, G:0xce, B:0x33}, {R: 0x08, G:0x46, B:0xa0}, {R: 0x27, G:0x4c, B:0x77}, 
     ];
     const negativeNotesRGBs= [
-        {R: 10, G:10, B:10},{R: 210, G:130, B:17}, {R: 13, G:160, B:20}, {R: 30, G:30, B:30}, {R: 130, G:220, B:130}, {R: 105, G:210, B:50}, 
-        {R: 40, G:50, B:0},{R: 10, G:230, B:127}, {R: 139, G:60, B:50}, {R: 40, G:20, B:10}, {R: 30, G:20, B:130}, {R: 105, G:110, B:50}, 
+        {R: 0x60, G:0x96, B:0xba},{R: 0x8b, G:0x8c, B:0x81}, {R: 0xa3, G:0xce, B:0x91}, {R: 0x41, G:0x45, B:0x35}, {R: 0xc1, G:0x98, B:0x95}, {R: 0xd3, G:0x65, B:0x62}, 
+        {R: 0x6e, G:0x66, B:0x94},{R: 0xec, G:0xc4, B:0x94}, {R: 0x2d, G:0x30, B:0x47}, {R: 0x41, G:0x9d, B:0x48}, {R: 0xff, G:0xdb, B:0xd5}, {R: 0x61, G:0x89, B:0x85}, 
     ];
 
     let canvas = document.getElementById('myCanvas');
