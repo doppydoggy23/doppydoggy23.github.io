@@ -80,6 +80,8 @@ function initializeUI() {
             let volume=document.getElementById("VolumeRange").value;
             let sampleNum=(document.getElementById("Selector"+(Globals.currentlySelectedSlot.ySquare+1)).value.slice(5) -1); // remove the "sound" label and adjust the sample number        
             playSampleByNumber(sampleNum, relfreq, volume);
+
+            drawMusicPattern(); // ToDo: check is it's playing to call this function with true 
         }
     });
 
@@ -322,6 +324,15 @@ function patternLengthOnChange() {
 }
 
 function drawMusicPattern(drawColumnMarker) {
+    const positiveNotesRGBs= [
+        {R: 10, G:10, B:10},{R: 210, G:130, B:17}, {R: 13, G:160, B:20}, {R: 30, G:30, B:30}, {R: 130, G:220, B:130}, {R: 105, G:210, B:50}, 
+        {R: 40, G:50, B:0},{R: 10, G:230, B:127}, {R: 139, G:60, B:50}, {R: 40, G:20, B:10}, {R: 30, G:20, B:130}, {R: 105, G:110, B:50}, 
+    ];
+    const negativeNotesRGBs= [
+        {R: 10, G:10, B:10},{R: 210, G:130, B:17}, {R: 13, G:160, B:20}, {R: 30, G:30, B:30}, {R: 130, G:220, B:130}, {R: 105, G:210, B:50}, 
+        {R: 40, G:50, B:0},{R: 10, G:230, B:127}, {R: 139, G:60, B:50}, {R: 40, G:20, B:10}, {R: 30, G:20, B:130}, {R: 105, G:110, B:50}, 
+    ];
+
     let canvas = document.getElementById('myCanvas');
     let ctx = canvas.getContext("2d");
     let canvasWidth = canvas.width;
@@ -360,10 +371,20 @@ function drawMusicPattern(drawColumnMarker) {
             let xpos=(i*squareSide)+Math.floor(squareSide/2);
             let roundSquareXPos=(i*squareSide)+Math.floor(squareSide*0.1);
 
-            if (Globals.musicPattern[ii][i]<=0) {
+            let myNote=Globals.musicPattern[ii][i];
+            if (myNote==null) {                
                 drawPoint(ctx, xpos, ypos, squareSide*0.1);
-            } else {            
-                drawRoundButton(ctx, roundSquareXPos, roundSquareYPos, Math.floor(squareSide*0.8), Math.floor(squareSide*0.8), Math.PI*2);
+            } else {
+                let blockcolors="rgba(0, 0, 0, 1)";
+                if (myNote.note>=1) {
+                    let rgbs=positiveNotesRGBs[myNote.note-1];
+                    blockcolors="rgba("+rgbs.R+", "+rgbs.G+", "+rgbs.B+", 1)";                
+                }
+                if (myNote.note<=-1) {
+                    let rgbs=negativeNotesRGBs[(myNote.note*-1)-1];
+                    blockcolors="rgba("+rgbs.R+", "+rgbs.G+", "+rgbs.B+", 1)";                
+                }
+                drawRoundButton(ctx, roundSquareXPos, roundSquareYPos, Math.floor(squareSide*0.8), Math.floor(squareSide*0.8), Math.PI*2, blockcolors);
             }
         }
     }
@@ -378,8 +399,10 @@ function drawPoint(ctx, x, y, radius) {
 
 }
 
-function drawRoundButton(ctx, x, y, width, height, arcsize) {
-    ctx.fillStyle = "black";
+function drawRoundButton(ctx, x, y, width, height, arcsize, myBlockColors) {
+    //ctx.fillStyle = "black";
+    ctx.fillStyle=myBlockColors;
+
     ctx.beginPath();
     ctx.moveTo(x+arcsize, y);
     ctx.lineTo(x+width-arcsize, y);
