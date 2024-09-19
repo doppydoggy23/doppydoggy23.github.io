@@ -100,6 +100,35 @@ function initializeUI() {
 
       //drawMusicPattern();
       setTimeout( ()=> { drawMusicPattern(); }, 1000); // FF will allow you to draw right after body.onload, but Chrome doesn't
+
+      window.oncontextmenu = function (evt) { // prevent right click context menu
+        evt.preventDefault();
+      }
+
+      document.getElementById("myCanvas").onmousedown = function(event) { // when right-click on a marked square, it means we want to edit its data
+        if (event.button>1) { // we only check for right button click
+            let canvas = document.getElementById('myCanvas');
+            let ctx = canvas.getContext("2d");
+            let canvasWidth = canvas.width;
+            let canvasHeight = canvas.height;
+        
+            let patternLength=document.getElementById("PatternLengthRange").value;
+            let squareSide=Math.floor(canvasWidth/patternLength);
+        
+            let xSquare=Math.floor(event.offsetX/squareSide);
+            let ySquare=Math.floor(event.offsetY/squareSide);
+
+            //console.log("xsquare="+xSquare+" ysquare="+ySquare);
+
+            let myNote=Globals.musicPattern[ySquare][xSquare];
+            if (myNote==null)
+                return;
+
+            document.getElementById("NoteRange").value=myNote.note;
+            document.getElementById("VolumeRange").value=myNote.volume;
+            Globals.currentlySelectedSlot= {xSquare, ySquare};
+        }
+      };
 }
 
 function loadSamples () {
@@ -323,13 +352,6 @@ function drawMusicPattern(drawColumnMarker) {
     let canvasHeight = canvas.height;
 
 
-/*    ctx.resetTransform();
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, 100, 100);*/
-    //ctx.moveTo(100, 100);
-
-    //drawRoundButton(ctx, 100, 100, 50, 20, Math.PI);
-
     //let patternLength=25;
     let patternLength=document.getElementById("PatternLengthRange").value;
     let numInstruments=Globals.numInstruments;
@@ -416,6 +438,11 @@ function canvasClick(event) {
     let xSquare=Math.floor(event.offsetX/squareSide);
     let ySquare=Math.floor(event.offsetY/squareSide);
 
+    //if (event.which>1) {
+        //right click
+        //console.log("right event.which: "+event.which+ " event.button: "+event.button);
+    //}
+
     //console.log(xSquare+ " "+ ySquare);
     if (Globals.musicPattern[ySquare][xSquare]==null) {
 
@@ -425,7 +452,10 @@ function canvasClick(event) {
 
         Globals.musicPattern[ySquare][xSquare]= { note: document.getElementById("NoteRange").value, volume: document.getElementById("VolumeRange").value};
         Globals.currentlySelectedSlot= {xSquare, ySquare};
-        //ToDo: play the sample sound when putting a filled square
+        
+        // we play the sample
+        let sampleNum=(document.getElementById("Selector"+(ySquare+1)).value.slice(5) -1); // remove the "sound" label and adjust the sample number        
+        playSampleByNumber(sampleNum);
     } else {
         Globals.musicPattern[ySquare][xSquare]=null;
         Globals.currentlySelectedSlot=null;
