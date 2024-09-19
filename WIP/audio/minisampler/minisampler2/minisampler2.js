@@ -45,14 +45,6 @@ function initializeUI() {
         }
       }
 
-      //ToDo: delete
-      /*Globals.musicPattern[0][0]=1;
-      Globals.musicPattern[0][1]=1;
-      Globals.musicPattern[0][9]=1;
-      Globals.musicPattern[3][2]=1;
-      Globals.musicPattern[2][5]=1;
-      Globals.musicPattern[4][24]=1;*/
-
       //attach to the track length range controller its change event handler
       document.getElementById("PatternLengthRange").addEventListener('sl-change', event => {
         patternLengthOnChange();
@@ -294,14 +286,6 @@ async function keyReleased(keyCode) {
     //console.log("keyReleased :"+keyCode)  
 }
 
-/*function playSound(sound) {
-    let soundNode=document.getElementById(sound).cloneNode();
-    //soundNode.playbackRate.value=2;
-    //soundNode.detune.value=299;
-    soundNode.play();
-}*/
-
-
 function SoundButtonClick(soundNumber) {
 
     playSampleByNumber(soundNumber-1);
@@ -419,6 +403,7 @@ function drawRoundButton(ctx, x, y, width, height, arcsize, myBlockColors) {
 }
 
 function canvasClick(event) {
+    //ToDo: check if clicks with the right button over a filled square, this could be used to load the square values to me modified instead of clearing it
     //console.log(event.offsetX+ " "+event.offsetY);
     let canvas = document.getElementById('myCanvas');
     let ctx = canvas.getContext("2d");
@@ -440,6 +425,7 @@ function canvasClick(event) {
 
         Globals.musicPattern[ySquare][xSquare]= { note: document.getElementById("NoteRange").value, volume: document.getElementById("VolumeRange").value};
         Globals.currentlySelectedSlot= {xSquare, ySquare};
+        //ToDo: play the sample sound when putting a filled square
     } else {
         Globals.musicPattern[ySquare][xSquare]=null;
         Globals.currentlySelectedSlot=null;
@@ -510,6 +496,7 @@ function SaveButtonClick() {
 
 function LoadButtonClick(event) {
     Globals.instrumentButtonSelected=null;
+    Globals.currentlySelectedSlot=null;
 
     //let file = event.target.files[0];   
 
@@ -555,6 +542,7 @@ function LoadButtonClick(event) {
             document.getElementById("SpeedRange").value=loadingOBJ.speed;
 
             drawMusicPattern(); //refresh pattern on screen
+            //ToDo: when loading a rythm while playing, the playing speed is not the one loaded, but the speed it had when the play button was clicked
          }
     }
 
