@@ -110,6 +110,15 @@ class TestSoundProcessor extends AudioWorkletProcessor {
           return this.A1*Math.sin( (2*Math.PI*this.C1*t) + (this.D1*M1Ampl)+(this.D3*M3Ampl) );
       }
 
+      if (this.Algorithm=="Algorithm10")  {
+        // Modulator M3 modulates modulator M2 who also is modulated by itself. Modulator M2 modulates modulator M1 who is also modulated by M3. M1 modulates Carrier C1
+        let M2Ampl= this.D2 * Math.sin( (2*Math.PI*this.M2*t) + (this.D2*this.oldM1Amplitude) + (this.D3*Math.sin(2*Math.PI*this.M3*t)) );
+        this.oldM1Amplitude=M2Ampl;
+        let M1Ampl= 1 * Math.sin( (2*Math.PI*this.M1*t) + (this.D2*M2Ampl) + (this.D3*Math.sin(2*Math.PI*this.M3*t)) );
+
+        return this.A1*Math.sin( (2*Math.PI*this.C1*t) + (this.D1*M1Ampl) );
+    }
+
   }
 
     // we need to define an onmessage function to received the audio data from audio.js

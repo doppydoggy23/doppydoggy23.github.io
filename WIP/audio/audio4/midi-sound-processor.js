@@ -151,7 +151,16 @@ class MIDISoundProcessor extends AudioWorkletProcessor {
       let M3Ampl= 1 * Math.sin( (2*Math.PI*formulaValues.M3*t) + (formulaValues.D4*Math.sin(2*Math.PI*formulaValues.M4*t)) );
 
       return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl)+(formulaValues.D3*M3Ampl) );
-  }
+    }
+
+    if (formulaValues.Algorithm=="Algorithm10")  {
+      // Modulator M3 modulates modulator M2 who also is modulated by itself. Modulator M2 modulates modulator M1 who is also modulated by M3. M1 modulates Carrier C1
+      let M2Ampl= formulaValues.D2 * Math.sin( (2*Math.PI*formulaValues.M2*t) + (formulaValues.D2*formulaValues.oldM1Value) + (formulaValues.D3*Math.sin(2*Math.PI*formulaValues.M3*t)) );
+      formulaValues.oldM1Value=M2Ampl;
+      let M1Ampl= 1 * Math.sin( (2*Math.PI*formulaValues.M1*t) + (formulaValues.D2*M2Ampl) + (formulaValues.D3*Math.sin(2*Math.PI*formulaValues.M3*t)) );
+
+      return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl) );
+    }
 
 }
 

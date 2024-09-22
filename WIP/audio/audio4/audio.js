@@ -37,7 +37,7 @@ function downloadWAV() {
         &&(formulaValues.Algorithm!="Algorithm3")&&(formulaValues.Algorithm!="Algorithm4")
         &&(formulaValues.Algorithm!="Algorithm5")&&(formulaValues.Algorithm!="Algorithm6")
         &&(formulaValues.Algorithm!="Algorithm7")&&(formulaValues.Algorithm!="Algorithm8")
-        &&(formulaValues.Algorithm!="Algorithm9")
+        &&(formulaValues.Algorithm!="Algorithm9")&&(formulaValues.Algorithm!="Algorithm10")
         )
         throw "Unsupported Algorithm downloadWAV()";
 
@@ -81,7 +81,7 @@ function playSound() {
         &&(formulaValues.Algorithm!="Algorithm3")&&(formulaValues.Algorithm!="Algorithm4")
         &&(formulaValues.Algorithm!="Algorithm5")&&(formulaValues.Algorithm!="Algorithm6")
         &&(formulaValues.Algorithm!="Algorithm7")&&(formulaValues.Algorithm!="Algorithm8")
-        &&(formulaValues.Algorithm!="Algorithm9")
+        &&(formulaValues.Algorithm!="Algorithm9")&&(formulaValues.Algorithm!="Algorithm10")
         )
         throw "Unsupported Algorithm playSound()";
 
@@ -227,6 +227,15 @@ function getFMAmplitudeFor (formulaValues, t) {
         let M3Ampl= 1 * Math.sin( (2*Math.PI*formulaValues.M3*t) + (formulaValues.D4*Math.sin(2*Math.PI*formulaValues.M4*t)) );
 
         return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl)+(formulaValues.D3*M3Ampl) );
+    }
+
+    if (formulaValues.Algorithm=="Algorithm10")  {
+        // Modulator M3 modulates modulator M2 who also is modulated by itself. Modulator M2 modulates modulator M1 who is also modulated by M3. M1 modulates Carrier C1
+        let M2Ampl= formulaValues.D2 * Math.sin( (2*Math.PI*formulaValues.M2*t) + (formulaValues.D2*window.oldC1Amplitude) + (formulaValues.D3*Math.sin(2*Math.PI*formulaValues.M3*t)) );
+        window.oldC1Amplitude=M2Ampl;
+        let M1Ampl= 1 * Math.sin( (2*Math.PI*formulaValues.M1*t) + (formulaValues.D2*M2Ampl) + (formulaValues.D3*Math.sin(2*Math.PI*formulaValues.M3*t)) );
+
+        return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl) );
     }
 
 }
@@ -458,7 +467,7 @@ function checkForValidValues() {
     &&(selectedAlgorithm!="Algorithm3")&&(selectedAlgorithm!="Algorithm4")
     &&(selectedAlgorithm!="Algorithm5")&&(selectedAlgorithm!="Algorithm6")
     &&(selectedAlgorithm!="Algorithm7")&&(selectedAlgorithm!="Algorithm8")
-    &&(selectedAlgorithm!="Algorithm9")
+    &&(selectedAlgorithm!="Algorithm9")&&(selectedAlgorithm!="Algorithm10")
     )
     throw "Unsupported Algorithm checkForValidValues()";
 
@@ -564,6 +573,15 @@ function AlgorithmListChange() {
         document.getElementById("algopicdiv").innerHTML='<img src="algorithm9.png" alt="Algorithm 9" style="width:10%;height:10%;">';
         window.oldC1Amplitude=0;
     }
+    if (selectedAlgorithm=="Algorithm10") { // M3-M2*-M1,-C1
+        document.getElementById("Modulator2Table").style.display = "initial";
+        document.getElementById("Modulator3Table").style.display = "initial";
+        document.getElementById("Modulator4Table").style.display = "none";
+        document.getElementById("Carrier2Table").style.display = "none";
+        document.getElementById("Carrier3Table").style.display = "none";
+        document.getElementById("algopicdiv").innerHTML='<img src="algorithm10.png" alt="Algorithm 10" style="width:10%;height:10%;">';
+        window.oldC1Amplitude=0;
+    }
 
     collectFormDataAndUpdateSignalProcessorValues();// update params of the signal processor if it is running
 }
@@ -663,7 +681,7 @@ async function testSoundClick() {
         &&(formulaValues.Algorithm!="Algorithm3")&&(formulaValues.Algorithm!="Algorithm4")
         &&(formulaValues.Algorithm!="Algorithm5")&&(formulaValues.Algorithm!="Algorithm6")
         &&(formulaValues.Algorithm!="Algorithm7")&&(formulaValues.Algorithm!="Algorithm8")
-        &&(formulaValues.Algorithm!="Algorithm9")
+        &&(formulaValues.Algorithm!="Algorithm9")&&(formulaValues.Algorithm!="Algorithm10")
         )
         throw "Unsupported Algorithm testSoundClick()";
 
