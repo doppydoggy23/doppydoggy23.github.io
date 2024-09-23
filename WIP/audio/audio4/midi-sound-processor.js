@@ -14,6 +14,7 @@ class MIDISoundProcessor extends AudioWorkletProcessor {
       key: e.data.key,
       samplesProcessed: 0,
       oldM1Value:0,
+      accumulatedValue2:0,
       timeShiftingRatio: e.data.timeShiftingRatio,
       //
       Algorithm:e.data.Algorithm,
@@ -160,6 +161,16 @@ class MIDISoundProcessor extends AudioWorkletProcessor {
       let M1Ampl= 1 * Math.sin( (2*Math.PI*formulaValues.M1*t) + (formulaValues.D2*M2Ampl) + (formulaValues.D3*Math.sin(2*Math.PI*formulaValues.M3*t)) );
 
       return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl) );
+    }
+
+    if (formulaValues.Algorithm=="Algorithm11")  {
+      // Modulator M1 modulates itself and Carrier C1, modulator M2 modulates itself an carrier C1, too
+      let M1Ampl= formulaValues.D1 * Math.sin( (2*Math.PI*formulaValues.M1*t) + (formulaValues.D1*formulaValues.oldM1Value) );
+      let M2Ampl= formulaValues.D2 * Math.sin( (2*Math.PI*formulaValues.M2*t) + (formulaValues.D2*formulaValues.accumulatedValue2) );
+      formulaValues.oldM1Value=M1Ampl; // we need the old value of M1 Amplitude to get the next new value
+      formulaValues.accumulatedValue2=M2Ampl; // we need the old value of M1 Amplitude to get the next new value
+
+      return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl) + (formulaValues.D2*M2Ampl));
     }
 
 }

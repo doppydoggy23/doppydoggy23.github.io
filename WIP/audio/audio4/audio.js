@@ -30,6 +30,7 @@ function initializeUI() {
 function downloadWAV() {
 
     window.oldC1Amplitude=0; // reset the value of M1 selfmodulation
+    window.accumulatedValue2=0; // reset the value of M1 selfmodulation
     let formulaValues=checkForValidValues();
     //document.getElementById("docfooter").innerHTML="dfsdf";
 
@@ -38,6 +39,7 @@ function downloadWAV() {
         &&(formulaValues.Algorithm!="Algorithm5")&&(formulaValues.Algorithm!="Algorithm6")
         &&(formulaValues.Algorithm!="Algorithm7")&&(formulaValues.Algorithm!="Algorithm8")
         &&(formulaValues.Algorithm!="Algorithm9")&&(formulaValues.Algorithm!="Algorithm10")
+        &&(formulaValues.Algorithm!="Algorithm11")
         )
         throw "Unsupported Algorithm downloadWAV()";
 
@@ -74,6 +76,7 @@ function downloadWAV() {
 // called when play sound button is pressed
 function playSound() {
     window.oldC1Amplitude=0;  // reset the value of M1 selfmodulation
+    window.accumulatedValue2=0;  // reset the value of M1 selfmodulation
     let formulaValues=checkForValidValues();
     //document.getElementById("docfooter").innerHTML="dfsdf";
 
@@ -82,6 +85,7 @@ function playSound() {
         &&(formulaValues.Algorithm!="Algorithm5")&&(formulaValues.Algorithm!="Algorithm6")
         &&(formulaValues.Algorithm!="Algorithm7")&&(formulaValues.Algorithm!="Algorithm8")
         &&(formulaValues.Algorithm!="Algorithm9")&&(formulaValues.Algorithm!="Algorithm10")
+        &&(formulaValues.Algorithm!="Algorithm11")
         )
         throw "Unsupported Algorithm playSound()";
 
@@ -236,6 +240,16 @@ function getFMAmplitudeFor (formulaValues, t) {
         let M1Ampl= 1 * Math.sin( (2*Math.PI*formulaValues.M1*t) + (formulaValues.D2*M2Ampl) + (formulaValues.D3*Math.sin(2*Math.PI*formulaValues.M3*t)) );
 
         return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl) );
+    }
+
+    if (formulaValues.Algorithm=="Algorithm11")  {
+        // Modulator M1 modulates itself and Carrier C1, modulator M2 modulates itself an carrier C1, too
+        let M1Ampl= formulaValues.D1 * Math.sin( (2*Math.PI*formulaValues.M1*t) + (formulaValues.D1*window.oldC1Amplitude) );
+        let M2Ampl= formulaValues.D2 * Math.sin( (2*Math.PI*formulaValues.M2*t) + (formulaValues.D2*window.accumulatedValue2) );
+        window.oldC1Amplitude=M1Ampl; // we need the old value of M1 Amplitude to get the next new value
+        window.accumulatedValue2=M2Ampl; // we need the old value of M1 Amplitude to get the next new value
+
+        return formulaValues.A1*Math.sin( (2*Math.PI*formulaValues.C1*t) + (formulaValues.D1*M1Ampl) + (formulaValues.D2*M2Ampl));
     }
 
 }
@@ -468,6 +482,7 @@ function checkForValidValues() {
     &&(selectedAlgorithm!="Algorithm5")&&(selectedAlgorithm!="Algorithm6")
     &&(selectedAlgorithm!="Algorithm7")&&(selectedAlgorithm!="Algorithm8")
     &&(selectedAlgorithm!="Algorithm9")&&(selectedAlgorithm!="Algorithm10")
+    &&(selectedAlgorithm!="Algorithm11")
     )
     throw "Unsupported Algorithm checkForValidValues()";
 
@@ -582,6 +597,16 @@ function AlgorithmListChange() {
         document.getElementById("algopicdiv").innerHTML='<img src="algorithm10.png" alt="Algorithm 10" style="width:10%;height:10%;">';
         window.oldC1Amplitude=0;
     }
+    if (selectedAlgorithm=="Algorithm11") { //-M1*-M2*-C1
+        document.getElementById("Modulator2Table").style.display = "initial";
+        document.getElementById("Modulator3Table").style.display = "none";
+        document.getElementById("Modulator4Table").style.display = "none";
+        document.getElementById("Carrier2Table").style.display = "none";
+        document.getElementById("Carrier3Table").style.display = "none";
+        document.getElementById("algopicdiv").innerHTML='<img src="algorithm11.png" alt="Algorithm 11" style="width:10%;height:10%;">';
+        window.oldC1Amplitude=0;
+        window.accumulatedValue2=0;
+    }
 
     collectFormDataAndUpdateSignalProcessorValues();// update params of the signal processor if it is running
 }
@@ -674,6 +699,7 @@ function stopTestClick() {
 // Test button called
 async function testSoundClick() {
     window.oldC1Amplitude=0;  // reset the value of M1 selfmodulation
+    window.accumulatedValue2=0;  // reset the value of M1 selfmodulation
     let formulaValues=checkForValidValues();
     //document.getElementById("docfooter").innerHTML="dfsdf";
 
@@ -682,6 +708,7 @@ async function testSoundClick() {
         &&(formulaValues.Algorithm!="Algorithm5")&&(formulaValues.Algorithm!="Algorithm6")
         &&(formulaValues.Algorithm!="Algorithm7")&&(formulaValues.Algorithm!="Algorithm8")
         &&(formulaValues.Algorithm!="Algorithm9")&&(formulaValues.Algorithm!="Algorithm10")
+        &&(formulaValues.Algorithm!="Algorithm11")
         )
         throw "Unsupported Algorithm testSoundClick()";
 

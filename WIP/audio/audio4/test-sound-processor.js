@@ -33,6 +33,7 @@ class TestSoundProcessor extends AudioWorkletProcessor {
     //not yet C4=null;
     //not yet D4=null;
     oldM1Amplitude=0;
+    accumulatedValue2=0;
 
     // the matchng function of getFMAmplitudeFor in audio.js is getFMAmplitudeFor. When adding new algorithms you need to change both.
     getFMAmplitudeFor(t) {
@@ -117,7 +118,18 @@ class TestSoundProcessor extends AudioWorkletProcessor {
         let M1Ampl= 1 * Math.sin( (2*Math.PI*this.M1*t) + (this.D2*M2Ampl) + (this.D3*Math.sin(2*Math.PI*this.M3*t)) );
 
         return this.A1*Math.sin( (2*Math.PI*this.C1*t) + (this.D1*M1Ampl) );
-    }
+      }
+
+      if (this.Algorithm=="Algorithm11")  {
+        // Modulator M1 modulates itself and Carrier C1, modulator M2 modulates itself an carrier C1, too
+        let M1Ampl= this.D1 * Math.sin( (2*Math.PI*this.M1*t) + (this.D1*this.oldM1Amplitude) );
+        let M2Ampl= this.D2 * Math.sin( (2*Math.PI*this.M2*t) + (this.D2*this.accumulatedValue2) );
+        this.oldM1Amplitude=M1Ampl; // we need the old value of M1 Amplitude to get the next new value
+        this.accumulatedValue2=M2Ampl; // we need the old value of M1 Amplitude to get the next new value
+
+        return this.A1*Math.sin( (2*Math.PI*this.C1*t) + (this.D1*M1Ampl) + (this.D2*M2Ampl));
+      } 
+
 
   }
 
