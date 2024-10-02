@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- This code belongs to public domain (2023) -->
+<title>FM synthesizer</title>
+<style>
+
+#docfooter {
+  /*background-color: red;*/
+}
+
+
+</style>
+
+  <script src="wavefile.js"></script>
+	<script src="adder.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+
+</head>
+
+<body onload="initializeUI()">
+
+  <h1>Additive Synthesis Sound Generator</h1>
+
+  <div>
+    <table style="display:initial;" id="table1">
+      <tr>
+        <th>Sinusoids</th>
+      </tr>
+      <tr>
+        <td><input type="range" min="0" max="10000" value="440" class="slider" id="W1FrequencySlider" step="1" style="width:880px;" oninput="W1FrequencySliderOnInput()"></td>
+        <td><input type="text" id="W1Frequency" value="440" onchange="W1FrequencyTextOnChange()" style="width:50px;"> </td>
+        <td><input type="range" min="0" max="1" value="1" class="slider" id="W1WeightSlider" step="0.01" style="width:100px;" oninput="W1WeightSliderOnInput()"></td>
+      </tr>
+      <tr>
+        <td><sl-range id="W2Range" label="Frequency" min="0" max="10000" step="1" help-text="Wave 2 Frequency" tooltip="bottom" oninput="W2FrequencySliderOnInput()"></sl-range></td>
+        <td><sl-input onchange="W2FrequencyTextOnChange()" help-text="W2 Frequency" style="width:100px;"> </sl-input></td>
+        <td><sl-range id="W2Weight" label="Weight" min="0" max="1" step="0.01" help-text="Wave 2 Weight" tooltip="bottom"></sl-range></td></td>
+      </tr>
+    </table> 
+  </div>
+
+  <div>
+    <input type="button" id="PlayButton"onclick="playSound()" value="Play Sound">
+    <input type="button" id="DownloadWavButton"onclick="downloadWAV()" value="Download Wav">
+    <input type="button" id="TestSoundButton"onclick="testSoundClick()" value="Test Sound">
+    <input type="button" id="StopTestButton"onclick="stopTestClick()" value="Stop Test">
+    <input type="button" id="CheckWebMidi"onclick="CheckWebMidiClick()" value="Check Web MIDI">
+  </div>
+
+<!-- Here it goes the description and information-->
+
+  
+
+<footer id="docfooter">
+
+</footer>
+
+</body>
+</html>
