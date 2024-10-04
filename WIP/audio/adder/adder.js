@@ -5,9 +5,10 @@ This code belongs to pubic domain (2024)
 */
 
 const GlobalConstants = {
-    MaxWaveFrequency: 10000,
+    MaxWaveFrequency: 5000,
     MinWaveFrequency: 0,
     DefaultWaveFrequency: 440,
+    numSinusoids: 3,
 }
 
 function initializeUI() {
@@ -28,6 +29,7 @@ function initializeUI() {
 
 }
 
+// This function adjust the values of the GUI elements to make sure they are valid and within range
 function AjustGUIForValidValues () {
     //Sinusoid 1
     let value=parseInt(document.getElementById("W1FInput").value);
@@ -69,6 +71,9 @@ function AjustGUIForValidValues () {
 
 function W1FrequencySliderOnInput () {
     document.getElementById("W1FInput").value=document.getElementById("W1FRange").value;
+    if (document.getElementById("SelectHarmonicsOptionRG").value==2) {
+        adjustValuesForHarmonicsInGUI();
+    }
 }
 
 function W2FrequencySliderOnInput(){
@@ -84,6 +89,9 @@ function W3FrequencySliderOnInput(){
 function W1FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W1FRange").value=document.getElementById("W1FInput").value;
+    if (document.getElementById("SelectHarmonicsOptionRG").value==2) {
+        adjustValuesForHarmonicsInGUI();
+    }
 }
 
 function W2FrequencyTextOnChange() {
@@ -96,6 +104,7 @@ function W3FrequencyTextOnChange() {
     document.getElementById("W3FRange").value=document.getElementById("W3FInput").value;
 }
 
+// this function retrieves the values of the GUI elements after making sure they are correct and within range
 function retrieveParsedValues() {
     AjustGUIForValidValues(); // ToDo: check if this function takes too much time, in case real time sound becomes laggy
     let W1F=parseInt(document.getElementById("W1FInput").value);
@@ -107,12 +116,27 @@ function PlayButtonClick() {
     console.log (retrieveParsedValues());
 }
 
-function SelectHarmonicsOptionRGOnChange() {
-    //console.log("HarmonicOnChangeHandler: "+document.getElementById("HarmonicSwitch").checked);
-    if (document.getElementById("SelectHarmonicsOptionRG").value==2) {
+// this function, adjust the values of the GUI elements to harmonics-based
+function adjustValuesForHarmonicsInGUI(){
+    let baseFreq=document.getElementById("W1FInput").value;
+    for (let i=2; i<=GlobalConstants.numSinusoids; i++) {
+        let harmFreq=baseFreq*i;
+        if (harmFreq>GlobalConstants.MaxWaveFrequency) {
+            harmFreq=GlobalConstants.MaxWaveFrequency;
+        }
+        document.getElementById("W"+i+"FInput").value=harmFreq;
+        document.getElementById("W"+i+"FRange").value=harmFreq;
+    }
+}
 
-        document.getElementById("W2FInput").value="1234";
-        document.getElementById("W3FInput").value="5678";
+//this function is called when harmonics/free are selected in the said radio buttons group
+function SelectHarmonicsOptionRGOnChange() {
+    AjustGUIForValidValues();
+    //console.log("HarmonicOnChangeHandler: "+document.getElementById("HarmonicSwitch").checked);
+
+    if (document.getElementById("SelectHarmonicsOptionRG").value==2) {
+        //harmonics selected
+        adjustValuesForHarmonicsInGUI();
 
         document.getElementById("W2FRange").disabled=true;
         document.getElementById("W2FInput").disabled=true;
