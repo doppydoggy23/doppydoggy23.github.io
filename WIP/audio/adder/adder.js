@@ -107,13 +107,25 @@ function W3FrequencyTextOnChange() {
 // this function retrieves the values of the GUI elements after making sure they are correct and within range
 function retrieveParsedValues() {
     AjustGUIForValidValues(); // ToDo: check if this function takes too much time, in case real time sound becomes laggy
-    let W1F=parseInt(document.getElementById("W1FInput").value);
+/*    let W1F=parseInt(document.getElementById("W1FInput").value);
     let W2F=parseInt(document.getElementById("W2FInput").value);
-    let W3F=parseInt(document.getElementById("W3FInput").value);
-    return {W1F, W2F, W3F};
+    let W3F=parseInt(document.getElementById("W3FInput").value);*/
+
+    let WFreqs=[];
+    let WAmplitudes=[];
+
+    for (let i=1; i<=GlobalConstants.numSinusoids; i++) {
+        WFreqs[i-1]=document.getElementById("W"+i+"FInput").value;
+        WAmplitudes[i-1]=document.getElementById("W"+i+"Weight").value;
+    }
+
+    //return {W1F, W2F, W3F};
+    return {WFreqs, WAmplitudes};
 }
+
 function PlayButtonClick() {
-    console.log (retrieveParsedValues());
+    //console.log (retrieveParsedValues());
+    playSound(retrieveParsedValues());
 }
 
 // this function, adjust the values of the GUI elements to harmonics-based
@@ -153,3 +165,62 @@ function SelectHarmonicsOptionRGOnChange() {
 /*function SelectHarmonicsOptionRGOnChange () {
     console.log(""+document.getElementById("SelectHarmonicsOptionRG").value);
 }*/
+
+// called when play sound button is pressed
+function playSound(pParsedValues) {
+
+    //let totalSampleTime=formulaValues.Attack+formulaValues.Decay+formulaValues.Sustain+formulaValues.Release;
+    let totalSampleTime=3; // 3 seconds
+    if (totalSampleTime<=0) 
+        return;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // 
+    const myArrayBuffer = audioCtx.createBuffer(
+    2,
+    audioCtx.sampleRate*totalSampleTime,
+    audioCtx.sampleRate
+    );
+
+    // Fill the buffer with sound;
+    // just values between -1.0 and 1.0
+    for (let channel = 0; channel < myArrayBuffer.numberOfChannels; channel++) {
+        // This gives us the actual array that contains the data
+        const nowBuffering = myArrayBuffer.getChannelData(channel);
+        for (let i = 0; i < myArrayBuffer.length; i++) {
+            let t=i/audioCtx.sampleRate;
+            //let minC1=Math.max(formulaValues.C1, 1);
+            //let shiftingRatio=(440/minC1); // adjust the timing to always play a note A
+            nowBuffering[i]=getAmplitudeFor(pParsedValues, t); // gets the amplitude [0..1] for the given time t
+            //nowBuffering[i]*=getWaveScaleFor(formulaValues, t); // multiplies it for a scale to give the wave the shape according to attack, sustain and release times
+        }
+    }
+
+    // Get an AudioBufferSourceNode.
+    // This is the AudioNode to use when we want to play an AudioBuffer
+    const source = audioCtx.createBufferSource();
+
+    // set the buffer in the AudioBufferSourceNode
+    source.buffer = myArrayBuffer;
+
+    // connect the AudioBufferSourceNode to the
+    // destination so we can hear the sound
+    source.connect(audioCtx.destination);
+
+    // start the source playing
+    source.start();
+}
+
+//mixes all weighted sinusoids together
+function getAmplitudeFor (pParsedValues, t) {
+    //let freq=440;
+    //return Math.sin( (2*Math.PI*freq*t) );
+
+    let acc=0;
+    for (let i=0; i<GlobalConstants.numSinusoids; i++) {
+        acc+= pParsedValues.WAmplitudes[i]*Math.sin( (2*Math.PI*pParsedValues.WFreqs[i]*t) );
+    }
+    acc/=GlobalConstants.numSinusoids;
+    return acc;
+}
