@@ -8,7 +8,7 @@ const GlobalConstants = {
     MaxWaveFrequency: 5000,
     MinWaveFrequency: 0,
     DefaultWaveFrequency: 440,
-    numSinusoids: 3,
+    numSinusoids: 3, // important. It says how many sinusoids (waves) we have to work with
 }
 
 function initializeUI() {
@@ -32,7 +32,7 @@ function initializeUI() {
 // This function adjust the values of the GUI elements to make sure they are valid and within range
 function AjustGUIForValidValues () {
     //Sinusoid 1
-    let value=parseInt(document.getElementById("W1FInput").value);
+/*    let value=parseInt(document.getElementById("W1FInput").value);
     if (isNaN(value)) {
         document.getElementById("W1FInput").value=""+GlobalConstants.DefaultWaveFrequency;
     }
@@ -66,7 +66,20 @@ function AjustGUIForValidValues () {
     if (value>GlobalConstants.MaxWaveFrequency) {
         document.getElementById("W3FInput").value=""+GlobalConstants.MaxWaveFrequency;
     }
-    
+*/ 
+
+    for (let i=1; i<=GlobalConstants.numSinusoids; i++) {
+        let value=parseInt(document.getElementById("W"+i+"FInput").value);
+        if (isNaN(value)) {
+            document.getElementById("W"+i+"FInput").value=""+GlobalConstants.DefaultWaveFrequency;
+        }
+        if (value<GlobalConstants.MinWaveFrequency) {
+            document.getElementById("W"+i+"FInput").value=""+GlobalConstants.MinWaveFrequency;
+        }
+        if (value>GlobalConstants.MaxWaveFrequency) {
+            document.getElementById("W"+i+"FInput").value=""+GlobalConstants.MaxWaveFrequency;
+        }
+    }
 }
 
 function W1FrequencySliderOnInput () {
@@ -146,19 +159,28 @@ function SelectHarmonicsOptionRGOnChange() {
     AjustGUIForValidValues();
     //console.log("HarmonicOnChangeHandler: "+document.getElementById("HarmonicSwitch").checked);
 
-    if (document.getElementById("SelectHarmonicsOptionRG").value==2) {
-        //harmonics selected
+    if (document.getElementById("SelectHarmonicsOptionRG").value==2) { //harmonics selected
         adjustValuesForHarmonicsInGUI();
 
-        document.getElementById("W2FRange").disabled=true;
+        /*document.getElementById("W2FRange").disabled=true;
         document.getElementById("W2FInput").disabled=true;
         document.getElementById("W3FRange").disabled=true;
-        document.getElementById("W3FInput").disabled=true;
+        document.getElementById("W3FInput").disabled=true;*/
+        for (let i=2; i<=GlobalConstants.numSinusoids; i++) {
+            document.getElementById("W"+i+"FInput").disabled=true;
+            document.getElementById("W"+i+"FRange").disabled=true;
+        }
+    
     } else {
-        document.getElementById("W2FRange").disabled=false;
+/*        document.getElementById("W2FRange").disabled=false;
         document.getElementById("W2FInput").disabled=false;
         document.getElementById("W3FRange").disabled=false;
-        document.getElementById("W3FInput").disabled=false;
+        document.getElementById("W3FInput").disabled=false;*/
+        for (let i=2; i<=GlobalConstants.numSinusoids; i++) {
+            document.getElementById("W"+i+"FInput").disabled=false;
+            document.getElementById("W"+i+"FRange").disabled=false;
+        }
+
     }
 }
 
@@ -218,9 +240,11 @@ function getAmplitudeFor (pParsedValues, t) {
     //return Math.sin( (2*Math.PI*freq*t) );
 
     let acc=0;
+    let accWeights=0;
     for (let i=0; i<GlobalConstants.numSinusoids; i++) {
-        acc+= pParsedValues.WAmplitudes[i]*Math.sin( (2*Math.PI*pParsedValues.WFreqs[i]*t) );
+        acc+= pParsedValues.WAmplitudes[i]*Math.sin( (2*Math.PI*pParsedValues.WFreqs[i]*t) ); // we add all sine waves together
+        accWeights+=pParsedValues.WAmplitudes[i]; // we add all weights together
     }
-    acc/=GlobalConstants.numSinusoids;
+    acc/=accWeights; // we divide by all weights
     return acc;
 }
