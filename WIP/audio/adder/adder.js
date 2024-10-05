@@ -69,7 +69,8 @@ function AjustGUIForValidValues () {
 */ 
 
     for (let i=1; i<=GlobalConstants.numSinusoids; i++) {
-        let value=parseInt(document.getElementById("W"+i+"FInput").value);
+        //let value=parseInt(document.getElementById("W"+i+"FInput").value); //ToDo: inputing "50g00" doesn't detect it as NaN
+        let value=document.getElementById("W"+i+"FInput").value; //ToDo: inputing "50g00" doesn't detect it as NaN
         if (isNaN(value)) {
             document.getElementById("W"+i+"FInput").value=""+GlobalConstants.DefaultWaveFrequency;
         }
