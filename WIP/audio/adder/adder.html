@@ -25,6 +25,23 @@
   margin-right: auto;
 }
 
+#controlsDiv {
+  max-width: fit-content;
+  margin: auto;
+  /*text-align: left;*/
+  display: flex; 
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.ADSRClass {
+  padding: 10px;
+}
+.LowerMenuButtons {
+  padding: 10px;
+}
+
 </style>
 
   <script src="wavefile.js"></script>
@@ -43,18 +60,18 @@
   <div id="tableDiv" >
     <table style="display:initial;" id="table1">
       <tr>
-        <td><sl-range id="W1FRange" min="0" max="5000" step="1" help-text="Wave 1 Frequency" tooltip="bottom" style="width:800px;" oninput="W1FrequencySliderOnInput()"></sl-range></td>
-        <td><sl-input id="W1FInput" help-text="W1 Frequency" style="width:100px;"> </sl-input></td>
+        <td><sl-range id="W1FRange" min="0" max="5000" step="1" help-text="Wave 1 Frequency" tooltip="bottom" style="width:800px;" oninput="W1FrequencySliderOnInput()" value="440"></sl-range></td>
+        <td><sl-input id="W1FInput" help-text="W1 Frequency" style="width:100px;" value="440"> </sl-input></td>
         <td><sl-range id="W1Weight" min="0" max="1" step="0.01" help-text="Wave 1 Weight" tooltip="bottom" value="1"></sl-range></td></td>
       </tr>
       <tr>
-        <td><sl-range id="W2FRange" min="0" max="5000" step="1" help-text="Wave 2 Frequency" tooltip="bottom" style="width:800px;" oninput="W2FrequencySliderOnInput()"></sl-range></td>
-        <td><sl-input id="W2FInput" help-text="W2 Frequency" style="width:100px;"> </sl-input></td>
+        <td><sl-range id="W2FRange" min="0" max="5000" step="1" help-text="Wave 2 Frequency" tooltip="bottom" style="width:800px;" oninput="W2FrequencySliderOnInput()" value="440"></sl-range></td>
+        <td><sl-input id="W2FInput" help-text="W2 Frequency" style="width:100px;" value="440"> </sl-input></td>
         <td><sl-range id="W2Weight" min="0" max="1" step="0.01" help-text="Wave 2 Weight" tooltip="bottom" value="1"></sl-range></td></td>
       </tr>
       <tr>
-        <td><sl-range id="W3FRange" min="0" max="5000" step="1" help-text="Wave 3 Frequency" tooltip="bottom" style="width:800px;" oninput="W3FrequencySliderOnInput()"></sl-range></td>
-        <td><sl-input id="W3FInput" help-text="W3 Frequency" style="width:100px;"> </sl-input></td>
+        <td><sl-range id="W3FRange" min="0" max="5000" step="1" help-text="Wave 3 Frequency" tooltip="bottom" style="width:800px;" oninput="W3FrequencySliderOnInput()" value="440"></sl-range></td>
+        <td><sl-input id="W3FInput" help-text="W3 Frequency" style="width:100px;" value="440"> </sl-input></td>
         <td><sl-range id="W3Weight" min="0" max="1" step="0.01" help-text="Wave 3 Weight" tooltip="bottom" value="1"></sl-range></td></td>
       </tr>
     </table> 
@@ -69,9 +86,14 @@
 
   <sl-divider></sl-divider>
 
-  <div>
-    
-    <sl-button onclick="PlayButtonClick()">Play</sl-button>
+  <div id=controlsDiv>
+    <sl-button onclick="PlayButtonClick()" class="LowerMenuButtons">Play</sl-button>
+    <sl-button onclick="DownloadWAVClick()" class="LowerMenuButtons">Download WAV</sl-button>
+    <sl-range id="AttackRange" min="0" max="1" step="0.01" value="0.1" help-text="Attack duration (s)" tooltip="bottom" class="ADSRClass"></sl-range>    
+    <sl-range id="DecayRange" min="0" max="1" step="0.01" value="0.1" help-text="Decay duration (s)" tooltip="bottom" class="ADSRClass"></sl-range>    
+    <sl-range id="SustainDurationRange" min="0" max="3" step="0.01" value="1" help-text="Sustain duration (s)" tooltip="bottom" class="ADSRClass"></sl-range>    
+    <sl-range id="SustainVolumeRange" min="0" max="1" step="0.01" value="0.7" help-text="Sustain Volume (%)" tooltip="bottom" class="ADSRClass"></sl-range>    
+    <sl-range id="ReleaseRange" min="0" max="1" step="0.01" value="0.1" help-text="Release duration (s)" tooltip="bottom" class="ADSRClass"></sl-range>    
   </div>
 
 <!-- Here it goes the description and information-->
