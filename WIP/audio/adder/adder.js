@@ -8,7 +8,7 @@ const GlobalConstants = {
     MaxWaveFrequency: 5000,
     MinWaveFrequency: 0,
     DefaultWaveFrequency: 440,
-    numSinusoids: 3, // important. It says how many sinusoids (waves) we have to work with
+    numSinusoids: 11, // important. It says how many sinusoids (waves) we have to work with
 }
 
 function initializeUI() {
@@ -25,6 +25,30 @@ function initializeUI() {
     })
     document.getElementById("W3FInput").addEventListener('sl-change', event => {
         W3FrequencyTextOnChange();
+    })
+    document.getElementById("W4FInput").addEventListener('sl-change', event => {
+        W4FrequencyTextOnChange();
+    })
+    document.getElementById("W5FInput").addEventListener('sl-change', event => {
+        W5FrequencyTextOnChange();
+    })
+    document.getElementById("W6FInput").addEventListener('sl-change', event => {
+        W6FrequencyTextOnChange();
+    })
+    document.getElementById("W7FInput").addEventListener('sl-change', event => {
+        W7FrequencyTextOnChange();
+    })
+    document.getElementById("W8FInput").addEventListener('sl-change', event => {
+        W8FrequencyTextOnChange();
+    })
+    document.getElementById("W9FInput").addEventListener('sl-change', event => {
+        W9FrequencyTextOnChange();
+    })
+    document.getElementById("W10FInput").addEventListener('sl-change', event => {
+        W10FrequencyTextOnChange();
+    })
+    document.getElementById("W11FInput").addEventListener('sl-change', event => {
+        W11FrequencyTextOnChange();
     })
 
 }
@@ -63,6 +87,40 @@ function W3FrequencySliderOnInput(){
     document.getElementById("W3FInput").value=document.getElementById("W3FRange").value;
 }
 
+function W4FrequencySliderOnInput(){
+    //console.log("W2FrequencySliderOnInput : "+document.getElementById("W2Range").value);
+    document.getElementById("W4FInput").value=document.getElementById("W4FRange").value;
+}
+
+function W5FrequencySliderOnInput(){
+    document.getElementById("W5FInput").value=document.getElementById("W5FRange").value;
+}
+
+function W6FrequencySliderOnInput(){
+    document.getElementById("W6FInput").value=document.getElementById("W6FRange").value;
+}
+
+function W7FrequencySliderOnInput(){
+    document.getElementById("W7FInput").value=document.getElementById("W7FRange").value;
+}
+
+function W8FrequencySliderOnInput(){
+    document.getElementById("W8FInput").value=document.getElementById("W8FRange").value;
+}
+
+function W9FrequencySliderOnInput(){
+    document.getElementById("W9FInput").value=document.getElementById("W9FRange").value;
+}
+
+function W10FrequencySliderOnInput(){
+    document.getElementById("W10FInput").value=document.getElementById("W10FRange").value;
+}
+
+function W11FrequencySliderOnInput(){
+    document.getElementById("W11FInput").value=document.getElementById("W11FRange").value;
+}
+
+
 function W1FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W1FRange").value=document.getElementById("W1FInput").value;
@@ -79,6 +137,46 @@ function W2FrequencyTextOnChange() {
 function W3FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W3FRange").value=document.getElementById("W3FInput").value;
+}
+
+function W4FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W4FRange").value=document.getElementById("W4FInput").value;
+}
+
+function W5FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W5FRange").value=document.getElementById("W5FInput").value;
+}
+
+function W6FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W6FRange").value=document.getElementById("W6FInput").value;
+}
+
+function W7FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W7FRange").value=document.getElementById("W7FInput").value;
+}
+
+function W8FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W8FRange").value=document.getElementById("W8FInput").value;
+}
+
+function W9FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W9FRange").value=document.getElementById("W9FInput").value;
+}
+
+function W10FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W10FRange").value=document.getElementById("W10FInput").value;
+}
+
+function W11FrequencyTextOnChange() {
+    AjustGUIForValidValues();
+    document.getElementById("W11FRange").value=document.getElementById("W11FInput").value;
 }
 
 // this function retrieves the values of the GUI elements after making sure they are correct and within range
