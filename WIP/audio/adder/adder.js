@@ -133,8 +133,14 @@ function retrieveParsedValues() {
         WAmplitudes[i-1]=document.getElementById("W"+i+"Weight").value;
     }
 
+    let Attack=document.getElementById("AttackRange").value;
+    let Decay=document.getElementById("DecayRange").value;
+    let Sustain=document.getElementById("SustainDurationRange").value;
+    let SustainVolume=document.getElementById("SustainVolumeRange").value;
+    let Release=document.getElementById("ReleaseRange").value;
+
     //return {W1F, W2F, W3F};
-    return {WFreqs, WAmplitudes};
+    return {WFreqs, WAmplitudes, Attack, Decay, Sustain, SustainVolume, Release};
 }
 
 function PlayButtonClick() {
@@ -192,8 +198,8 @@ function SelectHarmonicsOptionRGOnChange() {
 // called when play sound button is pressed
 function playSound(pParsedValues) {
 
-    //let totalSampleTime=formulaValues.Attack+formulaValues.Decay+formulaValues.Sustain+formulaValues.Release;
-    let totalSampleTime=3; // 3 seconds
+    let totalSampleTime=pParsedValues.Attack+pParsedValues.Decay+pParsedValues.Sustain+pParsedValues.Release;
+    //let totalSampleTime=3; // 3 seconds
     if (totalSampleTime<=0) 
         return;
 
@@ -216,7 +222,7 @@ function playSound(pParsedValues) {
             //let minC1=Math.max(formulaValues.C1, 1);
             //let shiftingRatio=(440/minC1); // adjust the timing to always play a note A
             nowBuffering[i]=getAmplitudeFor(pParsedValues, t); // gets the amplitude [0..1] for the given time t
-            //nowBuffering[i]*=getWaveScaleFor(formulaValues, t); // multiplies it for a scale to give the wave the shape according to attack, sustain and release times
+            nowBuffering[i]*=getWaveScaleFor(pParsedValues, t); // multiplies it for a scale to give the wave the shape according to attack, sustain and release times
         }
     }
 
@@ -235,7 +241,7 @@ function playSound(pParsedValues) {
     source.start();
 }
 
-//mixes all weighted sinusoids together
+//mixes all weighted sinusoids together. returns [0..1]
 function getAmplitudeFor (pParsedValues, t) {
     //let freq=440;
     //return Math.sin( (2*Math.PI*freq*t) );
@@ -248,4 +254,27 @@ function getAmplitudeFor (pParsedValues, t) {
     }
     acc/=accWeights; // we divide by all weights
     return acc;
+}
+
+// applies the wave shape functions (volume levels) returns [0..1]
+function getWaveScaleFor (formulaValues, t) {
+
+    if( (formulaValues.Attack>0)&& ((t>=0)&&(t<=formulaValues.Attack)) ) {
+        return (1/formulaValues.Attack)*t;
+    }
+
+    if( (formulaValues.Decay>0)&& ((t>=formulaValues.Attack)&&(t<=(formulaValues.Attack+formulaValues.Decay))) ) {
+        return ( 1- (((1-formulaValues.SustainVolume)/formulaValues.Decay)*(t-formulaValues.Attack)) );
+    }
+
+    if( (formulaValues.Sustain>0)&& ((t>=(formulaValues.Attack+formulaValues.Decay))&&(t<=(formulaValues.Attack+formulaValues.Decay+formulaValues.Sustain))) ) {
+        //console.log("sustain");
+        return formulaValues.SustainVolume;
+    }
+
+    if( (formulaValues.Release>0)&& ((t>=(formulaValues.Attack+formulaValues.Decay+formulaValues.Sustain))&&(t<=(formulaValues.Attack+formulaValues.Decay+formulaValues.Sustain+formulaValues.Release))) ) {
+        return ( formulaValues.SustainVolume-((formulaValues.SustainVolume/formulaValues.Release)*(t-formulaValues.Attack-formulaValues.Decay-formulaValues.Sustain)) );
+    }
+
+    return 0;
 }
