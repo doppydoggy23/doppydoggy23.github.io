@@ -31,43 +31,6 @@ function initializeUI() {
 
 // This function adjust the values of the GUI elements to make sure they are valid and within range
 function AjustGUIForValidValues () {
-    //Sinusoid 1
-/*    let value=parseInt(document.getElementById("W1FInput").value);
-    if (isNaN(value)) {
-        document.getElementById("W1FInput").value=""+GlobalConstants.DefaultWaveFrequency;
-    }
-    if (value<GlobalConstants.MinWaveFrequency) {
-        document.getElementById("W1FInput").value=""+GlobalConstants.MinWaveFrequency;
-    }
-    if (value>GlobalConstants.MaxWaveFrequency) {
-        document.getElementById("W1FInput").value=""+GlobalConstants.MaxWaveFrequency;
-    }
-    
-    //Sinusoid 2
-    value=parseInt(document.getElementById("W2FInput").value);
-    if (isNaN(value)) {
-        document.getElementById("W2FInput").value=""+GlobalConstants.DefaultWaveFrequency;
-    }
-    if (value<GlobalConstants.MinWaveFrequency) {
-        document.getElementById("W2FInput").value=""+GlobalConstants.MinWaveFrequency;
-    }
-    if (value>GlobalConstants.MaxWaveFrequency) {
-        document.getElementById("W2FInput").value=""+GlobalConstants.MaxWaveFrequency;
-    }
-    
-    //Sinusoid 3
-    value=parseInt(document.getElementById("W3FInput").value);
-    if (isNaN(value)) {
-        document.getElementById("W3FInput").value=""+GlobalConstants.DefaultWaveFrequency;
-    }
-    if (value<GlobalConstants.MinWaveFrequency) {
-        document.getElementById("W3FInput").value=""+GlobalConstants.MinWaveFrequency;
-    }
-    if (value>GlobalConstants.MaxWaveFrequency) {
-        document.getElementById("W3FInput").value=""+GlobalConstants.MaxWaveFrequency;
-    }
-*/ 
-
     for (let i=1; i<=GlobalConstants.numSinusoids; i++) {
         //let value=parseInt(document.getElementById("W"+i+"FInput").value); //ToDo: inputing "50g00" doesn't detect it as NaN
         let value=document.getElementById("W"+i+"FInput").value; //ToDo: inputing "50g00" doesn't detect it as NaN
@@ -146,6 +109,10 @@ function retrieveParsedValues() {
 function PlayButtonClick() {
     //console.log (retrieveParsedValues());
     playSound(retrieveParsedValues());
+}
+
+function DownloadWAVClick() {
+    downloadWAV(retrieveParsedValues());
 }
 
 // this function, adjust the values of the GUI elements to harmonics-based
@@ -277,4 +244,37 @@ function getWaveScaleFor (formulaValues, t) {
     }
 
     return 0;
+}
+
+// called when download wav button is pressed
+function downloadWAV(formulaValues) {
+
+    let totalSampleTime=formulaValues.Attack+formulaValues.Decay+formulaValues.Sustain+formulaValues.Release;
+    if (totalSampleTime<=0) 
+        return;
+
+
+    let wav = new wavefile.WaveFile();
+
+    let myInt16Array = new Int16Array(44100*totalSampleTime);
+    for (let i=0; i<myInt16Array.length; i++) {
+
+        let t=i/44100;
+
+        let smpl=getAmplitudeFor(formulaValues, t); // gets the amplitude [0..1] for the given time i
+        smpl*=getWaveScaleFor(formulaValues, t); // multiplies it for a scale to give the wave the shape according to attack, sustain and release times //ToDo: check this
+        smpl=Math.floor(smpl*32766); // convert it to 16 bit signed integers
+        myInt16Array[i]=smpl;
+    }
+
+    // Create a mono wave file, 44.1 kHz, 16-bit
+    wav.fromScratch(1, 44100, '16', myInt16Array);
+
+    // create the file
+    var blob = new Blob([wav.toBuffer()], {type: "audio/wav"});
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    var fileName = "sound.wav";
+    link.download = fileName;
+    link.click();
 }
