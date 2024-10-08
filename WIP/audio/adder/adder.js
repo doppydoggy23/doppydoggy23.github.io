@@ -11,6 +11,13 @@ const GlobalConstants = {
     numSinusoids: 11, // important. It says how many sinusoids (waves) we have to work with
 }
 
+const GlobalVariables = {
+    signalProcessor: null,
+    myAudioContext:null,
+    isSoundTestRunning: false,
+}
+
+
 function initializeUI() {
 
 /*    document.getElementById("HarmonicSwitch").addEventListener('sl-change', event => {
@@ -75,49 +82,60 @@ function W1FrequencySliderOnInput () {
     if (document.getElementById("SelectHarmonicsOptionRG").value==2) {
         adjustValuesForHarmonicsInGUI();
     }
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W2FrequencySliderOnInput(){
     //console.log("W2FrequencySliderOnInput : "+document.getElementById("W2Range").value);
     document.getElementById("W2FInput").value=document.getElementById("W2FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W3FrequencySliderOnInput(){
     //console.log("W2FrequencySliderOnInput : "+document.getElementById("W2Range").value);
     document.getElementById("W3FInput").value=document.getElementById("W3FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W4FrequencySliderOnInput(){
     //console.log("W2FrequencySliderOnInput : "+document.getElementById("W2Range").value);
     document.getElementById("W4FInput").value=document.getElementById("W4FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W5FrequencySliderOnInput(){
     document.getElementById("W5FInput").value=document.getElementById("W5FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W6FrequencySliderOnInput(){
     document.getElementById("W6FInput").value=document.getElementById("W6FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W7FrequencySliderOnInput(){
     document.getElementById("W7FInput").value=document.getElementById("W7FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W8FrequencySliderOnInput(){
     document.getElementById("W8FInput").value=document.getElementById("W8FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W9FrequencySliderOnInput(){
     document.getElementById("W9FInput").value=document.getElementById("W9FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W10FrequencySliderOnInput(){
     document.getElementById("W10FInput").value=document.getElementById("W10FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W11FrequencySliderOnInput(){
     document.getElementById("W11FInput").value=document.getElementById("W11FRange").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 
@@ -127,56 +145,71 @@ function W1FrequencyTextOnChange() {
     if (document.getElementById("SelectHarmonicsOptionRG").value==2) {
         adjustValuesForHarmonicsInGUI();
     }
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W2FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W2FRange").value=document.getElementById("W2FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W3FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W3FRange").value=document.getElementById("W3FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W4FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W4FRange").value=document.getElementById("W4FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W5FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W5FRange").value=document.getElementById("W5FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W6FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W6FRange").value=document.getElementById("W6FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W7FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W7FRange").value=document.getElementById("W7FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W8FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W8FRange").value=document.getElementById("W8FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W9FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W9FRange").value=document.getElementById("W9FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W10FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W10FRange").value=document.getElementById("W10FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 function W11FrequencyTextOnChange() {
     AjustGUIForValidValues();
     document.getElementById("W11FRange").value=document.getElementById("W11FInput").value;
+    collectFormDataAndUpdateSignalProcessorValues();
+}
+
+function WeightSliderOnInput() { // the same func for all Weight Sliders
+    collectFormDataAndUpdateSignalProcessorValues();
 }
 
 // this function retrieves the values of the GUI elements after making sure they are correct and within range
@@ -254,6 +287,7 @@ function SelectHarmonicsOptionRGOnChange() {
         }
 
     }
+    collectFormDataAndUpdateSignalProcessorValues(); // after all change for harmonics have been made, inform the signal processor, if it exists
 }
 
 /*function SelectHarmonicsOptionRGOnChange () {
@@ -351,7 +385,6 @@ function downloadWAV(formulaValues) {
     if (totalSampleTime<=0) 
         return;
 
-
     let wav = new wavefile.WaveFile();
 
     let myInt16Array = new Int16Array(44100*totalSampleTime);
@@ -375,4 +408,77 @@ function downloadWAV(formulaValues) {
     var fileName = "sound.wav";
     link.download = fileName;
     link.click();
+}
+
+async function TestSoundClick() {
+    // create the audio worklet and configure it via a message
+    const audioContext = new AudioContext();
+    await audioContext.audioWorklet.addModule("test-sound-processor.js");
+    //
+    let testSPNode = new AudioWorkletNode(
+    audioContext,
+    "test-sound-processor",
+    );
+    //
+    testSPNode.port.onmessage = (e) => console.log("Main app: Received from sound procesor: "+e.data);
+    testSPNode.connect(audioContext.destination);
+
+    let myAudioProcessorMessage =new AudioProcessorMessage(retrieveParsedValues(), false, audioContext.sampleRate); // create config message
+    testSPNode.port.postMessage(myAudioProcessorMessage); // send configuration message
+
+    //global variables
+    GlobalVariables.signalProcessor=testSPNode;
+    GlobalVariables.myAudioContext=audioContext; //global var
+    GlobalVariables.isSoundTestRunning=true;
+
+}
+
+function StopTestClick(){
+    if (GlobalVariables.isSoundTestRunning==false)
+        return;
+
+    if ((GlobalVariables.myAudioContext!=null)&&(GlobalVariables.signalProcessor!=null)) {
+
+        let myAudioProcessorMessage =new AudioProcessorMessage(null, true, -1); // create a stop message
+    
+        GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage); //send the stop message
+    
+        //clean
+        GlobalVariables.myAudioContext.close();
+        GlobalVariables.signalProcessor=null;
+        GlobalVariables.myAudioContext=null;
+        GlobalVariables.isSoundTestRunning=false;
+    
+        //CheckWebMidiClick(); // we re-install midi sound processor
+    }        
+}
+
+// constains the info sent via message to an audio signal processor
+class AudioProcessorMessage {  
+    audioTestStopRequested= false; // request audio signal processing to stop
+    audioCtxSampleRate= -1;
+    parsedValues=null;
+ 
+    constructor(pParsedValues, extirreq, smplerate) { 
+        
+        if (pParsedValues!=null) {
+            //M1
+            this.parsedValues=pParsedValues; 
+       }
+        
+        this.audioCtxSampleRate=smplerate;
+        this.audioTestStopRequested=extirreq;    
+    }  
+}
+
+// if a signal processor exists, send all the changes in GUI
+function collectFormDataAndUpdateSignalProcessorValues(){
+    if (GlobalVariables.isSoundTestRunning==false)
+        return;
+
+    if ((GlobalVariables.signalProcessor!=null)&&(GlobalVariables.myAudioContext!=null))
+    {   
+        let myAudioProcessorMessage =new AudioProcessorMessage(retrieveParsedValues(), false, GlobalVariables.myAudioContext.sampleRate); 
+        GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);// send the new form values to audio processor
+    }
 }
