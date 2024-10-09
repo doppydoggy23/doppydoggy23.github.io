@@ -426,6 +426,9 @@ function downloadWAV(formulaValues) {
 }
 
 async function TestSoundClick() {
+    if (GlobalVariables.isSoundTestRunning)
+        return;
+
     // create the audio worklet and configure it via a message
     const audioContext = new AudioContext();
     await audioContext.audioWorklet.addModule("test-sound-processor.js");
