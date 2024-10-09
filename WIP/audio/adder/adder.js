@@ -590,7 +590,7 @@ async function keyPressed(keyCode) {
 async function keyReleased(keyCode) {
     //console.log("keyReleased :"+keyCode)    
 
-    if (window.isSoundTestRunning)
+    if (GlobalVariables.isSoundTestRunning)
         return;
 
     if ((GlobalVariables.myAudioContext==null)||(GlobalVariables.signalProcessor==null))
@@ -606,7 +606,7 @@ Checks if webmidi is available and configures it, but first, installs the midi s
 */
 async function CheckWebMidiClick() {
 
-    if (window.isSoundTestRunning)
+    if (GlobalVariables.isSoundTestRunning)
         return;
 
     if (GlobalVariables.myAudioContext!=null) {
