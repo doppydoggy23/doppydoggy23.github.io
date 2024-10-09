@@ -638,6 +638,8 @@ async function CheckWebMidiClick() {
     .then(
       (midi) => midiReady(midi),
       (err) => console.log('MIDI: Something went wrong', err));
+
+    document.getElementById("MIDIDialog").show(); //show dialog informing that you can use midi
 }
 
 function midiReady(midi) {
@@ -714,3 +716,5 @@ function midiReady(midi) {
 function midiNoteToFrequency (note) {
     return Math.pow(2, ((note - 69) / 12)) * 440;
 }
+
+
