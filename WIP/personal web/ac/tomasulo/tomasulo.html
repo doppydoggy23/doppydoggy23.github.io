@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RISC-V Assembly Language Summary</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+#pseudomainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+
+#tablewrapper {
+    display: inline-block;
+}
+#tablewrapperreg {
+    /*display: inline-block;*/
+    display: inline-block;
+}
+
+
+#docfooter {
+  /*background-color: red;*/
+}
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: center;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+.styled-table {
+    border-collapse: collapse;
+    margin-top: 5px;
+    margin-bottom: 25px;
+    margin-right: 0;
+    margin-left: 0px;
+    /*margin: 25px 0;*/
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.FigureText {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	color: black;
+	text-align: center;
+    margin-bottom: 0px;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+h2 {
+    font-size: 14pt;    
+}
+
+h1 {
+    font-size: 20pt;    
+}
+
+
+.cdc {
+  text-align: center;
+}
+
+.cdcl {
+  display: inline-block;
+  text-align: left;
+}
+
+</style>
+
+
+</head>
+<body>
+
+    <h1>Tomasulo's Algorithm</h1>
+
+<section>
+
+    <h2>Introduction</h2>
+    <p>
+        This text is a compilation of the notes I've taken while studying computer architecture. I intended to write about some aspects of <a href="tomasulopaper.pdf"> Tomasulo's algorithm </a> that aren't clear
+        to other students like me using the RISC-V architecture.
+    </p>
+
+    <h2>Description of Tomasulo's Algorithm</h2>
+    <ul>
+        <li>Allows out-of-order execution. It avoids RAW hazards waiting for the operands while executing other instructions.</li>
+        <li>Avoids WAR and WAW hazards through <i>register renaming</i>.</li>
+        <li>Hardware loop unrolling.</li>
+        <li>No need for special compilers.</li>        
+    </ul> 
+
+    <h2>Parts of the Tomasulo's Machine</h2>
+    First, let's start reviewing the parts of a Tomasulo machine. Note that this example uses floating point, but it can be used with other types of data.
+    <img src="tommachpar.png" alt="Tomasulo's Machine Parts">
+    <div class="cdc">
+        <ol class="cdcl">
+            <li>The <b>Instruction Queue</b>, where instructions are issued in order, one each cycle, <span style="color:green;">in green. </span></li>
+            <li>The <b>Reservation Stations</b> where operations are waiting to be executed <span style="color:blue;">in blue. </span></li>
+                Each RE holds the operation to be performed, the operands, and a busy bit:
+            <li>The <b>Floating Point Registers</b> <span style="color:red;">in red</span>, RISC-V has 32, but 5 will suffice for this example. </li>
+                Each register has a field that indicates which Reservation Station holds the value that should be written to said register.
+            <li>The memory <b>Load and Store Buffers</b>, which hold the operations waiting for memory, <span style="color:darkorange;">in yellow.</span> </li>
+            <li>The <b>Common Data Bus</b> where FP and memory results are broadcast wherever they're needed, <span style="color:violet;">in violet.​</span></li>
+        </ol> 
+    </div>
+
+    <h2>Stages of a Tomasulo's Machine</h2>
+    <ol>
+        <li><b>Issue</b>:</li>
+        Gets the next instruction from the Instruction Queue. 
+        If there is a Reservation Station empty, the operation is sent there, otherwise stall. 
+        Copies the values of operands to the Reservation Station (register renaming), eliminating WAR/WAW hazzards. 
+        If there are missing operands, wait for them to be broadcast through the Common Data Bus.
+        <li><b>Execute</b>:</li>
+        The operation in a Reservation Station waits until it has all operands. 
+        When it's ready, the operation is sent to the corresponding functional unit.
+        <li><b>Write Result</b>:.</li>
+        Write the result of the instruction to the Common Data Bus and then to registers and pending Reservation Stations.
+    </ol> 
+
+    <h2>Examples of the Tomasulo's Algorithm</h2>
+    <p>The following example was taken from <a href="https://www.youtube.com/watch?v=jyjE6NHtkiA"> this video.</a></p>
+    <p style="text-align:center">
+        <iframe src="https://1drv.ms/p/c/4cedddcc0fb3a373/IQRzo7MPzN3tIIBMeAcAAAAAASMGz1ifvjVZ3BrflgqTtWA?em=2&amp;wdAr=1.7777777777777777" width="1428px" height="864px" frameborder="0">Esto es un archivo de presentación de <a target="_blank" href="https://office.com">Microsoft Office</a> incrustado con tecnología de <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+    </p>
+
+    *UNCLEAR ASPECTS
+    *no instruction is allowed to initiate execution until a branch that precedes the instruction in program order has completed.
+    This restriction guarantees that an instruction that causes an exception during
+    execution really would have been executed.
+    *WAW example
+    *REGISTER RENAMING
+</section>
+
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>
+
+
+
