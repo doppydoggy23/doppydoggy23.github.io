@@ -133,6 +133,14 @@ h1 {
   text-align: left;
 }
 
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
 </style>
 
 
@@ -191,13 +199,34 @@ h1 {
     <p style="text-align:center">
         <iframe src="https://1drv.ms/p/c/4cedddcc0fb3a373/IQRzo7MPzN3tIIBMeAcAAAAAASMGz1ifvjVZ3BrflgqTtWA?em=2&amp;wdAr=1.7777777777777777" width="1428px" height="864px" frameborder="0">Esto es un archivo de presentación de <a target="_blank" href="https://office.com">Microsoft Office</a> incrustado con tecnología de <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
     </p>
+    <p>Download files <a href="tomasuloV2.pptx"> tomasuloV2.pptx</a> <a href="tomasuloV2.pdf"> tomasuloV2.pdf</a> </p>
 
-    *UNCLEAR ASPECTS
-    *no instruction is allowed to initiate execution until a branch that precedes the instruction in program order has completed.
-    This restriction guarantees that an instruction that causes an exception during
-    execution really would have been executed.
-    *WAW example
-    *REGISTER RENAMING
+    <p>The following example is based in <a href="http://www.facom.ufms.br/~ricardo/Courses/AdvTopCompSys/Material/tomasulo-training.pdf"> this pdf.</a></p>
+    <p style="text-align:center">
+        <iframe src="https://1drv.ms/p/c/4cedddcc0fb3a373/IQRSOnJjGeLVSplGjrztPf4-AdiiHzlzYnxfrgaUs-cC3vQ?em=2&amp;wdAr=1.7777777777777777" width="1428px" height="864px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+    </p>
+    <p>Download files <a href="tomasuloloop.pptx"> tomasuloloop.pptx</a> <a href="tomasuloloop.pdf"> tomasuloloop.pdf</a> </p>
+
+    <h2>Unclear aspects of the Tomasulo's Algorithm</h2>
+    <h3>Exceptions</h3>
+    <p>No instruction is executed until the branch that precedes a instruction has completed. This guarantees that an instruction that causes an exception really would have been executed. 
+    </p>
+    <p> In a bare Tomasulo Machine you will get <em> imprecise exceptions</em>. This happens because instructions are completed out of order. 
+        That means that some instructions following the causing exception may execute before the exception-controlling code executes.</p>
+    <h3>WAW Hazards</h3>
+    <p> How does Tomasulo's Algorithm guarantee that this sequence gets the correct result, when it's obvous the fadd instruction will complete before the fdiv? </p>
+<pre> <code>1: fdiv.s f0, f4, f5
+2: fadd.s f0, f1, f2
+</code> </pre>
+    <p> 
+    Each register has a field that points to which Reservation Station should hold its value. 
+    Since instructions are issued in order, the register F0 will be marked as waiting for the fdiv fist, and then for the fadd, as it should be, so it will hold the correct value in the end.
+    </p>
+    <h3>What if two instructions need to broadcast through the Common Data Bus at the same time?</h3>
+    <p>I haven't found a clear answer to this. My guess is that arbitration mechanisms would have to be implemented.
+    </p>
+
+    
 </section>
 
 
