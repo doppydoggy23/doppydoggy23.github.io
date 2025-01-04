@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RISC-V Assembly Language Summary</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+#pseudomainDiv {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+}
+
+
+#tablewrapper {
+    display: inline-block;
+}
+#tablewrapperreg {
+    /*display: inline-block;*/
+    display: inline-block;
+}
+
+
+#docfooter {
+  /*background-color: red;*/
+}
+#titleH {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	color: black;
+	  text-align: center;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+
+img {
+      display: block;
+      margin: 0 auto;
+	
+}
+
+.curierfont {font-family:courier, courier new, serif;}
+.bolded { font-weight: bold; }
+
+.styled-table {
+    border-collapse: collapse;
+    margin-top: 5px;
+    margin-bottom: 25px;
+    margin-right: 0;
+    margin-left: 0px;
+    /*margin: 25px 0;*/
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.FigureText {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	color: black;
+	text-align: center;
+    margin-bottom: 0px;
+
+/*	margin: auto; /*center horizontally*/
+  position: relative; /* makes next element align vertically bellow this one*/
+  
+}
+
+h2 {
+    font-size: 14pt;    
+}
+
+h1 {
+    font-size: 20pt;    
+}
+
+
+.cdc {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cdcl {
+  display: inline-block;
+  text-align: left;
+}
+
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;
+			
+		}
+</style>
+
+
+</head>
+<body>
+
+    <h1>ROB (Re-Order Buffer)</h1>
+
+<section>
+
+    <h2>Introduction</h2>
+    <p>
+        A ROB is an extension to Tomasulo's Algorithm that allows us to:
+        <ul>
+            <li>Speculate with branches.</li>
+            <li>Get <i> precise exceptions.</i></li>
+        </ul> 
+    </p>
+        It's usually implemented as a circular buffer (FIFO) that keeps the order of instructions, its destination and value. That way we can temporary store the result of the instruction
+        until it's no longer speculative and we can <i>Commit</i> it to the register or memory. In case the branch prediction was wrong, it's easy to roll-back the changes in the ROB.
+    <p>
+        Tranks to the ROB, instructions can execute out-of-order but commit always in-order.
+    </p>
+
+    *************ESQUEMA DE TOMASULO CON ROB
+
+    <p>
+        A typical ROB will look like this:        
+    </p>
+
+    <table class="styled-table" style="margin-left: auto;margin-right: auto;">
+            <tr>
+                <th>Instruction</th>
+                <th>Destination</th>
+                <th>Result</th>
+            </tr>
+            <tr>
+                <td>flw f1,34(t0)</td>
+                <td>F1</td>
+                <td>null</td>
+            </tr>
+            <tr>
+                <td>fsw f2,45(t1)</td>
+                <td>Mem[55]</td>
+                <td>10</td>
+              </tr>
+              <tr>
+                <td>fmul.s f3,f2,f4</td>
+                <td>F3</td>
+                <td>null</td>
+              </tr>
+              <tr>
+                <td>fsub.s f5,f1,f2</td>
+                <td>F5</td>
+                <td>34</td>
+              </tr>
+              <tr>
+                <td>fdiv.s f0,f3,f1</td>
+                <td>F0</td>
+                <td>null</td>
+              </tr>
+              <tr>
+                <td>fadd.s f1,f5,f2</td>
+                <td>F1</td>
+                <td>56</td>
+              </tr>
+    </table> 
+
+    <h2>Stages of a ROB (Re-Order Buffer)</h2>
+    <ul>
+        <li>Issue</li>
+        <li>Execute</li>
+        <li>Write Result</li>
+        <li>Commit</li>        
+    </ul> 
+
+    
+</section>
+
+
+
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>
+
+
+
