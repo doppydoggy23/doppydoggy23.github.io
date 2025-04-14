@@ -1,0 +1,148 @@
+/*
+ToDo: 1. use metatiles. 
+    2. why does it not show the upper row?
+ */
+
+mapfab(raw, "t2.mapfab", "chr", "palette", "metatiles", "level")
+//mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
+
+vars /game_vars
+//    CCC/levels nametable_data
+    U px = 128
+    U py = 128
+
+/*
+Loads a 16x15 metatiles screen made with MapFab. 
+Its only argument is a pointer to the levels struct 
+made with the macros included in the earlier mapfab()
+*/
+fn load_screen(CCC/levels my_lvl_pointer)
+    U chr_bank = read U(my_lvl_pointer)
+    CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
+    CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
+    UU size = UU(read U(my_lvl_pointer)) // width in metatiles of screen
+    //after all these reads, now my_lvl_pointer points to the metatiles matrix
+
+    // set palette
+    load_palette(pal)
+    ppu_upload_palette()
+       
+    UU mt_size = UU(read U(mymetatiles)) // number of metatiles
+    if mt_size == 0
+        mt_size = 256
+    //after this read now mymetatiles points to the 
+    // metatiles struct made with the metatiles.macrofab in the mapfab ()
+
+    //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
+    CC/metatiles mt_nw
+    CC/metatiles mt_ne
+    CC/metatiles mt_sw
+    CC/metatiles mt_se
+    CC/metatiles mt_attr
+    
+    mt_nw=mymetatiles
+    mt_ne=mt_nw
+    mt_ne+=mt_size
+    mt_sw=mt_ne
+    mt_sw+=mt_size
+    mt_se=mt_sw
+    mt_se+=mt_size
+    mt_attr=mt_se
+    mt_attr+=mt_size
+    // now every pointer points where it should
+
+    U i=0
+    ppu_reset_addr($2000)
+    
+    for U y=0; y<15; y+=1
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U nw_tile=mt_nw{my_metatile}
+            U ne_tile=mt_ne{my_metatile}
+            {PPUDATA}(nw_tile)
+            {PPUDATA}(ne_tile)
+            i+=1
+        i=i-16
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U sw_tile=mt_sw{my_metatile}
+            U se_tile=mt_se{my_metatile}
+            {PPUDATA}(sw_tile)
+            {PPUDATA}(se_tile)
+            i+=1
+
+
+nmi main_nmi()
+    // Update OAM and poll the pads:
+    ppu_upload_oam_poll_pads(0)
+
+    // Turn on rendering:
+    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+
+    // Reset the scroll
+    ppu_reset_scroll(0, 0)
+    //ppu_set_scroll(0,0)
+    
+mode main()
+: nmi main_nmi
+
+    ppu_reset_scroll(0, 0)
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+
+    // Wait forever, one frame at a time:
+    while true
+        //update_pads()
+        //move_player() 
+        //update_sprites()
+        nmi // Wait for the next NMI
+
+fn update_sprites()
+    // Our stack index into OAM:
+    U i = 0
+
+    // Push a sprite:
+    set_oam_x(i, px)     // x-position
+    set_oam_y(i, py - 1) // y-position
+    set_oam_p(i, 2)    // tile
+    set_oam_a(i, 0)      // options
+    i += 4
+
+    // Clear the remainder of OAM
+    hide_oam(i)
+
+/*fn move_player()
+    // Move the player horizontally based on button presses:
+    if pads[0].held & BUTTON_LEFT
+        if tile_at(px - 1, py) == '.' && tile_at(px - 1, py + 7) == '.'
+            px -= 1
+    else if pads[0].held & BUTTON_RIGHT
+        if tile_at(px + 8, py) == '.' && tile_at(px + 8, py + 7) == '.'
+            px += 1
+
+    // Move the player vertically based on button presses:
+    if pads[0].held & BUTTON_UP
+        if tile_at(px, py - 1) == '.' && tile_at(px + 7, py - 1) == '.'
+            py -= 1
+    else if pads[0].held & BUTTON_DOWN
+        if tile_at(px, py + 8) == '.' && tile_at(px + 7, py + 8) == '.'
+            py += 1
+
+fn tile_at(U x, U y) U
+    // Divide by 8 to get the tile position:
+    x >>= 3
+    y >>= 3
+
+    // Return the tile:
+    return (level_ptr + UU(y * 32))[x]
+*/
+
+// Define the tileset (commonly called CHR):
+//chrrom
+//    file(fmt, "tiles.png")
+
+//chrrom
+//    file(fmt, "t2.chr")
