@@ -54,6 +54,7 @@ fn load_screen(CCC/levels my_lvl_pointer)
     U i=0
     ppu_reset_addr($2000)
     
+    // upload namespace data
     for U y=0; y<15; y+=1
         for U x=0; x<16; x+=1
             U my_metatile=my_lvl_pointer{i}
@@ -71,6 +72,26 @@ fn load_screen(CCC/levels my_lvl_pointer)
             {PPUDATA}(se_tile)
             i+=1
 
+    //upload attributes data, we need to OR it together
+    //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
+    i=0
+    for U y=0; y<15; y+=2
+        for U x=0; x<16; x+=2
+            U my_metatile=my_lvl_pointer{i}
+            U my_attr=mt_attr{my_metatile}
+            //
+            my_metatile=my_lvl_pointer{i+1}
+            my_attr|=(mt_attr{my_metatile}<<2)
+            //
+            my_metatile=my_lvl_pointer{i+16}
+            my_attr|=(mt_attr{my_metatile}<<4)
+            //
+            my_metatile=my_lvl_pointer{i+17}
+            my_attr|=(mt_attr{my_metatile}<<6)
+            i+=2
+            {PPUDATA}(my_attr)
+        i+=16
+            
 
 nmi main_nmi()
     // Update OAM and poll the pads:
