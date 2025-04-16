@@ -127,8 +127,22 @@ fn update_sprites()
     // Our stack index into OAM:
     U i = 0
 
+    for U n=0; n<NUM_BALLS; n+=1
+        balls_pos_x[n]+=balls_xinc[n]
+        balls_pos_y[n]+=balls_yinc[n]
+
+    for U n=0; n<NUM_BALLS; n+=1
+        if balls_pos_x[n]<=0
+            balls_xinc[n]=1
+        if ((balls_pos_x[n]+8)>=255)
+            balls_xinc[n]=-1
+        if balls_pos_y[n]<=0
+            balls_yinc[n]=1
+        if ((balls_pos_y[n]+8)>=239)
+            balls_yinc[n]=-1
+
     // Push sprites
-    for U n=0; n<NUM_BALLS; n+=1        
+    for U n=0; n<NUM_BALLS; n+=1
         set_oam_x(i, balls_pos_x[n])     // x-position
         set_oam_y(i, balls_pos_y[n]) // y-position
         set_oam_p(i, BALL_SPRITE)    // tile
