@@ -6,10 +6,16 @@ ToDo: 1. use metatiles.
 mapfab(raw, "t2.mapfab", "chr", "palette", "metatiles", "level")
 //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
 
+ct U BALL_SPRITE=7
+ct U NUM_BALLS=4
+
 vars /game_vars
-//    CCC/levels nametable_data
-    U px = 128
-    U py = 128
+    U[NUM_BALLS] balls_pos_x = U[](100, 110, 120, 140)
+    U[NUM_BALLS] balls_pos_y = U[](150, 110, 115, 140)
+    S[NUM_BALLS] balls_xinc = S[](1, -1, 1, -1)
+    S[NUM_BALLS] balls_yinc = S[](1, -1, -1, 1)
+
+    
 
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
@@ -102,68 +108,42 @@ nmi main_nmi()
 
     // Reset the scroll
     ppu_reset_scroll(0, 0)
-    //ppu_set_scroll(0,0)
     
 mode main()
 : nmi main_nmi
 
-    ppu_reset_scroll(0, 0)
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
     load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
 
     // Wait forever, one frame at a time:
     while true
-        //update_pads()
+        update_pads()
         //move_player() 
-        //update_sprites()
+        update_sprites()
         nmi // Wait for the next NMI
 
 fn update_sprites()
     // Our stack index into OAM:
     U i = 0
 
-    // Push a sprite:
-    set_oam_x(i, px)     // x-position
-    set_oam_y(i, py - 1) // y-position
-    set_oam_p(i, 2)    // tile
-    set_oam_a(i, 0)      // options
-    i += 4
+    // Push sprites
+    for U n=0; n<NUM_BALLS; n+=1        
+        set_oam_x(i, balls_pos_x[n])     // x-position
+        set_oam_y(i, balls_pos_y[n]) // y-position
+        set_oam_p(i, BALL_SPRITE)    // tile
+        set_oam_a(i, 0)      // options
+        i += 4
 
     // Clear the remainder of OAM
     hide_oam(i)
 
-/*fn move_player()
-    // Move the player horizontally based on button presses:
-    if pads[0].held & BUTTON_LEFT
-        if tile_at(px - 1, py) == '.' && tile_at(px - 1, py + 7) == '.'
-            px -= 1
-    else if pads[0].held & BUTTON_RIGHT
-        if tile_at(px + 8, py) == '.' && tile_at(px + 8, py + 7) == '.'
-            px += 1
-
-    // Move the player vertically based on button presses:
-    if pads[0].held & BUTTON_UP
-        if tile_at(px, py - 1) == '.' && tile_at(px + 7, py - 1) == '.'
-            py -= 1
-    else if pads[0].held & BUTTON_DOWN
-        if tile_at(px, py + 8) == '.' && tile_at(px + 7, py + 8) == '.'
-            py += 1
-
-fn tile_at(U x, U y) U
+/*fn tile_at(U x, U y) U
     // Divide by 8 to get the tile position:
     x >>= 3
     y >>= 3
 
     // Return the tile:
-    return (level_ptr + UU(y * 32))[x]
-*/
+    return (level_ptr + UU(y * 32))[x]*/
 
-// Define the tileset (commonly called CHR):
-//chrrom
-//    file(fmt, "tiles.png")
 
-//chrrom
-//    file(fmt, "t2.chr")
