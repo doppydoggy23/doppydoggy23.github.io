@@ -15,6 +15,7 @@ vars /game_vars
     S[NUM_BALLS] balls_xinc = S[](1, -1, 1, -1)
     S[NUM_BALLS] balls_yinc = S[](1, -1, -1, 1)
 
+    CCC/levels lvl1_mtmap_ptr // pointer to level 1 metatiles map
     
 
 /*
@@ -56,6 +57,8 @@ fn load_screen(CCC/levels my_lvl_pointer)
     mt_attr=mt_se
     mt_attr+=mt_size
     // now every pointer points where it should
+
+    lvl1_mtmap_ptr=my_lvl_pointer // gobal var to the mt map
 
     U i=0
     ppu_reset_addr($2000)
@@ -127,19 +130,21 @@ fn update_sprites()
     // Our stack index into OAM:
     U i = 0
 
+    // update balls position
     for U n=0; n<NUM_BALLS; n+=1
         balls_pos_x[n]+=balls_xinc[n]
         balls_pos_y[n]+=balls_yinc[n]
 
+    // check collisions
     for U n=0; n<NUM_BALLS; n+=1
-        if balls_pos_x[n]<=0
-            balls_xinc[n]=1
-        if ((balls_pos_x[n]+8)>=255)
-            balls_xinc[n]=-1
-        if balls_pos_y[n]<=0
+        if get_metatile_at_pix((balls_pos_x[n]+4), balls_pos_y[n]) > 0
             balls_yinc[n]=1
-        if ((balls_pos_y[n]+8)>=239)
+        if get_metatile_at_pix((balls_pos_x[n]+4), (balls_pos_y[n]+8)) > 0
             balls_yinc[n]=-1
+        if get_metatile_at_pix(balls_pos_x[n], (balls_pos_y[n]+4)) > 0
+            balls_xinc[n]=1
+        if get_metatile_at_pix((balls_pos_x[n]+8), (balls_pos_y[n]+4)) > 0
+            balls_xinc[n]=-1
 
     // Push sprites
     for U n=0; n<NUM_BALLS; n+=1
@@ -152,12 +157,11 @@ fn update_sprites()
     // Clear the remainder of OAM
     hide_oam(i)
 
-/*fn tile_at(U x, U y) U
-    // Divide by 8 to get the tile position:
-    x >>= 3
-    y >>= 3
-
-    // Return the tile:
-    return (level_ptr + UU(y * 32))[x]*/
-
+/*
+returns the map metatile at screen pixel position (px, py)
+*/
+fn get_metatile_at_pix (U px, U py) U
+    UU lvlmtm=(((py>>4)<<4)+(px>>4))
+    U t=lvl1_mtmap_ptr{lvlmtm}
+    return t
 
