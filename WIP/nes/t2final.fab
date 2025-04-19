@@ -16,8 +16,6 @@ vars /game_vars
     S[NUM_BALLS] balls_xinc = S[](1, -1, 1, -1)
     S[NUM_BALLS] balls_yinc = S[](1, -1, -1, 1)
 
-    //CCC/levels lvl1_mtmap_ptr // pointer to level 1 metatiles map (likely in ROM)
-
     U[16*15] lvl1_mt_map // level 1 map of metatiles in RAM
 
     //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
