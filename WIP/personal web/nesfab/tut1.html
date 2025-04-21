@@ -153,17 +153,407 @@ pre code {
 
     <h2>Introduction</h2>
     <p>
-        This page is intended to be guide for programmers that want to program NESFab as an extension of the maze tutorial. You can download the code used here.
+        This page is intended to be a guide for programmers that want to develop with <a href="https://pubby.games/nesfab">NESFab</a>. It's an extension of the 
+        <a href="https://pubby.games/nesfab/maze_tutorial.html">maze tutorial</a> . <a href="nestut1.zip">You can download the code used in this tutorial here</a>.
     </p>
 
     <h2>Playing with single screen MapFab projects</h2>
-        MapFab is a very useful tool paired with YY-CHR, since NESFab projects can be imported by NESFab directly.
+    <p>
+      <a href="https://pubby.games/mapfab.html">MapFab</a> is a very useful tool paired with <a href="yychr20210606.zip">YY-CHR</a>, since YY-CHR files and MapFab projects can be imported by NESFab directly.
+    </p>
+    <p>
+      This example is divided in 2 versions, <b>t2.fab</b> loads a single screen made with YY-CHR and MapFab. Displays it, and moves sprites across the screen. 
+      The second version (<b>t2final.fab</b>)  adds screen modification to it.
+    </p>
+    <p>
+      MapFab is a tool that takes YY-CHR NES 8x8 pixel tiles and groups them in a 2x2 metatile that we use to compose the level.
+      Here is the code for the first version <b>t2.fab</b>, which we will disect later:
+    </p>
+<pre> <code>
+mapfab(raw, "t2.mapfab", "chr", "palette", "metatiles", "level")
+//mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
 
+ct U BALL_SPRITE=7
+ct U NUM_BALLS=4
 
+vars /game_vars
+    U[NUM_BALLS] balls_pos_x = U[](100, 110, 120, 140)
+    U[NUM_BALLS] balls_pos_y = U[](150, 110, 115, 140)
+    S[NUM_BALLS] balls_xinc = S[](1, -1, 1, -1)
+    S[NUM_BALLS] balls_yinc = S[](1, -1, -1, 1)
+
+    CCC/levels lvl1_mtmap_ptr // pointer to level 1 metatiles map
     
+
+/*
+Loads a 16x15 metatiles screen made with MapFab. 
+Its only argument is a pointer to the levels struct 
+made with the macros included in the earlier mapfab()
+*/
+fn load_screen(CCC/levels my_lvl_pointer)
+    U chr_bank = read U(my_lvl_pointer)
+    CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
+    CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
+    UU size = UU(read U(my_lvl_pointer)) // width in metatiles of screen
+    //after all these reads, now my_lvl_pointer points to the metatiles matrix
+
+    // set palette
+    load_palette(pal)
+    ppu_upload_palette()
+       
+    UU mt_size = UU(read U(mymetatiles)) // number of metatiles
+    if mt_size == 0
+        mt_size = 256
+    //after this read now mymetatiles points to the 
+    // metatiles struct made with the metatiles.macrofab in the mapfab ()
+
+    //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
+    CC/metatiles mt_nw
+    CC/metatiles mt_ne
+    CC/metatiles mt_sw
+    CC/metatiles mt_se
+    CC/metatiles mt_attr
+    
+    mt_nw=mymetatiles
+    mt_ne=mt_nw
+    mt_ne+=mt_size
+    mt_sw=mt_ne
+    mt_sw+=mt_size
+    mt_se=mt_sw
+    mt_se+=mt_size
+    mt_attr=mt_se
+    mt_attr+=mt_size
+    // now every pointer points where it should
+
+    lvl1_mtmap_ptr=my_lvl_pointer // gobal var to the mt map
+
+    U i=0
+    ppu_reset_addr($2000)
+    
+    // upload namespace data
+    for U y=0; y<15; y+=1
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U nw_tile=mt_nw{my_metatile}
+            U ne_tile=mt_ne{my_metatile}
+            {PPUDATA}(nw_tile)
+            {PPUDATA}(ne_tile)
+            i+=1
+        i=i-16
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U sw_tile=mt_sw{my_metatile}
+            U se_tile=mt_se{my_metatile}
+            {PPUDATA}(sw_tile)
+            {PPUDATA}(se_tile)
+            i+=1
+
+    //upload attributes data, we need to OR it together
+    //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
+    i=0
+    for U y=0; y<15; y+=2
+        for U x=0; x<16; x+=2
+            U my_metatile=my_lvl_pointer{i}
+            U my_attr=mt_attr{my_metatile}
+            //
+            my_metatile=my_lvl_pointer{i+1}
+            my_attr|=(mt_attr{my_metatile}<<2)
+            //
+            my_metatile=my_lvl_pointer{i+16}
+            my_attr|=(mt_attr{my_metatile}<<4)
+            //
+            my_metatile=my_lvl_pointer{i+17}
+            my_attr|=(mt_attr{my_metatile}<<6)
+            i+=2
+            {PPUDATA}(my_attr)
+        i+=16
+            
+
+nmi main_nmi()
+    // Update OAM and poll the pads:
+    ppu_upload_oam_poll_pads(0)
+
+    // Turn on rendering:
+    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+
+    // Reset the scroll
+    ppu_reset_scroll(0, 0)
+    
+mode main()
+: nmi main_nmi
+
+    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+
+    // Wait forever, one frame at a time:
+    while true
+        update_pads()
+        //move_player() 
+        update_sprites()
+        nmi // Wait for the next NMI
+
+fn update_sprites()
+    // Our stack index into OAM:
+    U i = 0
+
+    // update balls position
+    for U n=0; n&#60;NUM_BALLS; n+=1
+        balls_pos_x[n]+=balls_xinc[n]
+        balls_pos_y[n]+=balls_yinc[n]
+
+    // check collisions
+    for U n=0; n&#60;NUM_BALLS; n+=1
+        if get_metatile_at_pix((balls_pos_x[n]+4), balls_pos_y[n]) > 0
+            balls_yinc[n]=1
+        if get_metatile_at_pix((balls_pos_x[n]+4), (balls_pos_y[n]+8)) > 0
+            balls_yinc[n]=-1
+        if get_metatile_at_pix(balls_pos_x[n], (balls_pos_y[n]+4)) > 0
+            balls_xinc[n]=1
+        if get_metatile_at_pix((balls_pos_x[n]+8), (balls_pos_y[n]+4)) > 0
+            balls_xinc[n]=-1
+
+    // Push sprites
+    for U n=0; n&#60;NUM_BALLS; n+=1
+        set_oam_x(i, balls_pos_x[n])     // x-position
+        set_oam_y(i, balls_pos_y[n]) // y-position
+        set_oam_p(i, BALL_SPRITE)    // tile
+        set_oam_a(i, 0)      // options
+        i += 4
+
+    // Clear the remainder of OAM
+    hide_oam(i)
+
+/*
+returns the map metatile at screen pixel position (px, py)
+*/
+fn get_metatile_at_pix (U px, U py) U
+    UU lvlmtm=(((py&#62;&#62;4)<<4)+(px&#62;&#62;4))
+    U t=lvl1_mtmap_ptr{lvlmtm}
+    return t
+</code> </pre>
+    
+<p>
+  The first line <b>mapfab(raw, "t2.mapfab", "chr", "palette", "metatiles", "level")</b> is very important.
+  It loads the MapFab project and runs some macros on the file that define a series of variables. Here are two of the macros that define variables we
+  will use later.  
+  Take a look:
+</p>
+<p>
+  The first one is defined in <i>metatiles.macrofab</i>, and defines the metatiles made of 2x2 YY-CHR tiles as an array.
+</p>
+<pre> <code>
+  #:name:# 
+  #:chr_name:#
+  #:palette_name:#
+  
+  omni data /metatiles
+      [] mt_#name#
+          U(_num)     // The amount of metatiles.
+          (_nw)       // North-west tiles of each metatile
+          (_ne)       // North-east tiles of each metatile
+          (_sw)       // South-west tiles of each metatile
+          (_se)       // South-east tiles of each metatile
+          (_combined) // The collisions and attributes, OR'd together.
+</code> </pre>
+
+  <p>
+    The second is defined in <i>levels.macrofab</i>, and defines an array that contains the map of metatiles that define the level.
+  </p>
+
+<pre> <code>
+#:name:# 
+#:chr_name:# 
+#:palette_name:# 
+#:metatiles_name:# 
+
+data /levels
+    [] lev_#name#
+        U(chr_#chr_name#_index) // The CHR banke
+        (@pal_#palette_name#)   // Pointer to the palette
+        (@mt_#metatiles_name#)  // Pointer to the metatiles
+        U(_width)               // The width, in tiles.
+        (_row_major)         // The actual level tiles
+</code> </pre>
+
+<p>
+  The second place we should look at is the <b>load_screen</b> function:
+</p>
+
+<pre> <code>
+  /*
+Loads a 16x15 metatiles screen made with MapFab. 
+Its only argument is a pointer to the levels struct 
+made with the macros included in the earlier mapfab()
+*/
+fn load_screen(CCC/levels my_lvl_pointer)
+    U chr_bank = read U(my_lvl_pointer)
+    CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
+    CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
+    UU size = UU(read U(my_lvl_pointer)) // width in metatiles of screen
+    //after all these reads, now my_lvl_pointer points to the metatiles matrix
+
+    // set palette
+    load_palette(pal)
+    ppu_upload_palette()
+       
+    UU mt_size = UU(read U(mymetatiles)) // number of metatiles
+    if mt_size == 0
+        mt_size = 256
+    //after this read now mymetatiles points to the 
+    // metatiles struct made with the metatiles.macrofab in the mapfab ()
+
+    //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
+    CC/metatiles mt_nw
+    CC/metatiles mt_ne
+    CC/metatiles mt_sw
+    CC/metatiles mt_se
+    CC/metatiles mt_attr
+    
+    mt_nw=mymetatiles
+    mt_ne=mt_nw
+    mt_ne+=mt_size
+    mt_sw=mt_ne
+    mt_sw+=mt_size
+    mt_se=mt_sw
+    mt_se+=mt_size
+    mt_attr=mt_se
+    mt_attr+=mt_size
+    // now every pointer points where it should
+
+    lvl1_mtmap_ptr=my_lvl_pointer // gobal var to the mt map
+
+    U i=0
+    ppu_reset_addr($2000)
+    
+    // upload namespace data
+    for U y=0; y<15; y+=1
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U nw_tile=mt_nw{my_metatile}
+            U ne_tile=mt_ne{my_metatile}
+            {PPUDATA}(nw_tile)
+            {PPUDATA}(ne_tile)
+            i+=1
+        i=i-16
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U sw_tile=mt_sw{my_metatile}
+            U se_tile=mt_se{my_metatile}
+            {PPUDATA}(sw_tile)
+            {PPUDATA}(se_tile)
+            i+=1
+
+    //upload attributes data, we need to OR it together
+    //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
+    i=0
+    for U y=0; y<15; y+=2
+        for U x=0; x<16; x+=2
+            U my_metatile=my_lvl_pointer{i}
+            U my_attr=mt_attr{my_metatile}
+            //
+            my_metatile=my_lvl_pointer{i+1}
+            my_attr|=(mt_attr{my_metatile}<<2)
+            //
+            my_metatile=my_lvl_pointer{i+16}
+            my_attr|=(mt_attr{my_metatile}<<4)
+            //
+            my_metatile=my_lvl_pointer{i+17}
+            my_attr|=(mt_attr{my_metatile}<<6)
+            i+=2
+            {PPUDATA}(my_attr)
+        i+=16
+</code></pre>
+<p>  
+  It perfoms a series of <b>reads</b>, which read the value where the pointer is pointing and advances the pointer. 
+  This is necessary to read the values of the variables created in the <i>.macrofab</i> files and get pointers to all the variables we need, like the palette, 
+  the 2x2 tiles metatiles definition, and the array of metatiles that make the screen.
+</p>
+
+<p>
+  Once it gets pointers to all the level definition variables, writes the data to the NES GFX memory, palette, namespace (map) and attributes data.
+</p>
+  
+<pre> <code>
+  nmi main_nmi()
+  // Update OAM and poll the pads:
+  ppu_upload_oam_poll_pads(0)
+
+  // Turn on rendering:
+  {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+
+  // Reset the scroll
+  ppu_reset_scroll(0, 0)
+  
+mode main()
+: nmi main_nmi
+
+  load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+  // Tell the NES to trigger NMI once per frame:
+  {PPUCTRL}(PPUCTRL_NMI_ON)
+
+  // Wait forever, one frame at a time:
+  while true
+      update_pads()
+      //move_player() 
+      update_sprites()
+      nmi // Wait for the next NMI
+
+fn update_sprites()
+  // Our stack index into OAM:
+  U i = 0
+
+  // update balls position
+  for U n=0; n&#60;NUM_BALLS; n+=1
+      balls_pos_x[n]+=balls_xinc[n]
+      balls_pos_y[n]+=balls_yinc[n]
+
+  // check collisions
+  for U n=0; n&#60;NUM_BALLS; n+=1
+      if get_metatile_at_pix((balls_pos_x[n]+4), balls_pos_y[n]) > 0
+          balls_yinc[n]=1
+      if get_metatile_at_pix((balls_pos_x[n]+4), (balls_pos_y[n]+8)) > 0
+          balls_yinc[n]=-1
+      if get_metatile_at_pix(balls_pos_x[n], (balls_pos_y[n]+4)) > 0
+          balls_xinc[n]=1
+      if get_metatile_at_pix((balls_pos_x[n]+8), (balls_pos_y[n]+4)) > 0
+          balls_xinc[n]=-1
+
+  // Push sprites
+  for U n=0; n&#60;NUM_BALLS; n+=1
+      set_oam_x(i, balls_pos_x[n])     // x-position
+      set_oam_y(i, balls_pos_y[n]) // y-position
+      set_oam_p(i, BALL_SPRITE)    // tile
+      set_oam_a(i, 0)      // options
+      i += 4
+
+  // Clear the remainder of OAM
+  hide_oam(i)
+
+/*
+returns the map metatile at screen pixel position (px, py)
+*/
+fn get_metatile_at_pix (U px, U py) U
+  UU lvlmtm=(((py&#62;&#62;4)&#60;&#60;4)+(px&#62;&#62;4))
+  U t=lvl1_mtmap_ptr{lvlmtm}
+  return t
+</code></pre>
+
+<p>
+  The rest of the code is pretty easy to read. It defines the NMI function to read the pads and upload the sprites data.
+</p>
+<p>
+  Then the main function (mode) that loads the screen withe <i>load_screen</i> function. The <i>update_sprites</i> function moves the sprite balls around the screen and the final function, 
+  <b>get_metatile_at_pix</b> returns the metatile at a specific pixel to check for collisions of the balls with the walls.
+</p>
+
+<p>
+  Here is what the screen looks like:
+</p>
+
+<img src="t2screen.png" alt="example 1 screen">
+
 </section>
-
-
 
 <footer id="docfooter">
 </footer>
