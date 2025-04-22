@@ -169,6 +169,9 @@ pre code {
       MapFab is a tool that takes YY-CHR NES 8x8 pixel tiles and groups them in a 2x2 metatile that we use to compose the level.
       Here is the code for the first version <b>t2.fab</b>, which we will disect later:
     </p>
+
+    <h2>First version. t2.fab</h2>
+
 <pre> <code>
 mapfab(raw, "t2.mapfab", "chr", "palette", "metatiles", "level")
 //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
@@ -473,6 +476,10 @@ fn load_screen(CCC/levels my_lvl_pointer)
 <p>
   Once it gets pointers to all the level definition variables, writes the data to the NES GFX memory, palette, namespace (map) and attributes data.
 </p>
+
+<p>
+  Here is the rest of the code:
+</p>
   
 <pre> <code>
   nmi main_nmi()
@@ -543,7 +550,7 @@ fn get_metatile_at_pix (U px, U py) U
   The rest of the code is pretty easy to read. It defines the NMI function to read the pads and upload the sprites data.
 </p>
 <p>
-  Then the main function (mode) that loads the screen withe <i>load_screen</i> function. The <i>update_sprites</i> function moves the sprite balls around the screen and the final function, 
+  Then the main function (mode) that loads the screen with the <i>load_screen</i> function. The <i>update_sprites</i> function moves the sprite balls around the screen and the final function, 
   <b>get_metatile_at_pix</b> returns the metatile at a specific pixel to check for collisions of the balls with the walls.
 </p>
 
@@ -553,8 +560,346 @@ fn get_metatile_at_pix (U px, U py) U
 
 <img src="t2screen.png" alt="example 1 screen">
 
-</section>
+<h2>Second version. t2final.fab</h2>
 
+<p>
+  Here is the code for the final version. This time we check for collisions with the walls and change the namespace (screen map)
+  with every collision.
+</p>
+
+<pre> <code>
+  mapfab(raw, "t2.mapfab", "chr", "palette", "metatiles", "level")
+  //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
+  
+  ct U BALL_SPRITE=7
+  ct U NUM_BALLS=4
+  ct U TOUCHED_WALL_MT=8 // metatile for touched wall
+  
+  vars /game_vars
+      U[NUM_BALLS] balls_pos_x = U[](100, 110, 120, 140)
+      U[NUM_BALLS] balls_pos_y = U[](150, 110, 115, 140)
+      S[NUM_BALLS] balls_xinc = S[](1, -1, 1, -1)
+      S[NUM_BALLS] balls_yinc = S[](1, -1, -1, 1)
+  
+      U[16*15] lvl1_mt_map // level 1 map of metatiles in RAM
+  
+      //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
+      CC/metatiles mt_nw
+      CC/metatiles mt_ne
+      CC/metatiles mt_sw
+      CC/metatiles mt_se
+      CC/metatiles mt_attr
+  
+      // we temporary need to store the collision 
+      // to update the map/GFX mem during VBLANK
+      Bool is_collision_pending=false
+      U collision_col
+      U collision_row
+  
+  /*
+  Loads a 16x15 metatiles screen made with MapFab. 
+  Its only argument is a pointer to the levels struct 
+  made with the macros included in the earlier mapfab()
+  */
+  fn load_screen(CCC/levels my_lvl_pointer)
+      U chr_bank = read U(my_lvl_pointer)
+      CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
+      CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
+      UU size = UU(read U(my_lvl_pointer)) // width in metatiles of screen
+      //after all these reads, now my_lvl_pointer points to the metatiles matrix
+  
+      // set palette
+      load_palette(pal)
+      ppu_upload_palette()
+         
+      UU mt_size = UU(read U(mymetatiles)) // number of metatiles
+      if mt_size == 0
+          mt_size = 256
+      //after this read now mymetatiles points to the 
+      // metatiles struct made with the metatiles.macrofab in the mapfab ()
+      
+      mt_nw=mymetatiles
+      mt_ne=mt_nw
+      mt_ne+=mt_size
+      mt_sw=mt_ne
+      mt_sw+=mt_size
+      mt_se=mt_sw
+      mt_se+=mt_size
+      mt_attr=mt_se
+      mt_attr+=mt_size
+      // now every pointer points where it should
+  
+      U i=0
+      ppu_reset_addr($2000)
+      
+      // upload namespace data
+      for U y=0; y<15; y+=1
+          for U x=0; x<16; x+=1
+              U my_metatile=my_lvl_pointer{i}
+              U nw_tile=mt_nw{my_metatile}
+              U ne_tile=mt_ne{my_metatile}
+              {PPUDATA}(nw_tile)
+              {PPUDATA}(ne_tile)
+              i+=1
+          i=i-16
+          for U x=0; x<16; x+=1
+              U my_metatile=my_lvl_pointer{i}
+              U sw_tile=mt_sw{my_metatile}
+              U se_tile=mt_se{my_metatile}
+              {PPUDATA}(sw_tile)
+              {PPUDATA}(se_tile)
+              i+=1
+  
+      //upload attributes data, we need to OR it together
+      //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
+      i=0
+      for U y=0; y<15; y+=2
+          for U x=0; x<16; x+=2
+              U my_metatile=my_lvl_pointer{i}
+              U my_attr=mt_attr{my_metatile}
+              //
+              my_metatile=my_lvl_pointer{i+1}
+              my_attr|=(mt_attr{my_metatile}<<2)
+              //
+              my_metatile=my_lvl_pointer{i+16}
+              my_attr|=(mt_attr{my_metatile}<<4)
+              //
+              my_metatile=my_lvl_pointer{i+17}
+              my_attr|=(mt_attr{my_metatile}<<6)
+              i+=2
+              {PPUDATA}(my_attr)
+          i+=16
+              
+      // copy the level metatiles map to RAM
+      for U iv=0; iv<(16*15); iv+=1
+          lvl1_mt_map{iv}=my_lvl_pointer{iv}
+  
+  
+  nmi main_nmi()
+      // we need to update GFXs while NMI, so we do this now
+      if is_collision_pending
+          set_metatile_at_colrow(collision_col, collision_row, TOUCHED_WALL_MT)
+          is_collision_pending=false
+  
+      // Update OAM and poll the pads:
+      ppu_upload_oam_poll_pads(0)
+  
+      // Turn on rendering:
+      {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+  
+      // Reset the scroll
+      ppu_reset_scroll(0, 0)
+      
+  mode main()
+  : nmi main_nmi
+  
+      load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+      // Tell the NES to trigger NMI once per frame:
+      {PPUCTRL}(PPUCTRL_NMI_ON)
+  
+      // Wait forever, one frame at a time:
+      while true
+          update_pads()
+          //move_player() 
+          update_sprites()
+          nmi // Wait for the next NMI
+  
+  fn update_sprites()
+      // Our stack index into OAM:
+      U i = 0
+  
+      // update balls position
+      for U n=0; n<NUM_BALLS; n+=1
+          balls_pos_x[n]+=balls_xinc[n]
+          balls_pos_y[n]+=balls_yinc[n]
+  
+      // check collisions
+      for U n=0; nn&#60;NUM_BALLS; n+=1
+          if get_metatile_at_pix((balls_pos_x[n]+4), balls_pos_y[n]) > 0
+              balls_yinc[n]=1
+              is_collision_pending=true
+              collision_col=((balls_pos_x[n]+4)>>4)
+              collision_row=(balls_pos_y[n]>>4)
+          if get_metatile_at_pix((balls_pos_x[n]+4), (balls_pos_y[n]+8)) > 0
+              balls_yinc[n]=-1
+              is_collision_pending=true
+              collision_col=((balls_pos_x[n]+4)>>4)
+              collision_row=((balls_pos_y[n]+8)>>4)
+          if get_metatile_at_pix(balls_pos_x[n], (balls_pos_y[n]+4)) > 0
+              balls_xinc[n]=1
+              is_collision_pending=true
+              collision_col=(balls_pos_x[n]>>4)
+              collision_row=((balls_pos_y[n]+4)>>4)
+          if get_metatile_at_pix((balls_pos_x[n]+8), (balls_pos_y[n]+4)) > 0
+              balls_xinc[n]=-1
+              is_collision_pending=true
+              collision_col=((balls_pos_x[n]+8)>>4)
+              collision_row=((balls_pos_y[n]+4)>>4)
+  
+      // Push sprites
+      for U n=0; nn&#60;NUM_BALLS; n+=1
+          set_oam_x(i, balls_pos_x[n])     // x-position
+          set_oam_y(i, balls_pos_y[n]) // y-position
+          set_oam_p(i, BALL_SPRITE)    // tile
+          set_oam_a(i, 0)      // options
+          i += 4
+  
+      // Clear the remainder of OAM
+      hide_oam(i)
+  
+  /*
+  returns the map metatile at screen pixel position (px, py)
+  */
+  fn get_metatile_at_pix (U px, U py) U
+      UU lvlmtm=(((py>>4)<<4)+(px>>4))
+      U t=lvl1_mt_map{lvlmtm}
+      return t
+  
+  /*
+  Sets the row,col metatile to a new value.
+  This is done in the collisions_map variable because
+  it's likely lvl1_mtmap_ptr points to ROM 
+  Notice that x,y are UU values, if defined as U, 
+  the math here for bit shifting wouldn't work
+  */
+  fn set_metatile_at_colrow (UU x, UU y, U new_mt)
+      // write to the ram metatiles map
+      UU map_displacement=((y<<4)+x)
+      lvl1_mt_map{map_displacement}=new_mt
+  
+      // change that metatile position in GFX RAM
+      // first the tiles
+      UU gfx_addr=((y<<6)+(x<<1))
+      gfx_addr+=$2000
+      ppu_reset_addr(gfx_addr)    
+      {PPUDATA}( mt_nw{new_mt} )
+      {PPUDATA}( mt_ne{new_mt} )
+      gfx_addr+=32
+      ppu_reset_addr(gfx_addr)    
+      {PPUDATA}( mt_sw{new_mt} )
+      {PPUDATA}( mt_se{new_mt} )
+  
+      //calculate the new 2x2 metatiles block attributes byte
+      UU mt_m_disp=(((y & %11111110) <<4)+(x & %11111110))
+      U mt_2x2_pos=U(((y&1)<<1)|(x & 1))
+      //
+      U my_metatile=lvl1_mt_map{mt_m_disp}
+      U new_attr=mt_attr{my_metatile}
+      //
+      my_metatile=lvl1_mt_map{mt_m_disp+1}
+      new_attr|=(mt_attr{my_metatile}<<2)
+      //
+      my_metatile=lvl1_mt_map{mt_m_disp+16}
+      new_attr|=(mt_attr{my_metatile}<<4)
+      //
+      my_metatile=lvl1_mt_map{mt_m_disp+17}
+      new_attr|=(mt_attr{my_metatile}<<6)
+      //
+  
+      //now access the attributes(palettes) address
+      UU attr_addr_disp=(((y>>1)<<3)+(x>>1))
+      ppu_reset_addr($2000+960+attr_addr_disp)
+      {PPUDATA}(new_attr)  
+</code></pre>
+
+<p>
+  Notice how, this time, in the <i>load_screen</i> function, we copy the map of metatiles to an array in RAM:
+</p>
+<pre> <code>
+  // copy the level metatiles map to RAM
+  for U iv=0; iv<(16*15); iv+=1
+      lvl1_mt_map{iv}=my_lvl_pointer{iv}
+</code></pre>
+
+<p>
+  This is done because, probably, the array of metatiles we passed to <i>load_screen</i> is probably in ROM, and we want to modify that array with every ball collision.
+</p>
+
+<p>
+  Now, at every collision of a ball with a wall, we mark the affected metatile with the variables <i>is_collision_pending</i>, <i>collision_col</i> and <i>collision_row</i>.
+</p>
+
+<pre> <code>
+  // check collisions
+  for U n=0; nn&#60;NUM_BALLS; n+=1
+      if get_metatile_at_pix((balls_pos_x[n]+4), balls_pos_y[n]) > 0
+          balls_yinc[n]=1
+          is_collision_pending=true
+          collision_col=((balls_pos_x[n]+4)>>4)
+          collision_row=(balls_pos_y[n]>>4)
+</code></pre>
+
+
+<p>
+  It's made that way because, during NMI, we must change the tiles in the NES GFX memory, as well as in the <b>lvl1_mt_map</b> variable, that contains the map of metatiles in RAM.
+</p>
+
+<pre> <code>
+  nmi main_nmi()
+      // we need to update GFXs while NMI, so we do this now
+      if is_collision_pending
+          set_metatile_at_colrow(collision_col, collision_row, TOUCHED_WALL_MT)
+          is_collision_pending=false
+</code></pre>
+
+<p>That change is made in the <b>set_metatile_at_colrow</b> function, which updates the <i>lvl1_mt_map</i> variable and the NES gfx memory:</p>
+
+<pre><code>
+  /*
+  Sets the row,col metatile to a new value.
+  This is done in the collisions_map variable because
+  it's likely lvl1_mtmap_ptr points to ROM 
+  Notice that x,y are UU values, if defined as U, 
+  the math here for bit shifting wouldn't work
+  */
+  fn set_metatile_at_colrow (UU x, UU y, U new_mt)
+      // write to the ram metatiles map
+      UU map_displacement=((y<<4)+x)
+      lvl1_mt_map{map_displacement}=new_mt
+  
+      // change that metatile position in GFX RAM
+      // first the tiles
+      UU gfx_addr=((y<<6)+(x<<1))
+      gfx_addr+=$2000
+      ppu_reset_addr(gfx_addr)    
+      {PPUDATA}( mt_nw{new_mt} )
+      {PPUDATA}( mt_ne{new_mt} )
+      gfx_addr+=32
+      ppu_reset_addr(gfx_addr)    
+      {PPUDATA}( mt_sw{new_mt} )
+      {PPUDATA}( mt_se{new_mt} )
+  
+      //calculate the new 2x2 metatiles block attributes byte
+      UU mt_m_disp=(((y & %11111110) <<4)+(x & %11111110))
+      U mt_2x2_pos=U(((y&1)<<1)|(x & 1))
+      //
+      U my_metatile=lvl1_mt_map{mt_m_disp}
+      U new_attr=mt_attr{my_metatile}
+      //
+      my_metatile=lvl1_mt_map{mt_m_disp+1}
+      new_attr|=(mt_attr{my_metatile}<<2)
+      //
+      my_metatile=lvl1_mt_map{mt_m_disp+16}
+      new_attr|=(mt_attr{my_metatile}<<4)
+      //
+      my_metatile=lvl1_mt_map{mt_m_disp+17}
+      new_attr|=(mt_attr{my_metatile}<<6)
+      //
+  
+      //now access the attributes(palettes) address
+      UU attr_addr_disp=(((y>>1)<<3)+(x>>1))
+      ppu_reset_addr($2000+960+attr_addr_disp)
+      {PPUDATA}(new_attr)  
+</code></pre>
+
+<p>
+  Notice that, we were able to copy the metatiles (16H*15V) to RAM because the screen is small. Since we only have 2KB of RAM, if we were to work with a map several screens wide,
+  we would need to use another approach.
+</p>
+
+<img src="t2finalscr.png" alt="final example 1 screen">
+
+</section>
 <footer id="docfooter">
 </footer>
 
