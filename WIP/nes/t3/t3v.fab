@@ -1,8 +1,8 @@
 
-mapfab(raw, "t3h.mapfab", "chr", "palette", "metatiles", "level")
+mapfab(raw, "t3v.mapfab", "chr", "palette", "metatiles", "level")
 
 ct UU max_x_scroll=256
-ct UU max_y_scroll=239
+ct UU max_y_scroll=240
 
 vars /game_vars
     CCC/levels lvl1_mt_map
@@ -11,7 +11,7 @@ vars /game_vars
     UU my_y_scroll=0
 
 /*
-Loads a 2 screen horizontal 32x15 metatiles screen made with MapFab. 
+Loads a 2 screen vertical 16x30 metatiles screen made with MapFab. 
 Its only argument is a pointer to the levels struct 
 made with the macros included in the earlier mapfab()
 */
@@ -48,13 +48,13 @@ fn load_screen(CCC/levels my_lvl_pointer)
     // upload first namespace data
     for UU y=0; y<15; y+=1
         for UU x=0; x<16; x+=1
-            U my_metatile=my_lvl_pointer{(y<<5)+x}
+            U my_metatile=my_lvl_pointer{(y<<4)+x}
             U nw_tile=mt_nw{my_metatile}
             U ne_tile=mt_ne{my_metatile}
             {PPUDATA}(nw_tile)
             {PPUDATA}(ne_tile)
         for UU x=0; x<16; x+=1
-            U my_metatile=my_lvl_pointer{(y<<5)+x}
+            U my_metatile=my_lvl_pointer{(y<<4)+x}
             U sw_tile=mt_sw{my_metatile}
             U se_tile=mt_se{my_metatile}
             {PPUDATA}(sw_tile)
@@ -64,31 +64,31 @@ fn load_screen(CCC/levels my_lvl_pointer)
     //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
     for UU y=0; y<15; y+=2
         for UU x=0; x<16; x+=2
-            U my_metatile=my_lvl_pointer{(y<<5)+x}
+            U my_metatile=my_lvl_pointer{(y<<4)+x}
             U my_attr=mt_attr{my_metatile}
             //
-            my_metatile=my_lvl_pointer{(y<<5)+x+1}
+            my_metatile=my_lvl_pointer{(y<<4)+x+1}
             my_attr|=(mt_attr{my_metatile}<<2)
             //
-            my_metatile=my_lvl_pointer{(y<<5)+x+32}
+            my_metatile=my_lvl_pointer{(y<<4)+x+32}
             my_attr|=(mt_attr{my_metatile}<<4)
             //
-            my_metatile=my_lvl_pointer{(y<<5)+x+33}
+            my_metatile=my_lvl_pointer{(y<<4)+x+33}
             my_attr|=(mt_attr{my_metatile}<<6)
             {PPUDATA}(my_attr)            
 
-    ppu_reset_addr($2400) // second screen https://www.nesdev.org/wiki/Mirroring
+    ppu_reset_addr($2800) // second screen https://www.nesdev.org/wiki/Mirroring
 
     // upload second namespace data
-    for UU y=0; y<15; y+=1
-        for UU x=16; x<32; x+=1
-            U my_metatile=my_lvl_pointer{(y<<5)+x}
+    for UU y=15; y<30; y+=1
+        for UU x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{(y<<4)+x}
             U nw_tile=mt_nw{my_metatile}
             U ne_tile=mt_ne{my_metatile}
             {PPUDATA}(nw_tile)
             {PPUDATA}(ne_tile)
-        for UU x=16; x<32; x+=1
-            U my_metatile=my_lvl_pointer{(y<<5)+x}
+        for UU x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{(y<<4)+x}
             U sw_tile=mt_sw{my_metatile}
             U se_tile=mt_se{my_metatile}
             {PPUDATA}(sw_tile)
@@ -96,18 +96,18 @@ fn load_screen(CCC/levels my_lvl_pointer)
 
     //upload second attributes data, we need to OR it together
     //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
-    for UU y=0; y<15; y+=2
-        for UU x=16; x<32; x+=2
-            U my_metatile=my_lvl_pointer{(y<<5)+x}
+    for UU y=15; y<30; y+=2
+        for UU x=0; x<16; x+=2
+            U my_metatile=my_lvl_pointer{(y<<4)+x}
             U my_attr=mt_attr{my_metatile}
             //
-            my_metatile=my_lvl_pointer{(y<<5)+x+1}
+            my_metatile=my_lvl_pointer{(y<<4)+x+1}
             my_attr|=(mt_attr{my_metatile}<<2)
             //
-            my_metatile=my_lvl_pointer{(y<<5)+x+32}
+            my_metatile=my_lvl_pointer{(y<<4)+x+16}
             my_attr|=(mt_attr{my_metatile}<<4)
             //
-            my_metatile=my_lvl_pointer{(y<<5)+x+33}
+            my_metatile=my_lvl_pointer{(y<<4)+x+17}
             my_attr|=(mt_attr{my_metatile}<<6)
             {PPUDATA}(my_attr)            
 
