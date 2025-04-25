@@ -1,9 +1,6 @@
 
 mapfab(raw, "t3h.mapfab", "chr", "palette", "metatiles", "level")
 
-ct UU max_x_scroll=256
-ct UU max_y_scroll=239
-
 vars /game_vars
     CCC/levels lvl1_mt_map
 
@@ -150,17 +147,27 @@ fn update_sprites()
     hide_oam(i)
 
 fn move_player()
+    /*
+    the X scroll runs smoothly but the Y scroll doesn't quite
+    work the way you'd expect. The 9th bit selects the namespace (screen)
+    and the 8 bit left (up to 239) the scroll inside that screen.
+    More info in https://www.nesdev.org/wiki/PPU_scrolling
+    */
     if pads[0].held & BUTTON_LEFT
-        if my_x_scroll > 0
-            my_x_scroll-=1
+        my_x_scroll-=1
     if pads[0].held & BUTTON_RIGHT
-        if my_x_scroll < max_x_scroll
-            my_x_scroll+=1
+        my_x_scroll+=1
     if pads[0].held & BUTTON_UP
-        if my_y_scroll > 0
-            my_y_scroll-=1
+        if my_y_scroll.a == 0
+            my_y_scroll.b^=1
+            my_y_scroll.a=239
+        else
+            my_y_scroll.a-=1
     if pads[0].held & BUTTON_DOWN
-        if my_y_scroll < max_y_scroll
+        if my_y_scroll.a == 239
+            my_y_scroll.a=0
+            my_y_scroll.b^=1
+        else
             my_y_scroll+=1
 
 /* This function sets a 9 bit scroll
