@@ -67,28 +67,43 @@ fn load_screen(CCC/levels my_lvl_pointer)
             i+=1
         ii+=1
 
-    //ToDo: attributes are not correct yet*************************************
-
     //upload first attributes data, we need to OR it together
     //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
-    //{PPUCTRL}(0) // clear addr incs of 32 to write the attributes
-    ppu_reset_addr($2000+960)
     i=0
-    for UU x=0; x<16; x+=2
-        for UU y=0; y<15; y+=2
+    ii=0
+    for UU a=0; a<8; a+=1
+        for UU attri=0; attri<32; attri+=8
+            ppu_reset_addr($2000+960+a+attri)
             U my_metatile=my_lvl_pointer{i} //tl
             U my_attr=mt_attr{my_metatile}
             //
-            my_metatile=my_lvl_pointer{i+16} // tr
+            my_metatile=my_lvl_pointer{i+15} // tr
             my_attr|=(mt_attr{my_metatile}<<2)
             //
             my_metatile=my_lvl_pointer{i+1} //bl
             my_attr|=(mt_attr{my_metatile}<<4)
             //
-            my_metatile=my_lvl_pointer{i+17} //br
+            my_metatile=my_lvl_pointer{i+16} //br
             my_attr|=(mt_attr{my_metatile}<<6)
+            //
             {PPUDATA}(my_attr)
-            i+=16
+            //
+            my_metatile=my_lvl_pointer{i+8} //tl
+            my_attr=mt_attr{my_metatile}
+            //
+            my_metatile=my_lvl_pointer{i+15+8} // tr
+            my_attr|=(mt_attr{my_metatile}<<2)
+            //
+            my_metatile=my_lvl_pointer{i+1+8} //bl
+            my_attr|=(mt_attr{my_metatile}<<4)
+            //
+            my_metatile=my_lvl_pointer{i+16+8} //br
+            my_attr|=(mt_attr{my_metatile}<<6)
+            //
+            {PPUDATA}(my_attr)
+            i+=2
+        ii+=30
+        i=ii
 
 
 nmi main_nmi()
