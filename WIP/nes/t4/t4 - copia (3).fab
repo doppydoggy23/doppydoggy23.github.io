@@ -3,20 +3,10 @@ mapfab(raw, "t4.mapfab", "chr", "palette", "metatiles", "level")
 
 vars /game_vars
     CCC/levels lvl1_mt_map
-    CC/metatiles mt_nw
-    CC/metatiles mt_ne
-    CC/metatiles mt_sw
-    CC/metatiles mt_se
-    CC/metatiles mt_attr
-
 
     UU my_x_scroll=0
     UU scr_bg_update_base_addr
     Bool scr_bg_update_needed=false
-    // The data we'll upload to the PPU during NMI.
-    U[30] scroll_tiles1
-    U[30] scroll_tiles2
-//    U[8] scroll_attrs
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -40,14 +30,14 @@ fn load_screen(CCC/levels my_lvl_pointer)
 
     lvl1_mt_map=my_lvl_pointer // the map is set in columns. it's in level.macrofab
     
-    mt_nw=mymetatiles
-    mt_ne=mt_nw
+    CC/metatiles mt_nw=mymetatiles
+    CC/metatiles mt_ne=mt_nw
     mt_ne+=mt_size
-    mt_sw=mt_ne
+    CC/metatiles mt_sw=mt_ne
     mt_sw+=mt_size
-    mt_se=mt_sw
+    CC/metatiles mt_se=mt_sw
     mt_se+=mt_size
-    mt_attr=mt_se
+    CC/metatiles mt_attr=mt_se
     mt_attr+=mt_size
     // now every pointer points where it should
 
@@ -198,20 +188,6 @@ fn calc_right_scr_bg(UU x)
     else
         col_start_addr=$2000+(column<<1)
     //
-    UU mt_map_col_start=((x+256) >> 4)
-    U y=0
-    UU map_mt_pointer=(mt_map_col_start << 4)
-    for U i=0; i<15; i+=1
-        U metatile=lvl1_mt_map{map_mt_pointer}
-        //
-        scroll_tiles1[y]=mt_nw[metatile]
-        scroll_tiles2[y]=mt_ne[metatile]
-        //
-        scroll_tiles1[y+1]=mt_sw[metatile]
-        scroll_tiles2[y+1]=mt_se[metatile]
-        y+=2
-        map_mt_pointer+=1
-    //
     scr_bg_update_base_addr=col_start_addr
     scr_bg_update_needed=true
 
@@ -224,11 +200,11 @@ fn nmi_update_screen_bg()
     {PPUCTRL}(PPUCTRL_VRAM_32_DOWN) // Used to write columns of data. Addr incs in 32 every write.
     //
     ppu_reset_addr(scr_bg_update_base_addr)
-    for U y=0; y<30; y+=1
-        {PPUDATA}(scroll_tiles1[y])
+    for UU y=0; y<30; y+=1
+        {PPUDATA}(5)
     //
     ppu_reset_addr(scr_bg_update_base_addr+1)
-    for U y=0; y<30; y+=1
-        {PPUDATA}(scroll_tiles2[y])
+    for UU y=0; y<30; y+=1
+        {PPUDATA}(6)
 
 
