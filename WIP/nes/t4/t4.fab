@@ -1,6 +1,8 @@
 
 mapfab(raw, "t4.mapfab", "chr", "palette", "metatiles", "level")
 
+ct U SCROLL_AMOUNT=8 // the amount of pixels that will move when a key is pressed
+
 vars /game_vars
     CCC/levels lvl1_mt_map
     CC/metatiles mt_nw
@@ -169,9 +171,9 @@ fn move_player()
     More info in https://www.nesdev.org/wiki/PPU_scrolling
     */
     if pads[0].held & BUTTON_LEFT
-        my_x_scroll-=1
+        my_x_scroll-=SCROLL_AMOUNT
     if pads[0].held & BUTTON_RIGHT
-        my_x_scroll+=1
+        my_x_scroll+=SCROLL_AMOUNT
         calc_right_scr_bg(my_x_scroll)
 
 
@@ -188,7 +190,7 @@ This function calculates the BG piece to put into the namespace
 after right scrolling. 
 */
 fn calc_right_scr_bg(UU x)
-    UU x_right=x+256
+    UU x_right=x+255
     UU column=(x_right.a>>4)
     UU col_start_addr
     //
@@ -198,7 +200,7 @@ fn calc_right_scr_bg(UU x)
     else
         col_start_addr=$2000+(column<<1)
     //
-    UU mt_map_col_start=((x+256) >> 4)
+    UU mt_map_col_start=((x+255) >> 4)
     U y=0
     UU map_mt_pointer=(mt_map_col_start << 4)
     for U i=0; i<15; i+=1
