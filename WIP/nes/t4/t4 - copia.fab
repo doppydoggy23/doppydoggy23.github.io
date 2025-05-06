@@ -5,8 +5,6 @@ vars /game_vars
     CCC/levels lvl1_mt_map
 
     UU my_x_scroll=0
-    UU scr_bg_update_base_addr
-    Bool scr_bg_update_needed=false
 
 /*
 Writes the initial 32x30 screen
@@ -117,9 +115,7 @@ nmi main_nmi()
 
     // Reset the scroll https://www.nesdev.org/wiki/PPU_scrolling
     // and https://www.nesdev.org/wiki/Mirroring
-    if scr_bg_update_needed
-        nmi_update_screen_bg()
-    //
+    calc_and_draw_scr_bg(my_x_scroll)
     ppu_reset_scroll_16(my_x_scroll, 0)
     
 mode main()
@@ -160,7 +156,6 @@ fn move_player()
         my_x_scroll-=1
     if pads[0].held & BUTTON_RIGHT
         my_x_scroll+=1
-        calc_right_scr_bg(my_x_scroll)
 
 
 /* This function sets a 9 bit scroll
@@ -171,11 +166,10 @@ fn ppu_reset_scroll_16(UU x, UU y)
     ppu_reset_scroll(x.a, y.a) // the 9th bits should go to ppuctrl right after
     {PPUCTRL}(PPUCTRL_NMI_ON | (x.b & 1) | ((y.b & 1)<<1))  // Set PPU control register, we want NMIs
 
-/*
-This function calculates the BG piece to put into the namespace 
-after right scrolling. 
-*/
-fn calc_right_scr_bg(UU x)
+fn calc_and_draw_scr_bg(UU x)
+    {PPUSTATUS}() // Reset the address latch just to be safe.
+    {PPUCTRL}(PPUCTRL_VRAM_32_DOWN) // Used to write columns of data. Addr incs in 32 every write.
+    //
     UU x_right=x+256
     UU column=(x_right.a>>4)
     UU col_start_addr
@@ -186,23 +180,14 @@ fn calc_right_scr_bg(UU x)
     else
         col_start_addr=$2000+(column<<1)
     //
-    scr_bg_update_base_addr=col_start_addr
-    scr_bg_update_needed=true
-
-/*
-Copies to the adequate namespace addr the bg piece needed
-This function is to be called when NMI takes place.
-*/
-fn nmi_update_screen_bg()
-    {PPUSTATUS}() // Reset the address latch just to be safe.
-    {PPUCTRL}(PPUCTRL_VRAM_32_DOWN) // Used to write columns of data. Addr incs in 32 every write.
+    ppu_reset_addr(col_start_addr)
     //
-    ppu_reset_addr(scr_bg_update_base_addr)
     for UU y=0; y<30; y+=1
         {PPUDATA}(5)
     //
-    ppu_reset_addr(scr_bg_update_base_addr+1)
+    ppu_reset_addr(col_start_addr+1)
     for UU y=0; y<30; y+=1
         {PPUDATA}(6)
+
 
 
