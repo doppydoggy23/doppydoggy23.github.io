@@ -1,10 +1,10 @@
 
 mapfab(raw, "t4.mapfab", "chr", "palette", "metatiles", "level")
 
-ct U SCROLL_AMOUNT=8 // the amount of pixels that will move when a key is pressed
+ct U SCROLL_AMOUNT=7 // the amount of pixels that will move when a key is pressed
 
 vars /game_vars
-    CCC/levels lvl1_mt_map
+    CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
     CC/metatiles mt_nw
     CC/metatiles mt_ne
     CC/metatiles mt_sw
@@ -12,13 +12,13 @@ vars /game_vars
     CC/metatiles mt_attr
 
 
-    UU my_x_scroll=0
-    UU scr_bg_update_base_addr
+    UU my_x_scroll=0 // this points to the current h. scroll value
+    UU scr_bg_update_base_addr // addrs where to copy data during NMI
+    UU scr_attr_bg_update_base_addr
     Bool scr_bg_update_needed=false
-    // The data we'll upload to the PPU during NMI.
-    U[30] scroll_tiles1
+    U[30] scroll_tiles1 // The data we'll upload to the PPU during NMI.
     U[30] scroll_tiles2
-//    U[8] scroll_attrs
+    U[8] scroll_attrs
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -187,19 +187,22 @@ fn ppu_reset_scroll_16(UU x, UU y)
 
 /*
 This function calculates the BG piece to put into the namespace 
-after right scrolling. 
+after right scrolling, and its attributes (palettes). 
 */
 fn calc_right_scr_bg(UU x)
     UU x_right=x+255
-    UU column=(x_right.a>>4)
+    UU column=(x_right.a >> 4)
     UU col_start_addr
-    //
+    UU attr_base_addr
+    // calculate the correct namespace 
     if (x_right.b & 1)
         col_start_addr=$2400+(column<<1)
+        attr_base_addr=$2400+960
         
     else
         col_start_addr=$2000+(column<<1)
-    //
+        attr_base_addr=$2000+960
+    // calculate the 8x8 tiles that will patch the screen
     UU mt_map_col_start=((x+255) >> 4)
     U y=0
     UU map_mt_pointer=(mt_map_col_start << 4)
@@ -213,8 +216,27 @@ fn calc_right_scr_bg(UU x)
         scroll_tiles2[y+1]=mt_se[metatile]
         y+=2
         map_mt_pointer+=1
-    //
+    // calculate the addresses where data will be written
     scr_bg_update_base_addr=col_start_addr
+    scr_attr_bg_update_base_addr=attr_base_addr
+    scr_attr_bg_update_base_addr+=(x_right.a >> 5)
+    // calculate the attributes data
+    UU base_mt_attr=((x+255) >> 4)
+    base_mt_attr&=$fffe
+    base_mt_attr=(base_mt_attr<<4)
+    U iii=0
+    for UU i=0; i<15; i+=2
+        U my_metatile=lvl1_mt_map{base_mt_attr+i} //tl
+        U my_attr=mt_attr{my_metatile}
+        my_metatile=lvl1_mt_map{base_mt_attr+i+16} // tr
+        my_attr|=(mt_attr{my_metatile}<<2)
+        my_metatile=lvl1_mt_map{base_mt_attr+i+1} //bl
+        my_attr|=(mt_attr{my_metatile}<<4)
+        my_metatile=lvl1_mt_map{base_mt_attr+i+17} //br
+        my_attr|=(mt_attr{my_metatile}<<6)
+        scroll_attrs[iii]=my_attr
+        iii+=1
+    //
     scr_bg_update_needed=true
 
 /*
@@ -224,13 +246,22 @@ This function is to be called when NMI takes place.
 fn nmi_update_screen_bg()
     {PPUSTATUS}() // Reset the address latch just to be safe.
     {PPUCTRL}(PPUCTRL_VRAM_32_DOWN) // Used to write columns of data. Addr incs in 32 every write.
-    //
+    // write the first column to the namespace
     ppu_reset_addr(scr_bg_update_base_addr)
     for U y=0; y<30; y+=1
         {PPUDATA}(scroll_tiles1[y])
-    //
+    //write the second column
     ppu_reset_addr(scr_bg_update_base_addr+1)
     for U y=0; y<30; y+=1
         {PPUDATA}(scroll_tiles2[y])
+    // now write the attrs. remember we are in addr+32 every write
+    U i=0
+    for UU attri=0; attri<32; attri+=8
+        ppu_reset_addr(scr_attr_bg_update_base_addr+attri)
+        {PPUDATA}(scroll_attrs[i])
+        {PPUDATA}(scroll_attrs[i+4])
+        i+=1
+    //
+    scr_bg_update_needed=false
 
 
