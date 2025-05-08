@@ -1,7 +1,7 @@
 
 mapfab(raw, "t4.mapfab", "chr", "palette", "metatiles", "level")
 
-ct UU SCROLL_AMOUNT=7 // the amount of pixels that will move when a key is pressed (1-8)
+ct U SCROLL_AMOUNT=7 // the amount of pixels that will move when a key is pressed (1-8)
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -11,8 +11,8 @@ vars /game_vars
     CC/metatiles mt_se
     CC/metatiles mt_attr
 
+
     UU my_x_scroll=0 // this points to the current h. scroll value
-    UU maximum_x // this will point to the map maximum x scroll value
     UU scr_bg_update_base_addr // addrs where to copy data during NMI
     UU scr_attr_bg_update_base_addr
     Bool scr_bg_update_needed=false
@@ -31,9 +31,6 @@ fn load_screen(CCC/levels my_lvl_pointer)
     CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
     UU size = UU(read U(my_lvl_pointer)) // width in metatiles of screen
     //after all these reads, now my_lvl_pointer points to the metatiles matrix
-
-    maximum_x=size<<4 // sets the maximum x value to scroll to
-    maximum_x-=256 //
 
     // set palette
     load_palette(pal)
@@ -174,16 +171,10 @@ fn move_player()
     More info in https://www.nesdev.org/wiki/PPU_scrolling
     */
     if pads[0].held & BUTTON_LEFT
-        if (my_x_scroll >= SCROLL_AMOUNT)
-            my_x_scroll-=SCROLL_AMOUNT
-        else
-            my_x_scroll=0
+        my_x_scroll-=SCROLL_AMOUNT
         calc_left_scr_bg(my_x_scroll)
     if pads[0].held & BUTTON_RIGHT
-        if ((my_x_scroll+SCROLL_AMOUNT) <= maximum_x)
-            my_x_scroll+=SCROLL_AMOUNT
-        else
-            my_x_scroll=maximum_x
+        my_x_scroll+=SCROLL_AMOUNT
         calc_right_scr_bg(my_x_scroll)
 
 
