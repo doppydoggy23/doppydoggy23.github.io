@@ -149,7 +149,7 @@ pre code {
 </head>
 <body>
 
-    <h1>ROB (Re-Order Buffer)</h1>
+    <h1>ROB (ReOrder Buffer)</h1>
 
 <section>
 
@@ -162,7 +162,7 @@ pre code {
         </ul> 
     </p>
         It's usually implemented as a circular buffer (FIFO) that keeps the order of instructions, its destination and value. That way we can temporary store the result of the instruction
-        until it's no longer speculative and we can <i>Commit</i> it to the register or memory. In case the branch prediction was wrong, it's easy to roll-back the changes in the ROB.
+        until it's no longer speculative and then <i>Commit</i> it to the register or memory. In case the branch prediction was wrong, it's easy to roll-back the changes in the ROB.
     <p>
         Tranks to the ROB, instructions can execute out-of-order but commit always in-order.
     </p>
@@ -211,12 +211,12 @@ pre code {
               </tr>
     </table> 
 
-    <h2>Stages of a ROB (Re-Order Buffer) machine:</h2>
+    <h2>Stages of a ROB (ReOrder Buffer) machine:</h2>
     <ul>
         <li><b>Issue</b></li>
           <p>
             If there is a free slot in the ROB and a free Reservation Station, send there the instruction. 
-            If the operands of the instruction are available either in the ROB or the registers, copy them too to the R.E.
+            If the operands of the instruction are available either in the ROB or the registers, copy them too to the R.S.
           </p>
         <li><b>Execute</b></li>
           <p>
@@ -228,7 +228,7 @@ pre code {
           </p>
         <li><b>Commit</b></li>        
           <p>
-            When an operation reaches the head of the ROB and it has its result, write the operation results to the registers or memory. 
+            When an operation reaches the head of the ROB and it has its result, write the operation results to the register or memory. 
             In case that what hits the head of the ROB is a mispredicted branch, flush the ROB and restart execution at the right instruction. If prediction was correct, the branch is finished.
           </p>
     </ul> 
