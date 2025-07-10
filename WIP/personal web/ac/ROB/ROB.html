@@ -211,12 +211,26 @@ pre code {
               </tr>
     </table> 
 
-    <h2>Stages of a ROB (Re-Order Buffer)</h2>
+    <h2>Stages of a ROB (Re-Order Buffer) machine:</h2>
     <ul>
-        <li>Issue</li>
-        <li>Execute</li>
-        <li>Write Result</li>
-        <li>Commit</li>        
+        <li><b>Issue</b></li>
+          <p>
+            If there is a free slot in the ROB and a free Reservation Station, send there the instruction. 
+            If the operands of the instruction are available either in the ROB or the registers, copy them too to the R.E.
+          </p>
+        <li><b>Execute</b></li>
+          <p>
+            If all operands are ready, send the instruction to the Functional Units and execute them. Otherwise, wait.
+          </p>
+        <li><b>Write Result</b></li>
+          <p>
+            When the result of the operation is available, send it through the Common Data Bus to the ROB and all Reservation Stations waiting for it.
+          </p>
+        <li><b>Commit</b></li>        
+          <p>
+            When an operation reaches the head of the ROB and it has its result, write the operation results to the registers or memory. 
+            In case that what hits the head of the ROB is a mispredicted branch, flush the ROB and restart execution at the right instruction. If prediction was correct, the branch is finished.
+          </p>
     </ul> 
 
     
