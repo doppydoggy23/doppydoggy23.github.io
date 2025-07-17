@@ -126,13 +126,13 @@ h1 {
 
 
 .cdc {
-  margin-left: auto;
-  margin-right: auto;
+  text-align: center;
 }
 
 .cdcl {
   display: inline-block;
-  text-align: left;
+  text-align: center;
+  width: 1428px;
 }
 
 
@@ -149,7 +149,7 @@ pre code {
 </head>
 <body>
 
-    <h1>ROB (ReOrder Buffer)</h1>
+    <h1>ROB (Reorder Buffer)</h1>
 
 <section>
 
@@ -167,7 +167,23 @@ pre code {
         Tranks to the ROB, instructions can execute out-of-order but commit always in-order.
     </p>
 
-    *************ESQUEMA DE TOMASULO CON ROB
+    <p style="text-align:center">
+    <iframe src="https://1drv.ms/p/c/4cedddcc0fb3a373/IQToVFlkRAklT5lfSjFIlEB5AajHJmC0ZlDqSRVqgRciDGk?em=2&amp;wdAr=1.7777777777777777" width="1428px" height="864px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+    </p>
+
+    <div class="cdc">
+    <p class="cdcl">
+      The structures are similar to what we already know of <a href="../tomasulo/tomasulo.html"> Tomasulo's Machine</a>. 
+      The main differences consist in that a <span style="color:red;"><b>Reorder Buffer</b></span> is added to temporary store the order and result of instructions. 
+      There is no store buffer for memory store operations because the <span style="color:red;"><b>ROB</b></span> already contains them.
+      Appart from that, the instructions are sent to the <span style="color:blue;"><b>Reservation Stations</b></span> labeled with the ROB entry number, 
+      that way, when the result is broadcast through the <span style="color:violet;"><b>Commmon Data Bus</b></span>, all <span style="color:blue;"><b>RS</b></span>, 
+      and the <span style="color:red;"><b>ROB</b></span> itself, can get the result they are waiting for. 
+      As you can see, the <span style="color:red;"><b>ROB</b></span> can be now another source for the operands sent to the <span style="color:blue;"><b>Reservation Stations</b></span>.
+      The <span style="color:coral;"><b>Registers</b></span> are written when an instruction <i>Commits</i>.
+    </p>
+    <p> <a href="ROBMachine.pptx"> ROBMachine.pptx</a> file.</p>
+    </div>
 
     <p>
         A typical ROB will look like this:        
@@ -211,7 +227,7 @@ pre code {
               </tr>
     </table> 
 
-    <h2>Stages of a ROB (ReOrder Buffer) machine:</h2>
+    <h2>Stages of a ROB (Reorder Buffer) machine:</h2>
     <ul>
         <li><b>Issue</b></li>
           <p>
