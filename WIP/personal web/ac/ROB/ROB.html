@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>RISC-V Assembly Language Summary</title>
+<title>How does a Reorder buffer work</title>
 <meta charset="utf-8">
 <style>
 
@@ -248,6 +248,21 @@ pre code {
             In case that what hits the head of the ROB is a mispredicted branch, flush the ROB and restart execution at the right instruction. If prediction was correct, the branch is finished.
           </p>
     </ul> 
+
+    <h2>Reorder buffer example:</h2>
+    <p>
+      I haven't been able to find much information on how the ROB interacts with the integer pipeline, and all texts I've found are vague about it, which is strange considering how tightly
+      related are ROB and branches, but I've managed to pull an example, cycle by cycle,  guessing how it would work here:
+    </p>
+
+    <p style="text-align:center">
+    <iframe src="https://1drv.ms/p/c/4cedddcc0fb3a373/IQTt4khVhVpZT4yqyNIOjBenAauyEa_dN-reKcXGX-voMxE?em=2&amp;wdAr=1.7777777777777777" width="1428px" height="864px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+    </p>
+
+    <div class="cdc">
+      <p> <a href="ROBExample.pptx"> ROBExample.pptx</a> and <a href="ROBExample.pdf"> ROBExample.pdf</a></p>
+      </div>
+  
 
     <h2>Where to go from here</h2>
     <p>
