@@ -1,5 +1,5 @@
 
-mapfab(raw, "t4.mapfab", "chr", "palette", "metatiles", "level")
+mapfab(raw, "t5.mapfab", "chr", "palette", "metatiles", "level")
 
 ct UU SCROLL_AMOUNT=7 // the amount of pixels that will move when a key is pressed (1-8)
 
@@ -159,7 +159,7 @@ fn update_sprites()
     // Push sprites
     set_oam_x(i, 0)     // x-position
     set_oam_y(i, 0) // y-position
-    set_oam_p(i, 8)    // empty tile
+    set_oam_p(i, 0)    // empty tile
     set_oam_a(i, 0)      // options
     i += 4
 
