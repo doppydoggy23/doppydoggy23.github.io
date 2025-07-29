@@ -1,11 +1,11 @@
 
 mapfab(raw, "t5.mapfab", "chr", "palette", "metatiles", "level")
 
-ct UU SCROLL_AMOUNT=1 // the amount of pixels that will scroll in one time
+//ct UU SCROLL_AMOUNT=1 // the amount of pixels that will scroll in one time
 
 ct U x_window_min=50 // the player character will move within these x coords without causing x scroll
 ct U x_window_max=206
-ct UU player_x_move_inc=2 // the char will move these many pixels at a time
+ct UU player_x_move_inc=3 // the char will move these many pixels in x at a time
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -24,9 +24,12 @@ vars /game_vars
     //U[30] scroll_tiles2
     U[8] scroll_attrs
 
-    // player character vars
-    UU player_absolute_x=128
-    UU player_absolute_y=120
+    // player character coords locally in screen (not inside map)
+    U player_window_x=128
+    U player_window_y=120
+    // player char coordinates globally (in the map)
+    UU player_map_x=0
+    UU player_map_y=0
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -172,8 +175,8 @@ fn update_sprites()
     i += 4*/
 
     // calculate player character on screen
-    U pcx=player_absolute_x.a
-    U pcy=player_absolute_y.a
+    U pcx=player_window_x
+    U pcy=player_window_y
     // draw character sprites
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy) // y-position
@@ -221,16 +224,34 @@ fn move_player()
         calc_right_scr_bg(my_x_scroll)
 */
     if pads[0].held & BUTTON_LEFT
-        if (player_absolute_x > x_window_min)
-            player_absolute_x-=player_x_move_inc
+        if (player_window_x > x_window_min)
+            player_window_x-=player_x_move_inc
         else
-            my_x_scroll-=player_x_move_inc
+            if (my_x_scroll >= player_x_move_inc)
+                my_x_scroll-=player_x_move_inc
+            else
+                my_x_scroll=0
+        //
+        calc_left_scr_bg(my_x_scroll)
+        //
+        player_map_x=my_x_scroll // calculate player x coord in map
+        player_map_x+=player_window_x
+        player_map_y=player_window_y // calculate player y coord in map
             
     if pads[0].held & BUTTON_RIGHT
-        if (player_absolute_x < x_window_max)
-            player_absolute_x+=player_x_move_inc
+        if (player_window_x < x_window_max)
+            player_window_x+=player_x_move_inc
         else
-            my_x_scroll+=player_x_move_inc
+            if ((my_x_scroll+player_x_move_inc) <= maximum_x)
+                my_x_scroll+=player_x_move_inc
+            else
+                my_x_scroll=maximum_x
+        //
+        calc_right_scr_bg(my_x_scroll)
+        //
+        player_map_x=my_x_scroll // calculate player x coord in map
+        player_map_x+=player_window_x
+        player_map_y=player_window_y // calculate player y coord in map
 
 
 /* This function sets a 9 bit scroll
