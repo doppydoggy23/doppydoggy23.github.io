@@ -1,5 +1,4 @@
 // ToDo: at the edge of the end of the map, the player char detects the ground as all terrain. Place exit portal there?
-// ToDo: the way it is now, it jumps too without being on the ground
 
 mapfab(raw, "t5.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -14,8 +13,6 @@ ct UU player_initial_x=128 // initial player coords
 ct UU player_initial_y=120
 
 ct U pass_through_mt=10 // metatiles we can pass through
-ct U num_jumping_frames=18 // number of frames the player character is jumping
-ct U num_jump_increment=3 // number of pixels the player jumps at every frame
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -40,10 +37,6 @@ vars /game_vars
     // player char coordinates globally (in the map)
     UU player_map_x=player_initial_x
     UU player_map_y=player_initial_y
-
-    //
-    Bool is_player_jumping=false
-    U count_frames_jumping=0
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -275,30 +268,21 @@ fn move_player()
         player_map_x=my_x_scroll // calculate player x coord in map
         player_map_x+=player_window_x
 
-    // check if player pressed jump button
-    if (pads[0].pressed & BUTTON_A)
-        count_frames_jumping=num_jumping_frames
-        is_player_jumping=true
-
-
     // simulate gravity
     if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) < pass_through_mt) && 
-        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height+1) < pass_through_mt) 
-        && (!is_player_jumping) )
+        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height+1) < pass_through_mt) )
         player_window_y+=1
         player_map_y=player_window_y
     //
 
-    // simulate jump
-    if (is_player_jumping)
-        player_window_y-=num_jump_increment
-        player_map_y=player_window_y
-        count_frames_jumping-=1
-    
-    // check if jumping should stop
-    if (count_frames_jumping == 0)
-        is_player_jumping=false
+/*DEBUG    if pads[0].held & BUTTON_LEFT
+        player_window_x-=1
+        player_map_x=player_window_x
 
+    if pads[0].held & BUTTON_RIGHT
+        player_window_x+=1
+        player_map_x=player_window_x
+*/
     if pads[0].held & BUTTON_UP
         player_window_y-=1
         player_map_y=player_window_y
