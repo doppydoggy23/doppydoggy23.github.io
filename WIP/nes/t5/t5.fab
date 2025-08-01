@@ -7,6 +7,10 @@ ct UU x_window_min=50 // the player character will move within these x coords wi
 ct UU x_window_max=206
 ct UU player_x_move_inc=4 // the char will move these many pixels in x at a time
 ct UU player_char_width=16
+ct UU player_char_height=16
+
+ct UU player_initial_x=128 // initial player coords
+ct UU player_initial_y=120
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -26,11 +30,11 @@ vars /game_vars
     U[8] scroll_attrs
 
     // player character coords locally in screen (not inside map)
-    UU player_window_x=128
-    UU player_window_y=120
+    UU player_window_x=player_initial_x//170//128//240
+    UU player_window_y=player_initial_y
     // player char coordinates globally (in the map)
-    UU player_map_x=0
-    UU player_map_y=0
+    UU player_map_x=player_initial_x
+    UU player_map_y=player_initial_y
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -224,6 +228,8 @@ fn move_player()
             my_x_scroll=maximum_x
         calc_right_scr_bg(my_x_scroll)
 */
+    player_map_y=player_window_y
+
     if pads[0].held & BUTTON_LEFT
         if (player_window_x > x_window_min)
             player_window_x-=player_x_move_inc
@@ -241,7 +247,7 @@ fn move_player()
         //
         player_map_x=my_x_scroll // calculate player x coord in map
         player_map_x+=player_window_x
-        player_map_y=player_window_y // calculate player y coord in map
+        //player_map_y=player_window_y // calculate player y coord in map
             
     if pads[0].held & BUTTON_RIGHT
         if ((player_window_x+player_char_width) < x_window_max)
@@ -260,8 +266,37 @@ fn move_player()
         //
         player_map_x=my_x_scroll // calculate player x coord in map
         player_map_x+=player_window_x
-        player_map_y=player_window_y // calculate player y coord in map
-        
+        //player_map_y=player_window_y // calculate player y coord in map
+
+    // simulate gravity
+    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) < 10) && (get_mt_at_pix(player_map_x+15, player_map_y+player_char_height+1) < 10) ) // 10
+        player_window_y+=1
+        player_map_y=player_window_y
+    //
+
+/*DEBUG    if pads[0].held & BUTTON_LEFT
+        player_window_x-=1
+        player_map_x=player_window_x
+
+    if pads[0].held & BUTTON_RIGHT
+        player_window_x+=1
+        player_map_x=player_window_x
+*/
+    if pads[0].held & BUTTON_UP
+        player_window_y-=1
+        player_map_y=player_window_y
+
+    if pads[0].held & BUTTON_DOWN
+        player_window_y+=1
+        player_map_y=player_window_y
+
+/*    // DEBUG
+    U mtd=get_mt_at_pix(player_map_x, player_map_y+16)
+    {PPUSTATUS}() // Reset the address latch just to be safe.
+    ppu_reset_addr($2000)
+    {PPUDATA}(mt_ne[mtd])
+    // DEBUG
+*/           
 
 
 /* This function sets a 9 bit scroll
@@ -398,3 +433,9 @@ fn calc_left_scr_bg(UU x)
         iii+=1
     //
     scr_bg_update_needed=true
+
+// returns the map metatile at screen pixel position (x, y)
+fn get_mt_at_pix(UU x, UU y) U
+    UU disp= ((x >> 4) << 4) + (y >> 4)
+    U mt=lvl1_mt_map{disp}
+    return mt
