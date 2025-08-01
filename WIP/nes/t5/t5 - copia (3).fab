@@ -1,4 +1,5 @@
 // ToDo: at the edge of the end of the map, the player char detects the ground as all terrain. Place exit portal there?
+// ToDo: the way it is now, it jumps too without being on the ground
 
 mapfab(raw, "t5.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -43,7 +44,6 @@ vars /game_vars
     //
     Bool is_player_jumping=false
     U count_frames_jumping=0
-    Bool is_player_on_ground=false
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -239,16 +239,6 @@ fn move_player()
 */
     player_map_y=player_window_y
 
-    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height+1) >= pass_through_mt) )
-        is_player_jumping=false
-        is_player_on_ground=true
-
-    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) < pass_through_mt) && 
-        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height+1) < pass_through_mt) )
-        is_player_on_ground=false
-
-
     if pads[0].held & BUTTON_LEFT
         if (player_window_x > x_window_min)
             player_window_x-=player_x_move_inc
@@ -286,13 +276,15 @@ fn move_player()
         player_map_x+=player_window_x
 
     // check if player pressed jump button
-    if ((pads[0].pressed & BUTTON_A) && is_player_on_ground)
+    if (pads[0].pressed & BUTTON_A)
         count_frames_jumping=num_jumping_frames
         is_player_jumping=true
-        is_player_on_ground=false
 
-    // simulate gravity (player should be falling slowly)
-    if ( (!is_player_on_ground) && (!is_player_jumping) )
+
+    // simulate gravity
+    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) < pass_through_mt) && 
+        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height+1) < pass_through_mt) 
+        && (!is_player_jumping) )
         player_window_y+=1
         player_map_y=player_window_y
     //
