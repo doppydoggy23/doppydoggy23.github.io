@@ -1,3 +1,7 @@
+//ToDo: check if collision detection works file with upper walls and num_jump_increment >1 
+//ToDo: make left/right wall check work with player_x_move_inc >1
+//ToDo: make jump wall checks work with num_jump_increment >1
+//ToDo: check why did_touch_wall_left/right only work with player_map_y+1
 
 mapfab(raw, "t5.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -12,8 +16,8 @@ ct UU player_initial_x=128 // initial player coords
 ct UU player_initial_y=120
 
 ct U pass_through_mt=10 // metatiles we can pass through
-ct U num_jumping_frames=18 // number of frames the player character is jumping
-ct U num_jump_increment=3 // number of pixels the player jumps at every frame
+ct U num_jumping_frames=50 // number of frames the player character is jumping
+ct U num_jump_increment=1 // number of pixels the player jumps at every frame
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -213,20 +217,25 @@ fn update_sprites()
 // this function calculates the movements of the player character
 fn move_player()
 
-    player_map_y=player_window_y
+    player_map_y=player_window_y // since we are in a horizontal scroll these values will always be the same
 
+    // check if the player has a ground underneath
     if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) >= pass_through_mt) || 
         (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+1) >= pass_through_mt) )
         is_player_jumping=false
         is_player_on_ground=true
 
+    // check if the player is on the air
     if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) < pass_through_mt) && 
         (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+1) < pass_through_mt) )
         is_player_on_ground=false
 
+    if (did_touch_wall_up())
+        is_player_jumping=false
 
+    // Check if the player can move left. It also manages horizontal scroll window
     if pads[0].held & BUTTON_LEFT
-        if (!did_touch_wall_left(player_map_x, player_map_y))
+        if (!did_touch_wall_left())
             //
             if (player_window_x > x_window_min)
                 player_window_x-=player_x_move_inc
@@ -245,8 +254,9 @@ fn move_player()
             player_map_x=my_x_scroll // calculate player x coord in map
             player_map_x+=player_window_x
             
+    // Check if the player can move right. It also manages horizontal scroll window
     if pads[0].held & BUTTON_RIGHT
-        if (!did_touch_wall_right(player_map_x, player_map_y))
+        if (!did_touch_wall_right())
             //
             if ((player_window_x+player_char_width) < x_window_max)
                 player_window_x+=player_x_move_inc
@@ -266,7 +276,7 @@ fn move_player()
             player_map_x+=player_window_x
 
     // check if player pressed jump button
-    if ((pads[0].pressed & BUTTON_A) && is_player_on_ground)
+    if ( (pads[0].pressed & BUTTON_A) && is_player_on_ground && (!did_touch_wall_up()) ) 
         count_frames_jumping=num_jumping_frames
         is_player_jumping=true
         is_player_on_ground=false
@@ -286,22 +296,6 @@ fn move_player()
     // check if jumping should stop
     if (count_frames_jumping == 0)
         is_player_jumping=false
-
-/* DEBUG    if pads[0].held & BUTTON_UP
-        player_window_y-=1
-        player_map_y=player_window_y
-
-    if pads[0].held & BUTTON_DOWN
-        player_window_y+=1
-        player_map_y=player_window_y
-*/
-/*    // DEBUG
-    U mtd=get_mt_at_pix(player_map_x, player_map_y+16)
-    {PPUSTATUS}() // Reset the address latch just to be safe.
-    ppu_reset_addr($2000)
-    {PPUDATA}(mt_ne[mtd])
-    // DEBUG
-*/           
 
 
 /* This function sets a 9 bit scroll
@@ -447,16 +441,24 @@ fn get_mt_at_pix(UU x, UU y) U
 
 // returns if the player is  touching a wall to its right
 // it only works right with player_x_move_inc=1
-fn did_touch_wall_right (UU x, UU y) Bool
-    if ( (get_mt_at_pix(player_map_x+player_char_width, player_map_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height) >= pass_through_mt) )
+fn did_touch_wall_right () Bool
+    if ( (get_mt_at_pix(player_map_x+player_char_width, player_map_y+1) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height-1) >= pass_through_mt) )
         return true
     return false
 
-// returns if the player is  touching a wall to its left
+// returns if the player is touching a wall to its left
 // it only works right with player_x_move_inc=1
-fn did_touch_wall_left (UU x, UU y) Bool
-    if ( (get_mt_at_pix(player_map_x-1, player_map_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x-1, player_map_y+player_char_height) >= pass_through_mt) )
+fn did_touch_wall_left () Bool
+    if ( (get_mt_at_pix(player_map_x-1, player_map_y+1) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x-1, player_map_y+player_char_height-1) >= pass_through_mt) )
+        return true
+    return false
+
+// returns if the player is touching a wall with its head
+// it only works with num_jump_increment=1
+fn did_touch_wall_up () Bool
+    if ( (get_mt_at_pix(player_map_x, player_map_y) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y) >= pass_through_mt) )
         return true
     return false
