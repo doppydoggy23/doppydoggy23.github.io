@@ -1,10 +1,11 @@
+// ToDo: at the edge of the end of the map, the player char detects the ground as all terrain. Place exit portal there?
 
 mapfab(raw, "t5.mapfab", "chr", "palette", "metatiles", "level")
 
 
 ct UU x_window_min=50 // the player character will move within these x coords without causing x scroll
 ct UU x_window_max=206
-ct UU player_x_move_inc=1 // the char will move these many pixels in x at a time
+ct UU player_x_move_inc=4 // the char will move these many pixels in x at a time
 ct UU player_char_width=16
 ct UU player_char_height=16
 
@@ -181,6 +182,12 @@ fn update_sprites()
     // Our stack index into OAM:
     U i = 0
     // Push sprites
+/*    set_oam_x(i, 0)     // x-position
+    set_oam_y(i, 0) // y-position
+    set_oam_p(i, 0)    // empty tile
+    set_oam_a(i, 0)      // options
+    i += 4*/
+
     // calculate player character on screen
     U pcx=player_window_x.a
     U pcy=player_window_y.a
@@ -210,60 +217,73 @@ fn update_sprites()
     // Clear the remainder of OAM
     hide_oam(i)
 
-// this function calculates the movements of the player character
 fn move_player()
-
+    /*
+    the X scroll runs smoothly but the Y scroll doesn't quite
+    work the way you'd expect. The 9th bit selects the namespace (screen)
+    and the 8 bit left (up to 239) the scroll inside that screen.
+    More info in https://www.nesdev.org/wiki/PPU_scrolling
+    */
+/*    if pads[0].held & BUTTON_LEFT
+        if (my_x_scroll >= SCROLL_AMOUNT)
+            my_x_scroll-=SCROLL_AMOUNT
+        else
+            my_x_scroll=0
+        calc_left_scr_bg(my_x_scroll)
+    if pads[0].held & BUTTON_RIGHT
+        if ((my_x_scroll+SCROLL_AMOUNT) <= maximum_x)
+            my_x_scroll+=SCROLL_AMOUNT
+        else
+            my_x_scroll=maximum_x
+        calc_right_scr_bg(my_x_scroll)
+*/
     player_map_y=player_window_y
 
     if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+1) >= pass_through_mt) )
+        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height+1) >= pass_through_mt) )
         is_player_jumping=false
         is_player_on_ground=true
 
     if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) < pass_through_mt) && 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+1) < pass_through_mt) )
+        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height+1) < pass_through_mt) )
         is_player_on_ground=false
 
 
     if pads[0].held & BUTTON_LEFT
-        if (!did_touch_wall_left(player_map_x, player_map_y))
-            //
-            if (player_window_x > x_window_min)
-                player_window_x-=player_x_move_inc
+        if (player_window_x > x_window_min)
+            player_window_x-=player_x_move_inc
+        else
+            if (my_x_scroll >= player_x_move_inc)
+                my_x_scroll-=player_x_move_inc
             else
-                if (my_x_scroll >= player_x_move_inc)
-                    my_x_scroll-=player_x_move_inc
+                my_x_scroll=0
+                if (player_window_x >= player_x_move_inc)
+                    player_window_x-=player_x_move_inc
                 else
-                    my_x_scroll=0
-                    if (player_window_x >= player_x_move_inc)
-                        player_window_x-=player_x_move_inc
-                    else
-                        player_window_x=0
-            //
-            calc_left_scr_bg(my_x_scroll)
-            //
-            player_map_x=my_x_scroll // calculate player x coord in map
-            player_map_x+=player_window_x
+                    player_window_x=0
+        //
+        calc_left_scr_bg(my_x_scroll)
+        //
+        player_map_x=my_x_scroll // calculate player x coord in map
+        player_map_x+=player_window_x
             
     if pads[0].held & BUTTON_RIGHT
-        if (!did_touch_wall_right(player_map_x, player_map_y))
-            //
-            if ((player_window_x+player_char_width) < x_window_max)
-                player_window_x+=player_x_move_inc
+        if ((player_window_x+player_char_width) < x_window_max)
+            player_window_x+=player_x_move_inc
+        else
+            if ((my_x_scroll+player_x_move_inc) <= maximum_x)
+                my_x_scroll+=player_x_move_inc
             else
-                if ((my_x_scroll+player_x_move_inc) <= maximum_x)
-                    my_x_scroll+=player_x_move_inc
+                my_x_scroll=maximum_x
+                if ((player_window_x+player_x_move_inc+player_char_width) <= 255)
+                    player_window_x+=player_x_move_inc
                 else
-                    my_x_scroll=maximum_x
-                    if ((player_window_x+player_x_move_inc+player_char_width) <= 255)
-                        player_window_x+=player_x_move_inc
-                    else
-                        player_window_x=256-player_char_width
-            //
-            calc_right_scr_bg(my_x_scroll)
-            //
-            player_map_x=my_x_scroll // calculate player x coord in map
-            player_map_x+=player_window_x
+                    player_window_x=256-player_char_width
+        //
+        calc_right_scr_bg(my_x_scroll)
+        //
+        player_map_x=my_x_scroll // calculate player x coord in map
+        player_map_x+=player_window_x
 
     // check if player pressed jump button
     if ((pads[0].pressed & BUTTON_A) && is_player_on_ground)
@@ -287,14 +307,14 @@ fn move_player()
     if (count_frames_jumping == 0)
         is_player_jumping=false
 
-/* DEBUG    if pads[0].held & BUTTON_UP
+    if pads[0].held & BUTTON_UP
         player_window_y-=1
         player_map_y=player_window_y
 
     if pads[0].held & BUTTON_DOWN
         player_window_y+=1
         player_map_y=player_window_y
-*/
+
 /*    // DEBUG
     U mtd=get_mt_at_pix(player_map_x, player_map_y+16)
     {PPUSTATUS}() // Reset the address latch just to be safe.
@@ -444,19 +464,3 @@ fn get_mt_at_pix(UU x, UU y) U
     UU disp= ((x >> 4) << 4) + (y >> 4)
     U mt=lvl1_mt_map{disp}
     return mt
-
-// returns if the player is  touching a wall to its right
-// it only works right with player_x_move_inc=1
-fn did_touch_wall_right (UU x, UU y) Bool
-    if ( (get_mt_at_pix(player_map_x+player_char_width, player_map_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height) >= pass_through_mt) )
-        return true
-    return false
-
-// returns if the player is  touching a wall to its left
-// it only works right with player_x_move_inc=1
-fn did_touch_wall_left (UU x, UU y) Bool
-    if ( (get_mt_at_pix(player_map_x-1, player_map_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x-1, player_map_y+player_char_height) >= pass_through_mt) )
-        return true
-    return false
