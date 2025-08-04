@@ -18,7 +18,6 @@ ct UU player_initial_y=120
 ct U pass_through_mt=10 // metatiles we can pass through
 ct U num_jump_increment=1 // number of pixels the player jumps at every frame
 ct U num_jump_values=30
-ct U falling_rate_px=2
 //ct U jump_slow_down_factor=1 // this slows down the jump by a factor of a number
 
 vars /game_vars
@@ -288,13 +287,8 @@ fn move_player()
 
     // simulate gravity (player falling slowly)
     if ( (!is_player_on_ground) && (!is_player_jumping) )
-        if (is_ground_close(falling_rate_px))
-            player_window_y+=1
-            player_map_y=player_window_y
-        else
-            player_window_y+=falling_rate_px
-            player_map_y=player_window_y
-
+        player_window_y+=1
+        player_map_y=player_window_y
     //
 
     // simulate jump
@@ -470,12 +464,5 @@ fn did_touch_wall_left () Bool
 fn did_touch_wall_up () Bool
     if ( (get_mt_at_pix(player_map_x, player_map_y) >= pass_through_mt) || 
         (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y) >= pass_through_mt) )
-        return true
-    return false
-
-// returns if we touch the gound in the next pxdown pixels
-fn is_ground_close (UU pxdown) Bool
-    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+pxdown) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+pxdown) >= pass_through_mt) )
         return true
     return false
