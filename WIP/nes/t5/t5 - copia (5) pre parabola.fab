@@ -16,9 +16,8 @@ ct UU player_initial_x=128 // initial player coords
 ct UU player_initial_y=120
 
 ct U pass_through_mt=10 // metatiles we can pass through
+ct U num_jumping_frames=50 // number of frames the player character is jumping
 ct U num_jump_increment=1 // number of pixels the player jumps at every frame
-ct U num_jump_values=15
-//ct U jump_slow_down_factor=1 // this slows down the jump by a factor of a number
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -48,8 +47,6 @@ vars /game_vars
     Bool is_player_jumping=false
     U count_frames_jumping=0
     Bool is_player_on_ground=false
-    U[num_jump_values] jump_values = U[num_jump_values](6, 6, 6, 6, 5, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1) 
-
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -280,11 +277,11 @@ fn move_player()
 
     // check if player pressed jump button
     if ( (pads[0].pressed & BUTTON_A) && is_player_on_ground && (!did_touch_wall_up()) ) 
-        count_frames_jumping=0
+        count_frames_jumping=num_jumping_frames
         is_player_jumping=true
         is_player_on_ground=false
 
-    // simulate gravity (player falling slowly)
+    // simulate gravity (player should be falling slowly)
     if ( (!is_player_on_ground) && (!is_player_jumping) )
         player_window_y+=1
         player_map_y=player_window_y
@@ -292,12 +289,12 @@ fn move_player()
 
     // simulate jump
     if (is_player_jumping)
-        player_window_y-=jump_values[count_frames_jumping]
+        player_window_y-=num_jump_increment
         player_map_y=player_window_y
-        count_frames_jumping+=1
+        count_frames_jumping-=1
     
     // check if jumping should stop
-    if (count_frames_jumping >= num_jump_values)
+    if (count_frames_jumping == 0)
         is_player_jumping=false
 
 
