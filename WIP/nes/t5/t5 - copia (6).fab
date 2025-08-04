@@ -50,8 +50,7 @@ vars /game_vars
     U count_frames_jumping=0
     Bool is_player_on_ground=false
     //U[num_jump_values] jump_values = U[num_jump_values](6, 6, 6, 6, 5, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1) 
-    //U[num_jump_values] jump_values = U[num_jump_values](3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1) 
-    U[num_jump_values] jump_values =   U[num_jump_values](4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0) 
+    U[num_jump_values] jump_values = U[num_jump_values](3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1) 
 
 
 /*
