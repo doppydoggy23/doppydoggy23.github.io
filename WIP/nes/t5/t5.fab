@@ -45,6 +45,9 @@ vars /game_vars
     U count_frames_jumping=0
     Bool is_player_on_ground=false
     U[num_jump_values] jump_values = U[num_jump_values](4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0) 
+    U[8] chr_sprt_table = U[8](230, 231, 246, 247, 228, 229, 244, 245) // chr table of player sprites 1 & 2
+    U which_player_sprite_show = 0
+    
 
 
 /*
@@ -190,22 +193,22 @@ fn update_sprites()
     // draw character sprites
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy) // y-position
-    set_oam_p(i, 230)    // tile
+    set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)])    // tile
     set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, pcx+8)     // x-position
     set_oam_y(i, pcy) // y-position
-    set_oam_p(i, 231)    // tile
+    set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+1])    // tile
     set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy+8) // y-position
-    set_oam_p(i, 246)    // tile
+    set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+2])    // tile
     set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, pcx+8)     // x-position
     set_oam_y(i, pcy+8) // y-position
-    set_oam_p(i, 247)    // tile
+    set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+3])    // tile
     set_oam_a(i, 0)      // options
     i += 4
     
@@ -215,6 +218,11 @@ fn update_sprites()
 
 // this function calculates the movements of the player character
 fn move_player()
+
+    if (is_player_on_ground)
+        which_player_sprite_show=((player_map_x.a>>4)&1)
+    else
+        which_player_sprite_show=0
 
     // check if the player has a ground underneath
     if (is_ground_close(1))
