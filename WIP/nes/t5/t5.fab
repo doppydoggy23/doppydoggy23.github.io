@@ -17,9 +17,8 @@ ct UU player_initial_y=120
 
 ct U pass_through_mt=10 // metatiles we can pass through
 ct U num_jump_increment=1 // number of pixels the player jumps at every frame
-ct U num_jump_values=30
-ct U falling_rate_px=2
-//ct U jump_slow_down_factor=1 // this slows down the jump by a factor of a number
+ct U num_jump_values=30 // size of the screen pixels the player will move up in a frame (jump_values)
+ct U falling_rate_px=2 // pixels the player will fall in a single frame
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -35,23 +34,17 @@ vars /game_vars
     UU scr_attr_bg_update_base_addr
     Bool scr_bg_update_needed=false
     U[30] scroll_tiles // The data we'll upload to the PPU during NMI.
-    //U[30] scroll_tiles2
     U[8] scroll_attrs
 
-    // player character coords locally in screen (not inside map)
-    UU player_window_x=player_initial_x//170//128//240
-    UU player_window_y=player_initial_y
-    // player char coordinates globally (in the map)
-    UU player_map_x=player_initial_x
-    UU player_map_y=player_initial_y
+    UU player_window_x=player_initial_x // player character coords locally in screen (not inside map)
+    UU player_map_x=player_initial_x // player char coordinates globally (in the map)
+    UU player_y=player_initial_y // only one global y coordinate for the player
 
     //
     Bool is_player_jumping=false
     U count_frames_jumping=0
     Bool is_player_on_ground=false
-    //U[num_jump_values] jump_values = U[num_jump_values](6, 6, 6, 6, 5, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1) 
-    //U[num_jump_values] jump_values = U[num_jump_values](3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1) 
-    U[num_jump_values] jump_values =   U[num_jump_values](4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0) 
+    U[num_jump_values] jump_values = U[num_jump_values](4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0) 
 
 
 /*
@@ -193,7 +186,7 @@ fn update_sprites()
     // Push sprites
     // calculate player character on screen
     U pcx=player_window_x.a
-    U pcy=player_window_y.a
+    U pcy=player_y.a
     // draw character sprites
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy) // y-position
@@ -223,19 +216,26 @@ fn update_sprites()
 // this function calculates the movements of the player character
 fn move_player()
 
-    player_map_y=player_window_y // since we are in a horizontal scroll these values will always be the same
-
     // check if the player has a ground underneath
-    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+1) >= pass_through_mt) )
+    if (is_ground_close(1))
         is_player_jumping=false
         is_player_on_ground=true
 
     // check if the player is on the air
-    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+1) < pass_through_mt) && 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+1) < pass_through_mt) )
+    if (is_player_on_the_air())
         is_player_on_ground=false
 
+
+/*    if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) >= pass_through_mt) )
+        is_player_jumping=false
+        is_player_on_ground=true
+
+    // check if the player is on the air
+    if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) < pass_through_mt) && 
+        (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) < pass_through_mt) )
+        is_player_on_ground=false
+*/
     if (did_touch_wall_up())
         is_player_jumping=false
 
@@ -290,18 +290,14 @@ fn move_player()
     // simulate gravity (player falling slowly)
     if ( (!is_player_on_ground) && (!is_player_jumping) )
         if (is_ground_close(falling_rate_px))
-            player_window_y+=1
-            player_map_y=player_window_y
+            player_y+=1
         else
-            player_window_y+=falling_rate_px
-            player_map_y=player_window_y
-
+            player_y+=falling_rate_px
     //
 
     // simulate jump
     if (is_player_jumping)
-        player_window_y-=jump_values[count_frames_jumping]
-        player_map_y=player_window_y
+        player_y-=jump_values[count_frames_jumping]
         count_frames_jumping+=1
     
     // check if jumping should stop
@@ -453,30 +449,37 @@ fn get_mt_at_pix(UU x, UU y) U
 // returns if the player is  touching a wall to its right
 // it only works right with player_x_move_inc=1
 fn did_touch_wall_right () Bool
-    if ( (get_mt_at_pix(player_map_x+player_char_width, player_map_y+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width, player_map_y+player_char_height-1) >= pass_through_mt) )
+    if ( (get_mt_at_pix(player_map_x+player_char_width, player_y+1) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width, player_y+player_char_height-1) >= pass_through_mt) )
         return true
     return false
 
 // returns if the player is touching a wall to its left
 // it only works right with player_x_move_inc=1
 fn did_touch_wall_left () Bool
-    if ( (get_mt_at_pix(player_map_x-1, player_map_y+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x-1, player_map_y+player_char_height-1) >= pass_through_mt) )
+    if ( (get_mt_at_pix(player_map_x-1, player_y+1) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x-1, player_y+player_char_height-1) >= pass_through_mt) )
         return true
     return false
 
 // returns if the player is touching a wall with its head
 // it only works with num_jump_increment=1
 fn did_touch_wall_up () Bool
-    if ( (get_mt_at_pix(player_map_x, player_map_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y) >= pass_through_mt) )
+    if ( (get_mt_at_pix(player_map_x, player_y) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width-1, player_y) >= pass_through_mt) )
         return true
     return false
 
 // returns if we touch the gound in the next pxdown pixels
 fn is_ground_close (UU pxdown) Bool
-    if ( (get_mt_at_pix(player_map_x, player_map_y+player_char_height+pxdown) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_map_y+player_char_height+pxdown) >= pass_through_mt) )
+    if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+pxdown) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+pxdown) >= pass_through_mt) )
+        return true
+    return false
+
+// returns whether the player is on the air
+fn is_player_on_the_air() Bool
+    if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) < pass_through_mt) && 
+        (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) < pass_through_mt) )
         return true
     return false
