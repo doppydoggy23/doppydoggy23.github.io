@@ -1,4 +1,6 @@
 //ToDo: check why did_touch_wall_left/right only work with player_map_y+1
+//ToDo: flip the player sprites horizontally when going left
+//ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
 
 mapfab(raw, "t6.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -9,13 +11,25 @@ ct UU player_x_move_inc=1 // the char will move these many pixels in x at a time
 ct UU player_char_width=16
 ct UU player_char_height=16
 
-ct UU player_initial_x=128 // initial player coords
+ct UU player_initial_x=58 // initial player coords
 ct UU player_initial_y=120
 
 ct U pass_through_mt=10 // metatiles we can pass through
-ct U num_jump_increment=1 // number of pixels the player jumps at every frame
+//ct U num_jump_increment=1 // number of pixels the player jumps at every frame
 ct U num_jump_values=30 // size of the screen pixels the player will move up in a frame (jump_values)
 ct U falling_rate_px=2 // pixels the player will fall in a single frame
+
+// enemies
+struct Enemy
+    UU map_x
+    UU map_y
+    UU initial_x
+    UU final_x
+    S x_speed
+//
+ct U level1_num_enemies=2
+ct UU enemy_char_width=16
+ct UU enemy_char_height=16
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -45,14 +59,15 @@ vars /game_vars
     U[8] chr_sprt_table = U[8](230, 231, 246, 247, 228, 229, 244, 245) // chr table of player sprites 1 & 2
     U which_player_sprite_show = 0
     
-
+    //enemies
+    Enemy[level1_num_enemies] enemies
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
 It has a 16th row of tiles that will never be seen to make multiplications
 by its height a power of two (faster)
 */
-fn load_screen(CCC/levels my_lvl_pointer)
+fn load_level1(CCC/levels my_lvl_pointer)
     U chr_bank = read U(my_lvl_pointer)
     CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
     CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
@@ -150,6 +165,20 @@ fn load_screen(CCC/levels my_lvl_pointer)
             i+=2
         ii+=32
         i=ii
+    
+    // create enemies
+    enemies[0].initial_x=368 // (23,10)-(27,10)
+    enemies[0].map_x=enemies[0].initial_x
+    enemies[0].final_x=432// (23,10)-(27,10)
+    enemies[0].map_y=160
+    enemies[0].x_speed=1
+    //
+    enemies[1].initial_x=160 // (10,13)-(13,13)
+    enemies[1].map_x=enemies[1].initial_x
+    enemies[1].final_x=208 // (10,13)-(13,13)
+    enemies[1].map_y=208
+    enemies[1].x_speed=1
+
 
 
 nmi main_nmi()
@@ -169,7 +198,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi
 
-    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+    load_level1(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
 
@@ -177,6 +206,7 @@ mode main()
     while true
         update_pads()
         move_player() 
+        move_enemies() 
         update_sprites()
         nmi // Wait for the next NMI
 
@@ -187,7 +217,7 @@ fn update_sprites()
     // calculate player character on screen
     U pcx=player_window_x.a
     U pcy=player_y.a
-    // draw character sprites
+    // draw player character sprites
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)])    // tile
@@ -209,6 +239,33 @@ fn update_sprites()
     set_oam_a(i, 0)      // options
     i += 4
     
+    // draw enemies
+    for U ei=0; ei<level1_num_enemies; ei+=1
+        if ( (enemies[ei].map_x > my_x_scroll) && ((enemies[ei].map_x+enemy_char_width) < (my_x_scroll+256)) )
+            UU tex=enemies[ei].map_x-my_x_scroll
+            U ex=tex.a
+            U ey=enemies[ei].map_y.a
+            //
+            set_oam_x(i, ex)     // x-position
+            set_oam_y(i, ey) // y-position
+            set_oam_p(i, 234)    // tile
+            set_oam_a(i, 2)      // options
+            i += 4
+            set_oam_x(i, ex+8)     // x-position
+            set_oam_y(i, ey) // y-position
+            set_oam_p(i, 235)    // tile
+            set_oam_a(i, 2)      // options
+            i += 4
+            set_oam_x(i, ex)     // x-position
+            set_oam_y(i, ey+8) // y-position
+            set_oam_p(i, 250)    // tile
+            set_oam_a(i, 2)      // options
+            i += 4
+            set_oam_x(i, ex+8)     // x-position
+            set_oam_y(i, ey+8) // y-position
+            set_oam_p(i, 251)    // tile
+            set_oam_a(i, 2)      // options
+            i += 4
 
     // Clear the remainder of OAM
     hide_oam(i)
@@ -231,16 +288,6 @@ fn move_player()
         is_player_on_ground=false
 
 
-/*    if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) >= pass_through_mt) )
-        is_player_jumping=false
-        is_player_on_ground=true
-
-    // check if the player is on the air
-    if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) < pass_through_mt) && 
-        (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) < pass_through_mt) )
-        is_player_on_ground=false
-*/
     if (did_touch_wall_up())
         is_player_jumping=false
 
@@ -308,6 +355,16 @@ fn move_player()
     // check if jumping should stop
     if (count_frames_jumping >= num_jump_values)
         is_player_jumping=false
+
+
+fn move_enemies()
+    for U i=0; i<level1_num_enemies; i+=1
+        enemies[i].map_x+=enemies[i].x_speed
+        //
+        if (enemies[i].map_x <= enemies[i].initial_x)
+            enemies[i].x_speed=1
+        if (enemies[i].map_x >= enemies[i].final_x)
+            enemies[i].x_speed=-1
 
 
 /* This function sets a 9 bit scroll
