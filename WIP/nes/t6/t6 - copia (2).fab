@@ -27,7 +27,6 @@ struct Enemy
     UU final_x
     S x_speed
     U status // 0-alive 1-killed and falling 2-killed and off the screen
-    //U which_sprite_to_show
 //
 ct U level1_num_enemies=2
 ct UU enemy_char_width=16
@@ -58,10 +57,8 @@ vars /game_vars
     U count_frames_jumping=0
     Bool is_player_on_ground=false
     U[num_jump_values] jump_values = U[num_jump_values](4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0) 
-    U[16] chr_sprt_table = U[16](230, 231, 246, 247, 228, 229, 244, 245,   231, 230, 247, 246, 229, 228, 245, 244) // chr table of player sprites 1 & 2
-    U[20] e_chr_sprt_table = U[20](234, 235, 250, 251, 232, 233, 248, 249,     235, 234, 251, 250, 233, 232, 249, 248,      251, 250, 235, 234) // chr table of enemies sprites 1 & 2
+    U[8] chr_sprt_table = U[8](230, 231, 246, 247, 228, 229, 244, 245) // chr table of player sprites 1 & 2
     U which_player_sprite_show = 0
-    Bool is_player_looking_left = false
     
     //enemies
     Enemy[level1_num_enemies] enemies
@@ -71,7 +68,7 @@ Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V.
 It has a 16th row of tiles that will never be seen to make multiplications
 by its height a power of two (faster)
 */
-fn load_level(CCC/levels my_lvl_pointer)
+fn load_level1(CCC/levels my_lvl_pointer)
     U chr_bank = read U(my_lvl_pointer)
     CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
     CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
@@ -204,7 +201,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi
 
-    load_level(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+    load_level1(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
 
@@ -223,29 +220,26 @@ fn update_sprites()
     // calculate player character on screen
     U pcx=player_window_x.a
     U pcy=player_y.a
-    U pattr=0
-    if (is_player_looking_left)
-        pattr|=%01000000
     // draw player character sprites
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)])    // tile
-    set_oam_a(i, pattr)      // options
+    set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, pcx+8)     // x-position
     set_oam_y(i, pcy) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+1])    // tile
-    set_oam_a(i, pattr)      // options
+    set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy+8) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+2])    // tile
-    set_oam_a(i, pattr)      // options
+    set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, pcx+8)     // x-position
     set_oam_y(i, pcy+8) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+3])    // tile
-    set_oam_a(i, pattr)      // options
+    set_oam_a(i, 0)      // options
     i += 4
     
     // draw enemies
@@ -254,36 +248,26 @@ fn update_sprites()
             UU tex=enemies[ei].map_x-my_x_scroll
             U ex=tex.a
             U ey=enemies[ei].map_y.a
-            U attrs=2 // https://www.nesdev.org/wiki/PPU_OAM
-            U which_sprite=(enemies[ei].map_x.a>>4)&1
-            //
-            if (enemies[ei].x_speed < 0) // going left
-                attrs|=%01000000 // flip h
-                which_sprite+=2
-            //
-            if (enemies[ei].status == 1) //falling enemy
-                attrs|=%11000000 // flip h&v
-                which_sprite=4 // flip h&v
             //
             set_oam_x(i, ex)     // x-position
             set_oam_y(i, ey) // y-position
-            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)])    // tile
-            set_oam_a(i, attrs)      // options
+            set_oam_p(i, 234)    // tile
+            set_oam_a(i, 2)      // options
             i += 4
             set_oam_x(i, ex+8)     // x-position
             set_oam_y(i, ey) // y-position
-            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)+1])    // tile
-            set_oam_a(i, attrs)      // options
+            set_oam_p(i, 235)    // tile
+            set_oam_a(i, 2)      // options
             i += 4
             set_oam_x(i, ex)     // x-position
             set_oam_y(i, ey+8) // y-position
-            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)+2])    // tile
-            set_oam_a(i, attrs)      // options
+            set_oam_p(i, 250)    // tile
+            set_oam_a(i, 2)      // options
             i += 4
             set_oam_x(i, ex+8)     // x-position
             set_oam_y(i, ey+8) // y-position
-            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)+3])    // tile
-            set_oam_a(i, attrs)      // options
+            set_oam_p(i, 251)    // tile
+            set_oam_a(i, 2)      // options
             i += 4
 
     // Clear the remainder of OAM
@@ -292,7 +276,6 @@ fn update_sprites()
 // this function calculates the movements of the player character
 fn move_player()
 
-    // adjust sprite to simulate walking
     if (is_player_on_ground)
         which_player_sprite_show=((player_map_x.a>>4)&1)
     else
@@ -313,7 +296,6 @@ fn move_player()
 
     // Check if the player can move left. It also manages horizontal scroll window
     if pads[0].held & BUTTON_LEFT
-        is_player_looking_left=true
         if (!did_touch_wall_left())
             //
             if (player_window_x > x_window_min)
@@ -335,7 +317,6 @@ fn move_player()
             
     // Check if the player can move right. It also manages horizontal scroll window
     if pads[0].held & BUTTON_RIGHT
-        is_player_looking_left=false
         if (!did_touch_wall_right())
             //
             if ((player_window_x+player_char_width) < x_window_max)
@@ -378,9 +359,6 @@ fn move_player()
     if (count_frames_jumping >= num_jump_values)
         is_player_jumping=false
 
-    // adjust player sprite if looking left
-    if (is_player_looking_left)
-        which_player_sprite_show+=2
 
 fn move_enemies()
     // move enemies
@@ -399,14 +377,6 @@ fn move_enemies()
             (((player_map_x+player_char_width) > enemies[i].map_x) && ((player_map_x+player_char_width) < (enemies[i].map_x+enemy_char_width))) )
             if (((player_y+player_char_height+1) == enemies[i].map_y) && (!is_player_on_ground))
                 enemies[i].status=1
-
-    // check if an enemy killed the player
-    for U i=0; i<level1_num_enemies; i+=1
-        if (enemies[i].status == 0)
-            if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
-                enemies[i].map_x, enemies[i].map_y, enemies[i].map_x+enemy_char_width, enemies[i].map_y+enemy_char_height) )
-                load_level(@lev_level1)
-
 
     // check if a dead enemy has to fall until it dissapears
     for U i=0; i<level1_num_enemies; i+=1
@@ -593,13 +563,4 @@ fn is_player_on_the_air() Bool
     if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) < pass_through_mt) && 
         (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) < pass_through_mt) )
         return true
-    return false
-
-// returns if 2 rectangles intersect
-fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU r2y2) Bool
-    if ( (r1x1 >= r2x1) && (r1x1 <= r2x2) ||
-        (r1x2 >= r2x1) && ( r1x2 <= r2x2) )
-        if ( (r1y1 >= r2y1) && (r1y1 <= r2y2) ||
-            (r1y2 >= r2y1) && ( r1y2 <= r2y2) )
-            return true
     return false

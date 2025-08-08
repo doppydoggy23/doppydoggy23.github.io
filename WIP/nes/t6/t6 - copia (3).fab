@@ -400,14 +400,6 @@ fn move_enemies()
             if (((player_y+player_char_height+1) == enemies[i].map_y) && (!is_player_on_ground))
                 enemies[i].status=1
 
-    // check if an enemy killed the player
-    for U i=0; i<level1_num_enemies; i+=1
-        if (enemies[i].status == 0)
-            if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
-                enemies[i].map_x, enemies[i].map_y, enemies[i].map_x+enemy_char_width, enemies[i].map_y+enemy_char_height) )
-                load_level(@lev_level1)
-
-
     // check if a dead enemy has to fall until it dissapears
     for U i=0; i<level1_num_enemies; i+=1
         if (enemies[i].status == 1)
@@ -593,13 +585,4 @@ fn is_player_on_the_air() Bool
     if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) < pass_through_mt) && 
         (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) < pass_through_mt) )
         return true
-    return false
-
-// returns if 2 rectangles intersect
-fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU r2y2) Bool
-    if ( (r1x1 >= r2x1) && (r1x1 <= r2x2) ||
-        (r1x2 >= r2x1) && ( r1x2 <= r2x2) )
-        if ( (r1y1 >= r2y1) && (r1y1 <= r2y2) ||
-            (r1y2 >= r2y1) && ( r1y2 <= r2y2) )
-            return true
     return false
