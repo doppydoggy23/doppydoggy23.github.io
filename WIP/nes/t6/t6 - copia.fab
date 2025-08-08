@@ -26,7 +26,6 @@ struct Enemy
     UU initial_x
     UU final_x
     S x_speed
-    U status // 0-alive 1-killed and falling 2-killed and off the screen
 //
 ct U level1_num_enemies=2
 ct UU enemy_char_width=16
@@ -173,14 +172,12 @@ fn load_level1(CCC/levels my_lvl_pointer)
     enemies[0].final_x=432// (23,10)-(27,10)
     enemies[0].map_y=160
     enemies[0].x_speed=1
-    enemies[0].status=0
     //
     enemies[1].initial_x=160 // (10,13)-(13,13)
     enemies[1].map_x=enemies[1].initial_x
     enemies[1].final_x=208 // (10,13)-(13,13)
     enemies[1].map_y=208
     enemies[1].x_speed=1
-    enemies[1].status=0
 
 
 
@@ -244,7 +241,7 @@ fn update_sprites()
     
     // draw enemies
     for U ei=0; ei<level1_num_enemies; ei+=1
-        if ( (enemies[ei].status < 2) && (enemies[ei].map_x > my_x_scroll) && ((enemies[ei].map_x+enemy_char_width) < (my_x_scroll+256)) )
+        if ( (enemies[ei].map_x > my_x_scroll) && ((enemies[ei].map_x+enemy_char_width) < (my_x_scroll+256)) )
             UU tex=enemies[ei].map_x-my_x_scroll
             U ex=tex.a
             U ey=enemies[ei].map_y.a
@@ -361,29 +358,13 @@ fn move_player()
 
 
 fn move_enemies()
-    // move enemies
     for U i=0; i<level1_num_enemies; i+=1
-        if (enemies[i].status == 0)
-            enemies[i].map_x+=enemies[i].x_speed
-            //
-            if (enemies[i].map_x <= enemies[i].initial_x)
-                enemies[i].x_speed=1
-            if (enemies[i].map_x >= enemies[i].final_x)
-                enemies[i].x_speed=-1
-
-    // check if player jumped on an enemy, killing it
-    for U i=0; i<level1_num_enemies; i+=1
-        if ( ((player_map_x > enemies[i].map_x) && (player_map_x < (enemies[i].map_x+enemy_char_width))) ||
-            (((player_map_x+player_char_width) > enemies[i].map_x) && ((player_map_x+player_char_width) < (enemies[i].map_x+enemy_char_width))) )
-            if (((player_y+player_char_height+1) == enemies[i].map_y) && (!is_player_on_ground))
-                enemies[i].status=1
-
-    // check if a dead enemy has to fall until it dissapears
-    for U i=0; i<level1_num_enemies; i+=1
-        if (enemies[i].status == 1)
-            enemies[i].map_y+=1
-            if (enemies[i].map_y >= 240)
-                enemies[i].status=2 // dead and no more movements
+        enemies[i].map_x+=enemies[i].x_speed
+        //
+        if (enemies[i].map_x <= enemies[i].initial_x)
+            enemies[i].x_speed=1
+        if (enemies[i].map_x >= enemies[i].final_x)
+            enemies[i].x_speed=-1
 
 
 /* This function sets a 9 bit scroll
