@@ -288,12 +288,12 @@ fn update_sprites()
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)])    // tile
-    set_oam_a(i, pattr)      // options
+    set_oam_a(i, pattr|1)      // options
     i += 4
     set_oam_x(i, pcx+8)     // x-position
     set_oam_y(i, pcy) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+1])    // tile
-    set_oam_a(i, pattr)      // options
+    set_oam_a(i, pattr|1)      // options
     i += 4
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy+8) // y-position
