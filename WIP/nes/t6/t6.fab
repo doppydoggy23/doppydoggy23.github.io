@@ -13,12 +13,11 @@ ct UU player_char_height=16
 ct UU player_initial_x=58 // initial player coords
 ct UU player_initial_y=120
 
-ct U pass_through_mt=10 // metatiles we can pass through
-//ct U num_jump_increment=1 // number of pixels the player jumps at every frame
+ct U pass_through_mt=12 // transparent metatiles
 ct U num_jump_values=30 // size of the screen pixels the player will move up in a frame (jump_values)
 ct U falling_rate_px=2 // pixels the player will fall in a single frame
 
-// enemies
+// Snake enemies
 struct Enemy
     UU map_x
     UU map_y
@@ -26,7 +25,6 @@ struct Enemy
     UU final_x
     S x_speed
     U status // 0-alive 1-killed and falling 2-killed and off the screen
-    //U which_sprite_to_show
 //
 ct U level1_num_enemies=8
 ct UU enemy_char_width=16
