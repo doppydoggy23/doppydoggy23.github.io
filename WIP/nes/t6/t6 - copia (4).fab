@@ -1,4 +1,5 @@
 //ToDo: check why did_touch_wall_left/right only work with player_map_y+1
+//ToDo: flip the player sprites horizontally when going left
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
 
 mapfab(raw, "t6.mapfab", "chr", "palette", "metatiles", "level")
@@ -28,7 +29,7 @@ struct Enemy
     U status // 0-alive 1-killed and falling 2-killed and off the screen
     //U which_sprite_to_show
 //
-ct U level1_num_enemies=8
+ct U level1_num_enemies=2
 ct UU enemy_char_width=16
 ct UU enemy_char_height=16
 
@@ -168,11 +169,8 @@ fn load_level(CCC/levels my_lvl_pointer)
             i+=2
         ii+=32
         i=ii
-    // fn end
-
-fn set_level1_vars()
+    
     // create enemies
-    // look at the metatile coords in MapFab and then multiply by 16
     enemies[0].initial_x=368 // (23,10)-(27,10)
     enemies[0].map_x=enemies[0].initial_x
     enemies[0].final_x=432// (23,10)-(27,10)
@@ -186,84 +184,16 @@ fn set_level1_vars()
     enemies[1].map_y=208
     enemies[1].x_speed=1
     enemies[1].status=0
-    //
-    enemies[2].initial_x=400 // (25,8)-(28,8)
-    enemies[2].map_x=enemies[2].initial_x
-    enemies[2].final_x=448 
-    enemies[2].map_y=128
-    enemies[2].x_speed=1
-    enemies[2].status=0
-    //
-    enemies[3].initial_x=432 // (27,6)-(30,6)
-    enemies[3].map_x=enemies[3].initial_x
-    enemies[3].final_x=480 
-    enemies[3].map_y=96
-    enemies[3].x_speed=1
-    enemies[3].status=0
-    //
-    enemies[4].initial_x=576 // (36,12)-(41,12)
-    enemies[4].map_x=enemies[4].initial_x
-    enemies[4].final_x=656 
-    enemies[4].map_y=192
-    enemies[4].x_speed=1
-    enemies[4].status=0
-    //
-    enemies[5].initial_x=704 // (44,10)-(48,10)
-    enemies[5].map_x=enemies[5].initial_x
-    enemies[5].final_x=768 
-    enemies[5].map_y=160
-    enemies[5].x_speed=1
-    enemies[5].status=0
-    //
-    enemies[6].initial_x=768 // (48,13)-(52,13)
-    enemies[6].map_x=enemies[6].initial_x
-    enemies[6].final_x=832 
-    enemies[6].map_y=208
-    enemies[6].x_speed=1
-    enemies[6].status=0
-    //
-    enemies[7].initial_x=912 // (57,13)-(61,13)
-    enemies[7].map_x=enemies[7].initial_x
-    enemies[7].final_x=976 
-    enemies[7].map_y=208
-    enemies[7].x_speed=1
-    enemies[7].status=0
-    // rest of global of vars
-    my_x_scroll=0 // this points to the current h. scroll value
-    scr_bg_update_needed=false
-    player_window_x=player_initial_x // player character coords locally in screen (not inside map)
-    player_map_x=player_initial_x // player char coordinates globally (in the map)
-    player_y=player_initial_y // only one global y coordinate for the player
-    is_player_jumping=false
-    count_frames_jumping=0
-    is_player_on_ground=false
-    which_player_sprite_show = 0
-    is_player_looking_left = false
-    //
 
-// jump here to play level 1
-mode play_level1()
-: nmi main_nmi 
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_level(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
-    set_level1_vars()
-    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
-
-    while true
-        update_pads()
-        move_player() 
-        move_enemies() 
-        update_sprites()
-        nmi // Wait for the next NMI
 
 
 nmi main_nmi()
     // Update OAM and poll the pads:
     ppu_upload_oam_poll_pads(0)
+
     // Turn on rendering:
     {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+
     // Reset the scroll https://www.nesdev.org/wiki/PPU_scrolling
     // and https://www.nesdev.org/wiki/Mirroring
     if scr_bg_update_needed
@@ -272,10 +202,20 @@ nmi main_nmi()
     ppu_reset_scroll_16(my_x_scroll, 0)
     
 mode main()
-    goto mode play_level1()  // Initialize game by entering the play level mode
-    : preserves
+: nmi main_nmi
 
-// update the sprites
+    load_level(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+
+    // Wait forever, one frame at a time:
+    while true
+        update_pads()
+        move_player() 
+        move_enemies() 
+        update_sprites()
+        nmi // Wait for the next NMI
+
 fn update_sprites()
     // Our stack index into OAM:
     U i = 0
@@ -442,8 +382,6 @@ fn move_player()
     if (is_player_looking_left)
         which_player_sprite_show+=2
 
-
-// move the enemies through the level
 fn move_enemies()
     // move enemies
     for U i=0; i<level1_num_enemies; i+=1
@@ -467,8 +405,8 @@ fn move_enemies()
         if (enemies[i].status == 0)
             if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
                 enemies[i].map_x, enemies[i].map_y, enemies[i].map_x+enemy_char_width, enemies[i].map_y+enemy_char_height) )
-                goto mode play_level1()  // Initialize game by entering the play level mode
-                : preserves
+                load_level(@lev_level1)
+
 
     // check if a dead enemy has to fall until it dissapears
     for U i=0; i<level1_num_enemies; i+=1
