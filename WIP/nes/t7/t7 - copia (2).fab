@@ -42,7 +42,6 @@ struct Platform
 //
 ct U max_platforms=10
 ct UU platform_width=16
-ct UU platform_height=8
 
 
 vars /game_vars
@@ -281,22 +280,20 @@ fn set_level2_vars()
     level_num_platforms=1
     is_player_on_platform=false
     //platforms
-/*    f_platforms[0].initial_x=32 // LEVEL2
+    f_platforms[0].initial_x=32
     f_platforms[0].map_x=f_platforms[0].initial_x // 2,14-12,14
     f_platforms[0].map_y=224
     f_platforms[0].final_x=192
     f_platforms[0].x_speed=1
-    f_platforms[0].y_speed=0 
-*/
-    f_platforms[0].initial_x=96 // TEST1
-    f_platforms[0].map_x=f_platforms[0].initial_x // 6,14-6,8
-    f_platforms[0].final_x=96
-    f_platforms[0].x_speed=0
-    f_platforms[0].initial_y=224
-    f_platforms[0].map_y=f_platforms[0].initial_y // 6,14-6,8 //initial-down final-up
-    f_platforms[0].final_y=128
-    f_platforms[0].y_speed=-1
+    f_platforms[0].y_speed=0
 
+/*/////////////////// ToDo
+    f_platforms[0].initial_x=32
+    f_platforms[0].map_x=f_platforms[0].initial_x // 6,14-6,8
+    f_platforms[0].map_y=224
+    f_platforms[0].final_x=192
+    f_platforms[0].x_speed=1
+*/
 
 // jump here to play level 1
 mode play_level1()
@@ -452,25 +449,17 @@ fn move_player()
     for U i=0; i<level_num_platforms; i+=1
         UU platformx=f_platforms[i].map_x
         UU platformy=f_platforms[i].map_y
-        if (!is_ground_close(1)) // we don't want the platform to drag the player in while he's on ground
-            if ( ((player_map_x+player_char_width) >= platformx) && (player_map_x <= (platformx+platform_width)) )
-                if ( ((player_y+player_char_height+1) >= platformy) && ((player_y+player_char_height+1) <= (platformy+platform_height)) )
-                    player_y=platformy-player_char_height
-                    is_player_on_platform=true
-                    is_player_jumping=false
-                    is_player_on_ground=true
-                    //goto mode play_level1()  // Initialize game by entering the play level mode
-                    //: preserves
-                    if ((f_platforms[i].x_speed) > 0)
-                        if (!did_touch_wall_right_plat())
-                            button_right_pressed() // move with the platform
-                    if ((f_platforms[i].x_speed) < 0)
-                        if (!did_touch_wall_left_plat())
-                            button_left_pressed() // move with the platform
-                    if ((f_platforms[i].y_speed) > 0)
-                        player_y+=1 // move with the platform
-                    if ((f_platforms[i].y_speed) < 0)
-                        player_y-=1 // move with the platform
+        if ( ((player_map_x+player_char_width) >= platformx) && (player_map_x <= (platformx+platform_width)) && ((player_y+player_char_height+1)==platformy) )
+            is_player_on_platform=true
+            is_player_jumping=false
+            is_player_on_ground=true
+            //goto mode play_level1()  // Initialize game by entering the play level mode
+            //: preserves
+            if ((f_platforms[i].x_speed) > 0)
+                button_right_pressed() // move with the platform
+            else
+                button_left_pressed() // move with the platform
+
 
     // adjust sprite to simulate walking
     if (is_player_on_ground && (!is_player_on_platform))
@@ -492,19 +481,11 @@ fn move_player()
 
     // Check if the player can move left. It also manages horizontal scroll window
     if pads[0].held & BUTTON_LEFT
-        if (is_player_on_platform) // solving a little bug
-            if (!did_touch_wall_left_plat())
-                button_left_pressed()
-        else
-            button_left_pressed()
+        button_left_pressed()
             
     // Check if the player can move right. It also manages horizontal scroll window
     if pads[0].held & BUTTON_RIGHT
-        if (is_player_on_platform) // solving a little bug
-            if (!did_touch_wall_right_plat())
-                button_right_pressed()
-        else
-            button_right_pressed()
+        button_right_pressed()
 
     // check if player pressed jump button
     if ( (pads[0].pressed & BUTTON_A) && is_player_on_ground && (!did_touch_wall_up()) ) 
@@ -574,18 +555,11 @@ fn move_enemies()
 // move the platforms
 fn move_platforms()
     for U i=0; i<level_num_platforms; i+=1
-        if (f_platforms[i].x_speed != 0)
-            f_platforms[i].map_x+=f_platforms[i].x_speed
-            if (f_platforms[i].map_x <= f_platforms[i].initial_x)
-                f_platforms[i].x_speed=1
-            if (f_platforms[i].map_x >= f_platforms[i].final_x)
-                f_platforms[i].x_speed=-1
-        if (f_platforms[i].y_speed != 0)
-            f_platforms[i].map_y+=f_platforms[i].y_speed
-            if (f_platforms[i].map_y <= f_platforms[i].final_y)
-                f_platforms[i].y_speed=1
-            if (f_platforms[i].map_y >= f_platforms[i].initial_y)
-                f_platforms[i].y_speed=-1
+        f_platforms[i].map_x+=f_platforms[i].x_speed
+        if (f_platforms[i].map_x <= f_platforms[i].initial_x)
+            f_platforms[i].x_speed=1
+        if (f_platforms[i].map_x >= f_platforms[i].final_x)
+            f_platforms[i].x_speed=-1
 
 /* This function sets a 9 bit scroll
     instead of the 8 bit ppu_reset_scroll
@@ -824,16 +798,3 @@ fn button_right_pressed()
         //
         player_map_x=my_x_scroll // calculate player x coord in map
         player_map_x+=player_window_x
-
-// these two functions are special, because they solve a little bug with the non _plat versions
-fn did_touch_wall_right_plat () Bool
-    if ( (get_mt_at_pix(player_map_x+player_char_width+1, player_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width+1, player_y+player_char_height) >= pass_through_mt) )
-        return true
-    return false
-//
-fn did_touch_wall_left_plat () Bool
-    if ( (get_mt_at_pix(player_map_x-2, player_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x-2, player_y+player_char_height) >= pass_through_mt) )
-        return true
-    return false
