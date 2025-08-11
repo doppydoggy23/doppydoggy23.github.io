@@ -70,6 +70,7 @@ vars /game_vars
     U[20] e_chr_sprt_table = U[20](234, 235, 250, 251, 232, 233, 248, 249,     235, 234, 251, 250, 233, 232, 249, 248,      251, 250, 235, 234) // chr table of enemies sprites 1 & 2
     U which_player_sprite_show = 0
     Bool is_player_looking_left = false
+    Bool is_player_on_platform=false
     
     //enemies
     SnakeEnemy[max_num_snake_enemies] snake_enemies
@@ -255,6 +256,7 @@ fn set_level1_vars()
     is_player_looking_left = false
     level_num_snake_enemies=8
     level_num_platforms=0
+    is_player_on_platform=false
     //
 
 
@@ -272,6 +274,7 @@ fn set_level2_vars()
     is_player_looking_left = false
     level_num_snake_enemies=0
     level_num_platforms=1
+    is_player_on_platform=false
     //platforms
     f_platforms[0].initial_x=32
     f_platforms[0].map_x=f_platforms[0].initial_x // 2,14-12,14
@@ -429,68 +432,48 @@ fn update_sprites()
 // this function calculates the movements of the player character
 fn move_player()
 
+    //check if we are on a platform
+    is_player_on_platform=false
+    for U i=0; i<level_num_platforms; i+=1
+        UU platformx=f_platforms[i].map_x
+        UU platformy=f_platforms[i].map_y
+        if ( ((player_map_x+player_char_width) >= platformx) && (player_map_x <= (platformx+platform_width)) && ((player_y+player_char_height+1)==platformy) )
+            is_player_on_platform=true
+            is_player_jumping=false
+            is_player_on_ground=true
+            //goto mode play_level1()  // Initialize game by entering the play level mode
+            //: preserves
+            if ((f_platforms[i].x_speed) > 0)
+                button_right_pressed() // move with the platform
+            else
+                button_left_pressed() // move with the platform
+
+
     // adjust sprite to simulate walking
-    if (is_player_on_ground)
+    if (is_player_on_ground && (!is_player_on_platform))
         which_player_sprite_show=((player_map_x.a>>4)&1)
     else
         which_player_sprite_show=0
 
     // check if the player has a ground underneath
-    if (is_ground_close(1))
+    if (is_ground_close(1) || is_player_on_platform)
         is_player_jumping=false
         is_player_on_ground=true
 
     // check if the player is on the air
-    if (is_player_on_the_air())
+    if (is_player_on_the_air() && (!is_player_on_platform))
         is_player_on_ground=false
-
 
     if (did_touch_wall_up())
         is_player_jumping=false
 
     // Check if the player can move left. It also manages horizontal scroll window
     if pads[0].held & BUTTON_LEFT
-        is_player_looking_left=true
-        if (!did_touch_wall_left())
-            //
-            if (player_window_x > x_window_min)
-                player_window_x-=player_x_move_inc
-            else
-                if (my_x_scroll >= player_x_move_inc)
-                    my_x_scroll-=player_x_move_inc
-                else
-                    my_x_scroll=0
-                    if (player_window_x >= player_x_move_inc)
-                        player_window_x-=player_x_move_inc
-                    else
-                        player_window_x=0
-            //
-            calc_left_scr_bg(my_x_scroll)
-            //
-            player_map_x=my_x_scroll // calculate player x coord in map
-            player_map_x+=player_window_x
+        button_left_pressed()
             
     // Check if the player can move right. It also manages horizontal scroll window
     if pads[0].held & BUTTON_RIGHT
-        is_player_looking_left=false
-        if (!did_touch_wall_right())
-            //
-            if ((player_window_x+player_char_width) < x_window_max)
-                player_window_x+=player_x_move_inc
-            else
-                if ((my_x_scroll+player_x_move_inc) <= maximum_x)
-                    my_x_scroll+=player_x_move_inc
-                else
-                    my_x_scroll=maximum_x
-                    if ((player_window_x+player_x_move_inc+player_char_width) <= 255)
-                        player_window_x+=player_x_move_inc
-                    else
-                        player_window_x=256-player_char_width
-            //
-            calc_right_scr_bg(my_x_scroll)
-            //
-            player_map_x=my_x_scroll // calculate player x coord in map
-            player_map_x+=player_window_x
+        button_right_pressed()
 
     // check if player pressed jump button
     if ( (pads[0].pressed & BUTTON_A) && is_player_on_ground && (!did_touch_wall_up()) ) 
@@ -761,3 +744,45 @@ fn did_crush_enemy(U i) Bool
         if (((player_y+player_char_height+1) == snake_enemies[i].map_y) && (!is_player_on_ground))
             return true
     return false
+
+fn button_left_pressed()
+    is_player_looking_left=true
+    if (!did_touch_wall_left())
+        //
+        if (player_window_x > x_window_min)
+            player_window_x-=player_x_move_inc
+        else
+            if (my_x_scroll >= player_x_move_inc)
+                my_x_scroll-=player_x_move_inc
+            else
+                my_x_scroll=0
+                if (player_window_x >= player_x_move_inc)
+                    player_window_x-=player_x_move_inc
+                else
+                    player_window_x=0
+        //
+        calc_left_scr_bg(my_x_scroll)
+        //
+        player_map_x=my_x_scroll // calculate player x coord in map
+        player_map_x+=player_window_x
+
+fn button_right_pressed()
+    is_player_looking_left=false
+    if (!did_touch_wall_right())
+        //
+        if ((player_window_x+player_char_width) < x_window_max)
+            player_window_x+=player_x_move_inc
+        else
+            if ((my_x_scroll+player_x_move_inc) <= maximum_x)
+                my_x_scroll+=player_x_move_inc
+            else
+                my_x_scroll=maximum_x
+                if ((player_window_x+player_x_move_inc+player_char_width) <= 255)
+                    player_window_x+=player_x_move_inc
+                else
+                    player_window_x=256-player_char_width
+        //
+        calc_right_scr_bg(my_x_scroll)
+        //
+        player_map_x=my_x_scroll // calculate player x coord in map
+        player_map_x+=player_window_x
