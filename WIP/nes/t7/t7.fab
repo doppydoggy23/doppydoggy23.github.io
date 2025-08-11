@@ -1,8 +1,8 @@
 //ToDo: check why did_touch_wall_left/right only work with player_map_y+1
-//ToDo: flip the player sprites horizontally when going left
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
+//ToDo: change the hardwritten "goto mode play_level1()"" and "goto mode play_level2()"" for variables pointing to the current level
 
-mapfab(raw, "t6.mapfab", "chr", "palette", "metatiles", "level")
+mapfab(raw, "t7.mapfab", "chr", "palette", "metatiles", "level")
 
 
 ct UU x_window_min=50 // the player character will move within these x coords without causing x scroll
@@ -11,25 +11,34 @@ ct UU player_x_move_inc=1 // the char will move these many pixels in x at a time
 ct UU player_char_width=16
 ct UU player_char_height=16
 
-ct UU player_initial_x=58 // initial player coords
-ct UU player_initial_y=120
-
-ct U pass_through_mt=10 // metatiles we can pass through
-//ct U num_jump_increment=1 // number of pixels the player jumps at every frame
+ct U pass_through_mt=12 // transparent metatiles
 ct U num_jump_values=30 // size of the screen pixels the player will move up in a frame (jump_values)
 ct U falling_rate_px=2 // pixels the player will fall in a single frame
 
-// enemies
-struct Enemy
+// Snake enemies
+struct SnakeEnemy
+    UU map_x
+    UU map_y
+    UU initial_x
+    UU final_x
+    S x_speed
+    U status // 0-alive 1-killed and falling 2-killed and off the screen
+//
+ct U max_num_snake_enemies=10
+ct UU enemy_char_width=16
+ct UU enemy_char_height=16
+
+// plarforms
+struct Platform
     UU map_x
     UU map_y
     UU initial_x
     UU final_x
     S x_speed
 //
-ct U level1_num_enemies=2
-ct UU enemy_char_width=16
-ct UU enemy_char_height=16
+ct U max_platforms=10
+ct UU platform_width=16
+
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -47,27 +56,34 @@ vars /game_vars
     U[30] scroll_tiles // The data we'll upload to the PPU during NMI.
     U[8] scroll_attrs
 
-    UU player_window_x=player_initial_x // player character coords locally in screen (not inside map)
-    UU player_map_x=player_initial_x // player char coordinates globally (in the map)
-    UU player_y=player_initial_y // only one global y coordinate for the player
+    UU player_window_x//player_initial_x // player character coords locally in screen (not inside map)
+    UU player_map_x//player_initial_x // player char coordinates globally (in the map)
+    UU player_y//player_initial_y // only one global y coordinate for the player
 
     //
     Bool is_player_jumping=false
     U count_frames_jumping=0
     Bool is_player_on_ground=false
     U[num_jump_values] jump_values = U[num_jump_values](4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0) 
-    U[8] chr_sprt_table = U[8](230, 231, 246, 247, 228, 229, 244, 245) // chr table of player sprites 1 & 2
+    U[16] chr_sprt_table = U[16](230, 231, 246, 247, 228, 229, 244, 245,   231, 230, 247, 246, 229, 228, 245, 244) // chr table of player sprites 1 & 2
+    // otro U[16] chr_sprt_table = U[16](37, 38, 53, 54, 39, 40, 55, 56,   231, 230, 247, 246, 229, 228, 245, 244) // chr table of player sprites 1 & 2
+    U[20] e_chr_sprt_table = U[20](234, 235, 250, 251, 232, 233, 248, 249,     235, 234, 251, 250, 233, 232, 249, 248,      251, 250, 235, 234) // chr table of enemies sprites 1 & 2
     U which_player_sprite_show = 0
+    Bool is_player_looking_left = false
     
     //enemies
-    Enemy[level1_num_enemies] enemies
+    SnakeEnemy[max_num_snake_enemies] snake_enemies
+    U level_num_snake_enemies
+    //platforms
+    Platform[max_platforms] f_platforms
+    U level_num_platforms
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
 It has a 16th row of tiles that will never be seen to make multiplications
 by its height a power of two (faster)
 */
-fn load_level1(CCC/levels my_lvl_pointer)
+fn load_level(CCC/levels my_lvl_pointer)
     U chr_bank = read U(my_lvl_pointer)
     CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
     CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
@@ -165,29 +181,146 @@ fn load_level1(CCC/levels my_lvl_pointer)
             i+=2
         ii+=32
         i=ii
-    
-    // create enemies
-    enemies[0].initial_x=368 // (23,10)-(27,10)
-    enemies[0].map_x=enemies[0].initial_x
-    enemies[0].final_x=432// (23,10)-(27,10)
-    enemies[0].map_y=160
-    enemies[0].x_speed=1
-    //
-    enemies[1].initial_x=160 // (10,13)-(13,13)
-    enemies[1].map_x=enemies[1].initial_x
-    enemies[1].final_x=208 // (10,13)-(13,13)
-    enemies[1].map_y=208
-    enemies[1].x_speed=1
+    // fn end
 
+fn set_level1_vars()
+    // create enemies
+    // look at the metatile coords in MapFab and then multiply by 16
+    snake_enemies[0].initial_x=368 // (23,10)-(27,10)
+    snake_enemies[0].map_x=snake_enemies[0].initial_x
+    snake_enemies[0].final_x=432// (23,10)-(27,10)
+    snake_enemies[0].map_y=160
+    snake_enemies[0].x_speed=1
+    snake_enemies[0].status=0
+    //
+    snake_enemies[1].initial_x=160 // (10,13)-(13,13)
+    snake_enemies[1].map_x=snake_enemies[1].initial_x
+    snake_enemies[1].final_x=208 // (10,13)-(13,13)
+    snake_enemies[1].map_y=208
+    snake_enemies[1].x_speed=1
+    snake_enemies[1].status=0
+    //
+    snake_enemies[2].initial_x=400 // (25,8)-(28,8)
+    snake_enemies[2].map_x=snake_enemies[2].initial_x
+    snake_enemies[2].final_x=448 
+    snake_enemies[2].map_y=128
+    snake_enemies[2].x_speed=1
+    snake_enemies[2].status=0
+    //
+    snake_enemies[3].initial_x=432 // (27,6)-(30,6)
+    snake_enemies[3].map_x=snake_enemies[3].initial_x
+    snake_enemies[3].final_x=480 
+    snake_enemies[3].map_y=96
+    snake_enemies[3].x_speed=1
+    snake_enemies[3].status=0
+    //
+    snake_enemies[4].initial_x=576 // (36,12)-(41,12)
+    snake_enemies[4].map_x=snake_enemies[4].initial_x
+    snake_enemies[4].final_x=656 
+    snake_enemies[4].map_y=192
+    snake_enemies[4].x_speed=1
+    snake_enemies[4].status=0
+    //
+    snake_enemies[5].initial_x=704 // (44,10)-(48,10)
+    snake_enemies[5].map_x=snake_enemies[5].initial_x
+    snake_enemies[5].final_x=768 
+    snake_enemies[5].map_y=160
+    snake_enemies[5].x_speed=1
+    snake_enemies[5].status=0
+    //
+    snake_enemies[6].initial_x=768 // (48,13)-(52,13)
+    snake_enemies[6].map_x=snake_enemies[6].initial_x
+    snake_enemies[6].final_x=832 
+    snake_enemies[6].map_y=208
+    snake_enemies[6].x_speed=1
+    snake_enemies[6].status=0
+    //
+    snake_enemies[7].initial_x=912 // (57,13)-(61,13)
+    snake_enemies[7].map_x=snake_enemies[7].initial_x
+    snake_enemies[7].final_x=976 
+    snake_enemies[7].map_y=208
+    snake_enemies[7].x_speed=1
+    snake_enemies[7].status=0
+    // rest of global of vars
+
+    my_x_scroll=0 // this points to the current h. scroll value
+    scr_bg_update_needed=false
+    player_window_x=58 // player character coords locally in screen (not inside map)
+    player_map_x=player_window_x // player char coordinates globally (in the map)
+    player_y=120 // only one global y coordinate for the player
+    is_player_jumping=false
+    count_frames_jumping=0
+    is_player_on_ground=false
+    which_player_sprite_show = 0
+    is_player_looking_left = false
+    level_num_snake_enemies=8
+    level_num_platforms=0
+    //
+
+
+fn set_level2_vars()
+    // rest of global of vars
+    my_x_scroll=0 // this points to the current h. scroll value
+    scr_bg_update_needed=false
+    player_window_x=20 // player character coords locally in screen (not inside map)
+    player_map_x=player_window_x // player char coordinates globally (in the map)
+    player_y=120 // only one global y coordinate for the player
+    is_player_jumping=false
+    count_frames_jumping=0
+    is_player_on_ground=false
+    which_player_sprite_show = 0
+    is_player_looking_left = false
+    level_num_snake_enemies=0
+    level_num_platforms=1
+    //platforms
+    f_platforms[0].initial_x=32
+    f_platforms[0].map_x=f_platforms[0].initial_x // 2,14-12,14
+    f_platforms[0].map_y=224
+    f_platforms[0].final_x=192
+    f_platforms[0].x_speed=1
+
+
+// jump here to play level 1
+mode play_level1()
+: nmi main_nmi 
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_level(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+    set_level1_vars()
+    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+
+    while true
+        update_pads()
+        move_player() 
+        move_enemies() 
+        update_sprites()
+        nmi // Wait for the next NMI
+
+// jump here to play level 2
+mode play_level2()
+: nmi main_nmi 
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_level(@lev_level2) // the name lev_level1 is defined in the levels.macrofab
+    set_level2_vars()
+    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+
+    while true
+        update_pads()
+        move_player() 
+        move_enemies() 
+        move_platforms()
+        update_sprites()
+        nmi // Wait for the next NMI
 
 
 nmi main_nmi()
     // Update OAM and poll the pads:
     ppu_upload_oam_poll_pads(0)
-
     // Turn on rendering:
     {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
-
     // Reset the scroll https://www.nesdev.org/wiki/PPU_scrolling
     // and https://www.nesdev.org/wiki/Mirroring
     if scr_bg_update_needed
@@ -196,20 +329,10 @@ nmi main_nmi()
     ppu_reset_scroll_16(my_x_scroll, 0)
     
 mode main()
-: nmi main_nmi
+    goto mode play_level2()  // Initialize game by entering the play level mode
+    : preserves
 
-    load_level1(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-
-    // Wait forever, one frame at a time:
-    while true
-        update_pads()
-        move_player() 
-        move_enemies() 
-        update_sprites()
-        nmi // Wait for the next NMI
-
+// update the sprites
 fn update_sprites()
     // Our stack index into OAM:
     U i = 0
@@ -217,54 +340,87 @@ fn update_sprites()
     // calculate player character on screen
     U pcx=player_window_x.a
     U pcy=player_y.a
+    U pattr=0
+    if (is_player_looking_left)
+        pattr|=%01000000
     // draw player character sprites
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)])    // tile
-    set_oam_a(i, 0)      // options
+    set_oam_a(i, pattr|1)      // options
     i += 4
     set_oam_x(i, pcx+8)     // x-position
     set_oam_y(i, pcy) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+1])    // tile
-    set_oam_a(i, 0)      // options
+    set_oam_a(i, pattr|1)      // options
     i += 4
     set_oam_x(i, pcx)     // x-position
     set_oam_y(i, pcy+8) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+2])    // tile
-    set_oam_a(i, 0)      // options
+    set_oam_a(i, pattr)      // options
     i += 4
     set_oam_x(i, pcx+8)     // x-position
     set_oam_y(i, pcy+8) // y-position
     set_oam_p(i, chr_sprt_table[(which_player_sprite_show<<2)+3])    // tile
-    set_oam_a(i, 0)      // options
+    set_oam_a(i, pattr)      // options
     i += 4
     
     // draw enemies
-    for U ei=0; ei<level1_num_enemies; ei+=1
-        if ( (enemies[ei].map_x > my_x_scroll) && ((enemies[ei].map_x+enemy_char_width) < (my_x_scroll+256)) )
-            UU tex=enemies[ei].map_x-my_x_scroll
+    for U ei=0; ei<level_num_snake_enemies; ei+=1
+        if ( (snake_enemies[ei].status < 2) && (snake_enemies[ei].map_x > my_x_scroll) && ((snake_enemies[ei].map_x+enemy_char_width) < (my_x_scroll+256)) )
+            UU tex=snake_enemies[ei].map_x-my_x_scroll
             U ex=tex.a
-            U ey=enemies[ei].map_y.a
+            U ey=snake_enemies[ei].map_y.a
+            U attrs=2 // https://www.nesdev.org/wiki/PPU_OAM
+            U which_sprite=(snake_enemies[ei].map_x.a>>4)&1
+            //
+            if (snake_enemies[ei].x_speed < 0) // going left
+                attrs|=%01000000 // flip h
+                which_sprite+=2
+            //
+            if (snake_enemies[ei].status == 1) //falling enemy
+                attrs|=%11000000 // flip h&v
+                which_sprite=4 // flip h&v
             //
             set_oam_x(i, ex)     // x-position
             set_oam_y(i, ey) // y-position
-            set_oam_p(i, 234)    // tile
-            set_oam_a(i, 2)      // options
+            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)])    // tile
+            set_oam_a(i, attrs)      // options
             i += 4
             set_oam_x(i, ex+8)     // x-position
             set_oam_y(i, ey) // y-position
-            set_oam_p(i, 235)    // tile
-            set_oam_a(i, 2)      // options
+            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)+1])    // tile
+            set_oam_a(i, attrs)      // options
             i += 4
             set_oam_x(i, ex)     // x-position
             set_oam_y(i, ey+8) // y-position
-            set_oam_p(i, 250)    // tile
-            set_oam_a(i, 2)      // options
+            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)+2])    // tile
+            set_oam_a(i, attrs)      // options
             i += 4
             set_oam_x(i, ex+8)     // x-position
             set_oam_y(i, ey+8) // y-position
-            set_oam_p(i, 251)    // tile
-            set_oam_a(i, 2)      // options
+            set_oam_p(i, e_chr_sprt_table[(which_sprite<<2)+3])    // tile
+            set_oam_a(i, attrs)      // options
+            i += 4
+    //
+    //draw platforms
+    for U pi=0; pi<level_num_platforms; pi+=1
+        if ( (f_platforms[pi].map_x > my_x_scroll) && ((f_platforms[pi].map_x+platform_width) < (my_x_scroll+256)) )
+            UU tex=f_platforms[pi].map_x-my_x_scroll
+            U px=tex.a
+            U py=f_platforms[pi].map_y.a
+            U pattrs=0 // https://www.nesdev.org/wiki/PPU_OAM
+            U pwhich_sprite=41
+            //
+            set_oam_x(i, px)     // x-position
+            set_oam_y(i, py) // y-position
+            set_oam_p(i, pwhich_sprite)    // tile
+            set_oam_a(i, pattrs)      // options
+            i += 4
+            set_oam_x(i, px+8)     // x-position
+            set_oam_y(i, py) // y-position
+            set_oam_p(i, pwhich_sprite)    // tile
+            set_oam_a(i, pattrs)      // options
             i += 4
 
     // Clear the remainder of OAM
@@ -273,6 +429,7 @@ fn update_sprites()
 // this function calculates the movements of the player character
 fn move_player()
 
+    // adjust sprite to simulate walking
     if (is_player_on_ground)
         which_player_sprite_show=((player_map_x.a>>4)&1)
     else
@@ -293,6 +450,7 @@ fn move_player()
 
     // Check if the player can move left. It also manages horizontal scroll window
     if pads[0].held & BUTTON_LEFT
+        is_player_looking_left=true
         if (!did_touch_wall_left())
             //
             if (player_window_x > x_window_min)
@@ -314,6 +472,7 @@ fn move_player()
             
     // Check if the player can move right. It also manages horizontal scroll window
     if pads[0].held & BUTTON_RIGHT
+        is_player_looking_left=false
         if (!did_touch_wall_right())
             //
             if ((player_window_x+player_char_width) < x_window_max)
@@ -356,16 +515,56 @@ fn move_player()
     if (count_frames_jumping >= num_jump_values)
         is_player_jumping=false
 
+    // adjust player sprite if looking left
+    if (is_player_looking_left)
+        which_player_sprite_show+=2
 
+    // check if player fell into an abism
+    if (player_y>=240)
+        goto mode play_level2()  // Initialize game by entering the play level mode
+        : preserves
+
+
+// move the enemies through the level
 fn move_enemies()
-    for U i=0; i<level1_num_enemies; i+=1
-        enemies[i].map_x+=enemies[i].x_speed
-        //
-        if (enemies[i].map_x <= enemies[i].initial_x)
-            enemies[i].x_speed=1
-        if (enemies[i].map_x >= enemies[i].final_x)
-            enemies[i].x_speed=-1
+    // move enemies
+    for U i=0; i<level_num_snake_enemies; i+=1
+        if (snake_enemies[i].status == 0)
+            snake_enemies[i].map_x+=snake_enemies[i].x_speed
+            //
+            if (snake_enemies[i].map_x <= snake_enemies[i].initial_x)
+                snake_enemies[i].x_speed=1
+            if (snake_enemies[i].map_x >= snake_enemies[i].final_x)
+                snake_enemies[i].x_speed=-1
 
+    // check if player crushed an enemy, killing it
+    for U i=0; i<level_num_snake_enemies; i+=1
+        if (did_crush_enemy(i))
+                snake_enemies[i].status=1
+
+    // check if an enemy killed the player
+    for U i=0; i<level_num_snake_enemies; i+=1
+        if (snake_enemies[i].status == 0)
+            if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
+                snake_enemies[i].map_x, snake_enemies[i].map_y, snake_enemies[i].map_x+enemy_char_width, snake_enemies[i].map_y+enemy_char_height) )
+                goto mode play_level1()  // Initialize game by entering the play level mode
+                : preserves
+
+    // check if a dead enemy has to fall until it dissapears
+    for U i=0; i<level_num_snake_enemies; i+=1
+        if (snake_enemies[i].status == 1)
+            snake_enemies[i].map_y+=1
+            if (snake_enemies[i].map_y >= 240)
+                snake_enemies[i].status=2 // dead and no more movements
+
+// move the platforms
+fn move_platforms()
+    for U i=0; i<level_num_platforms; i+=1
+        f_platforms[i].map_x+=f_platforms[i].x_speed
+        if (f_platforms[i].map_x <= f_platforms[i].initial_x)
+            f_platforms[i].x_speed=1
+        if (f_platforms[i].map_x >= f_platforms[i].final_x)
+            f_platforms[i].x_speed=-1
 
 /* This function sets a 9 bit scroll
     instead of the 8 bit ppu_reset_scroll
@@ -544,4 +743,21 @@ fn is_player_on_the_air() Bool
     if ( (get_mt_at_pix(player_map_x, player_y+player_char_height+1) < pass_through_mt) && 
         (get_mt_at_pix(player_map_x+player_char_width-1, player_y+player_char_height+1) < pass_through_mt) )
         return true
+    return false
+
+// returns if 2 rectangles intersect
+fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU r2y2) Bool
+    if ( (r1x1 >= r2x1) && (r1x1 <= r2x2) ||
+        (r1x2 >= r2x1) && ( r1x2 <= r2x2) )
+        if ( (r1y1 >= r2y1) && (r1y1 <= r2y2) ||
+            (r1y2 >= r2y1) && ( r1y2 <= r2y2) )
+            return true
+    return false
+
+// returns if the player crushed an enemy
+fn did_crush_enemy(U i) Bool
+    if ( ((player_map_x > snake_enemies[i].map_x) && (player_map_x < (snake_enemies[i].map_x+enemy_char_width))) ||
+        (((player_map_x+player_char_width) > snake_enemies[i].map_x) && ((player_map_x+player_char_width) < (snake_enemies[i].map_x+enemy_char_width))) )
+        if (((player_y+player_char_height+1) == snake_enemies[i].map_y) && (!is_player_on_ground))
+            return true
     return false

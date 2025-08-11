@@ -453,11 +453,9 @@ fn move_enemies()
             if (enemies[i].map_x >= enemies[i].final_x)
                 enemies[i].x_speed=-1
 
-    // check if player jumped on an enemy, killing it
+    // check if player crushed an enemy, killing it
     for U i=0; i<level1_num_enemies; i+=1
-        if ( ((player_map_x > enemies[i].map_x) && (player_map_x < (enemies[i].map_x+enemy_char_width))) ||
-            (((player_map_x+player_char_width) > enemies[i].map_x) && ((player_map_x+player_char_width) < (enemies[i].map_x+enemy_char_width))) )
-            if (((player_y+player_char_height+1) == enemies[i].map_y) && (!is_player_on_ground))
+        if (did_crush_enemy(i))
                 enemies[i].status=1
 
     // check if an enemy killed the player
@@ -661,5 +659,13 @@ fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU 
         (r1x2 >= r2x1) && ( r1x2 <= r2x2) )
         if ( (r1y1 >= r2y1) && (r1y1 <= r2y2) ||
             (r1y2 >= r2y1) && ( r1y2 <= r2y2) )
+            return true
+    return false
+
+// returns if the player crushed an enemy
+fn did_crush_enemy(U i) Bool
+    if ( ((player_map_x > enemies[i].map_x) && (player_map_x < (enemies[i].map_x+enemy_char_width))) ||
+        (((player_map_x+player_char_width) > enemies[i].map_x) && ((player_map_x+player_char_width) < (enemies[i].map_x+enemy_char_width))) )
+        if (((player_y+player_char_height+1) == enemies[i].map_y) && (!is_player_on_ground))
             return true
     return false
