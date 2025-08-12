@@ -2,13 +2,12 @@
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
 //ToDo: change the hardwritten "goto mode play_level1()"" and "goto mode play_level2()"" for variables pointing to the current level
 //ToDo: why are platforms 1 pixel lower than they should?
-//ToDo: remove the "if (is_player_on_platform) // solving a little bug if (!did_touch_wall_left_plat()) button_left_pressed() else" from the move_player func
 
 mapfab(raw, "t7.mapfab", "chr", "palette", "metatiles", "level")
 
 
-ct UU x_window_min=75//50 // the player character will move within these x coords without causing x scroll
-ct UU x_window_max=181//206
+ct UU x_window_min=50 // the player character will move within these x coords without causing x scroll
+ct UU x_window_max=206
 ct UU player_x_move_inc=1 // the char will move these many pixels in x at a time
 ct UU player_char_width=16
 ct UU player_char_height=16
@@ -279,8 +278,8 @@ fn set_level2_vars()
     is_player_on_ground=false
     which_player_sprite_show = 0
     is_player_looking_left = false
-    level_num_snake_enemies=5
-    level_num_platforms=3
+    level_num_snake_enemies=2
+    level_num_platforms=2
     is_player_on_platform=false
     //enemies
     snake_enemies[0].initial_x=208 // (13,13)-(15,13)
@@ -296,27 +295,6 @@ fn set_level2_vars()
     snake_enemies[1].map_y=32
     snake_enemies[1].x_speed=1
     snake_enemies[1].status=0
-    //
-    snake_enemies[2].initial_x=554 // (34,6)-(37,6)
-    snake_enemies[2].map_x=snake_enemies[2].initial_x
-    snake_enemies[2].final_x=592 
-    snake_enemies[2].map_y=96
-    snake_enemies[2].x_speed=1
-    snake_enemies[2].status=0
-    //
-    snake_enemies[3].initial_x=640 // (40,6)-(43,6)
-    snake_enemies[3].map_x=snake_enemies[3].initial_x
-    snake_enemies[3].final_x=688 
-    snake_enemies[3].map_y=96
-    snake_enemies[3].x_speed=1
-    snake_enemies[3].status=0
-    //
-    snake_enemies[4].initial_x=832 // (52,12)-(63,12)
-    snake_enemies[4].map_x=snake_enemies[4].initial_x
-    snake_enemies[4].final_x=1008 
-    snake_enemies[4].map_y=192
-    snake_enemies[4].x_speed=1
-    snake_enemies[4].status=0
     //platforms
     f_platforms[0].initial_x=32 // LEVEL2
     f_platforms[0].map_x=f_platforms[0].initial_x // 2,14-12,14
@@ -333,13 +311,6 @@ fn set_level2_vars()
     f_platforms[1].map_y=f_platforms[1].initial_y // 6,14-6,8 //initial-down final-up
     f_platforms[1].final_y=48
     f_platforms[1].y_speed=-1
-    //platforms
-    f_platforms[2].initial_x=688 // 43,10-49,10
-    f_platforms[2].map_x=f_platforms[2].initial_x // 
-    f_platforms[2].map_y=160
-    f_platforms[2].final_x=784
-    f_platforms[2].x_speed=1
-    f_platforms[2].y_speed=0 
 
 
 
@@ -795,7 +766,7 @@ fn get_mt_at_pix(UU x, UU y) U
 
 // returns if the player is  touching a wall to its right
 // it only works right with player_x_move_inc=1
-/*fn did_touch_wall_right () Bool
+fn did_touch_wall_right () Bool
     if ( (get_mt_at_pix(player_map_x+player_char_width, player_y+1) >= pass_through_mt) || 
         (get_mt_at_pix(player_map_x+player_char_width, player_y+player_char_height-1) >= pass_through_mt) )
         return true
@@ -808,7 +779,7 @@ fn did_touch_wall_left () Bool
         (get_mt_at_pix(player_map_x-1, player_y+player_char_height-1) >= pass_through_mt) )
         return true
     return false
-*/
+
 // returns if the player is touching a wall with its head
 // it only works with num_jump_increment=1
 fn did_touch_wall_up () Bool
@@ -857,7 +828,7 @@ fn did_crush_enemy(U i) Bool
 
 fn button_left_pressed()
     is_player_looking_left=true
-    if (!did_touch_wall_left_plat())
+    if (!did_touch_wall_left())
         //
         if (player_window_x > x_window_min)
             player_window_x-=player_x_move_inc
@@ -878,7 +849,7 @@ fn button_left_pressed()
 
 fn button_right_pressed()
     is_player_looking_left=false
-    if (!did_touch_wall_right_plat())
+    if (!did_touch_wall_right())
         //
         if ((player_window_x+player_char_width) < x_window_max)
             player_window_x+=player_x_move_inc
@@ -898,7 +869,6 @@ fn button_right_pressed()
         player_map_x+=player_window_x
 
 // these two functions are special, because they solve a little bug with the non _plat versions
-// returns if the player is  touching a wall to its right or left
 fn did_touch_wall_right_plat () Bool
     if ( (get_mt_at_pix(player_map_x+player_char_width, player_y) >= pass_through_mt) || 
         (get_mt_at_pix(player_map_x+player_char_width, player_y+player_char_height) >= pass_through_mt) )
