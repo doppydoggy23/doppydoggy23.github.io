@@ -28,6 +28,7 @@ struct SnakeEnemy
 ct U max_num_snake_enemies=10
 ct UU enemy_char_width=16
 ct UU enemy_char_height=16
+ct UU enemy_tolerance=2 // how many px the player can "sink" into an enemy and not be killed
 
 // plarforms
 struct Platform
@@ -277,18 +278,43 @@ fn set_level2_vars()
     is_player_on_ground=false
     which_player_sprite_show = 0
     is_player_looking_left = false
-    level_num_snake_enemies=0
-    level_num_platforms=1
+    level_num_snake_enemies=2
+    level_num_platforms=2
     is_player_on_platform=false
+    //enemies
+    snake_enemies[0].initial_x=208 // (13,13)-(15,13)
+    snake_enemies[0].map_x=snake_enemies[0].initial_x
+    snake_enemies[0].final_x=240 
+    snake_enemies[0].map_y=208
+    snake_enemies[0].x_speed=1
+    snake_enemies[0].status=0
+    //
+    snake_enemies[1].initial_x=272 // (17,2)-(23,2)
+    snake_enemies[1].map_x=snake_enemies[1].initial_x
+    snake_enemies[1].final_x=368 
+    snake_enemies[1].map_y=32
+    snake_enemies[1].x_speed=1
+    snake_enemies[1].status=0
     //platforms
-/*    f_platforms[0].initial_x=32 // LEVEL2
+    f_platforms[0].initial_x=32 // LEVEL2
     f_platforms[0].map_x=f_platforms[0].initial_x // 2,14-12,14
     f_platforms[0].map_y=224
     f_platforms[0].final_x=192
     f_platforms[0].x_speed=1
     f_platforms[0].y_speed=0 
-*/
-    f_platforms[0].initial_x=96 // TEST1
+    //
+    f_platforms[1].initial_x=256
+    f_platforms[1].map_x=f_platforms[1].initial_x // 16,13-16,3
+    f_platforms[1].final_x=f_platforms[1].initial_x
+    f_platforms[1].x_speed=0
+    f_platforms[1].initial_y=208
+    f_platforms[1].map_y=f_platforms[1].initial_y // 6,14-6,8 //initial-down final-up
+    f_platforms[1].final_y=48
+    f_platforms[1].y_speed=-1
+
+
+
+/*    f_platforms[0].initial_x=96 // TEST1
     f_platforms[0].map_x=f_platforms[0].initial_x // 6,14-6,8
     f_platforms[0].final_x=96
     f_platforms[0].x_speed=0
@@ -296,7 +322,7 @@ fn set_level2_vars()
     f_platforms[0].map_y=f_platforms[0].initial_y // 6,14-6,8 //initial-down final-up
     f_platforms[0].final_y=128
     f_platforms[0].y_speed=-1
-
+*/
 
 // jump here to play level 1
 mode play_level1()
@@ -321,7 +347,7 @@ mode play_level2()
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
-    load_level(@lev_test1) // the name lev_levelX is defined in the levels.macrofab
+    load_level(@lev_level2) // the name lev_levelX is defined in the levels.macrofab
     set_level2_vars()
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
 
@@ -512,10 +538,11 @@ fn move_player()
             button_right_pressed()
 
     // check if player pressed jump button
-    if ( (pads[0].pressed & BUTTON_A) && is_player_on_ground && (!did_touch_wall_up()) ) 
+    if ( (pads[0].pressed & BUTTON_A) && (is_player_on_ground || is_player_on_platform) && (!did_touch_wall_up()) ) 
         count_frames_jumping=0
         is_player_jumping=true
         is_player_on_ground=false
+        is_player_on_platform=false
 
     // simulate gravity (player falling slowly)
     if ( (!is_player_on_ground) && (!is_player_jumping) )
@@ -528,6 +555,8 @@ fn move_player()
     // simulate jump
     if (is_player_jumping)
         player_y-=jump_values[count_frames_jumping]
+        if (player_y >= 240) // if we jump through the roof, limit it
+            player_y=0
         count_frames_jumping+=1
     
     // check if jumping should stop
@@ -560,13 +589,15 @@ fn move_enemies()
     for U i=0; i<level_num_snake_enemies; i+=1
         if (did_crush_enemy(i))
                 snake_enemies[i].status=1
+                //goto mode play_level1()  // Initialize game by entering the play level mode
+                //: preserves
 
     // check if an enemy killed the player
     for U i=0; i<level_num_snake_enemies; i+=1
         if (snake_enemies[i].status == 0)
             if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
                 snake_enemies[i].map_x, snake_enemies[i].map_y, snake_enemies[i].map_x+enemy_char_width, snake_enemies[i].map_y+enemy_char_height) )
-                goto mode play_level1()  // Initialize game by entering the play level mode
+                goto mode play_level2()  // Initialize game by entering the play level mode
                 : preserves
 
     // check if a dead enemy has to fall until it dissapears
@@ -780,11 +811,18 @@ fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU 
             return true
     return false
 
+/* OLD fn did_crush_enemy(U i) Bool
+    if ( ((player_map_x > snake_enemies[i].map_x) && (player_map_x < (snake_enemies[i].map_x+enemy_char_width))) ||
+        (((player_map_x+player_char_width) > snake_enemies[i].map_x) && ((player_map_x+player_char_width) < (snake_enemies[i].map_x+enemy_char_width))) )
+        if (((player_y+player_char_height+1) == snake_enemies[i].map_y) && (!is_player_on_ground))
+            return true
+    return false
+*/
 // returns if the player crushed an enemy
 fn did_crush_enemy(U i) Bool
     if ( ((player_map_x > snake_enemies[i].map_x) && (player_map_x < (snake_enemies[i].map_x+enemy_char_width))) ||
         (((player_map_x+player_char_width) > snake_enemies[i].map_x) && ((player_map_x+player_char_width) < (snake_enemies[i].map_x+enemy_char_width))) )
-        if (((player_y+player_char_height+1) == snake_enemies[i].map_y) && (!is_player_on_ground))
+        if ( ((player_y+player_char_height+enemy_tolerance) >= snake_enemies[i].map_y) && ((player_y+player_char_height) <= (snake_enemies[i].map_y+enemy_tolerance)) )
             return true
     return false
 
