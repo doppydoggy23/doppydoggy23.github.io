@@ -1,7 +1,7 @@
 //ToDo: check why did_touch_wall_left/right only work with player_map_y+1
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
 //ToDo: change the hardwritten "goto mode play_level1()"" and "goto mode play_level2()"" for variables pointing to the current level
-//ToDo: why are platforms 1 pixel lower than they should?
+//ToDo: on a vertical platform, if (did_touch_wall_up and player_is_on_platform) call player_killed()?
 
 mapfab(raw, "t7.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -471,11 +471,6 @@ fn move_player()
                         player_y+=1 // move with the platform
                     if ((f_platforms[i].y_speed) < 0)
                         player_y-=1 // move with the platform
-    
-    // check if the player is crushed by a platform and a wall
-    if (did_touch_wall_up() && is_player_on_platform)
-        goto mode play_level2()  // Initialize game by entering the play level mode
-        : preserves
 
     // adjust sprite to simulate walking
     if (is_player_on_ground && (!is_player_on_platform))
@@ -832,13 +827,13 @@ fn button_right_pressed()
 
 // these two functions are special, because they solve a little bug with the non _plat versions
 fn did_touch_wall_right_plat () Bool
-    if ( (get_mt_at_pix(player_map_x+player_char_width, player_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width, player_y+player_char_height) >= pass_through_mt) )
+    if ( (get_mt_at_pix(player_map_x+player_char_width+1, player_y) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width+1, player_y+player_char_height) >= pass_through_mt) )
         return true
     return false
 //
 fn did_touch_wall_left_plat () Bool
-    if ( (get_mt_at_pix(player_map_x-1, player_y) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x-1, player_y+player_char_height) >= pass_through_mt) )
+    if ( (get_mt_at_pix(player_map_x-2, player_y) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x-2, player_y+player_char_height) >= pass_through_mt) )
         return true
     return false
