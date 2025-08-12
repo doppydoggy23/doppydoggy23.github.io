@@ -320,7 +320,7 @@ fn set_level2_vars()
     //platforms
     f_platforms[0].initial_x=32 // LEVEL2
     f_platforms[0].map_x=f_platforms[0].initial_x // 2,14-12,14
-    f_platforms[0].map_y=224
+    f_platforms[0].map_y=224-1
     f_platforms[0].final_x=192
     f_platforms[0].x_speed=1
     f_platforms[0].y_speed=0 
@@ -331,7 +331,7 @@ fn set_level2_vars()
     f_platforms[1].x_speed=0
     f_platforms[1].initial_y=208
     f_platforms[1].map_y=f_platforms[1].initial_y // 6,14-6,8 //initial-down final-up
-    f_platforms[1].final_y=48
+    f_platforms[1].final_y=48-1
     f_platforms[1].y_speed=-1
     //platforms
     f_platforms[2].initial_x=688 // 43,10-49,10
