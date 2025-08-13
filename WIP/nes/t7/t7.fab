@@ -12,7 +12,7 @@ ct UU player_x_move_inc=1 // the char will move these many pixels in x at a time
 ct UU player_char_width=16
 ct UU player_char_height=16
 
-ct U pass_through_mt=12 // transparent metatiles
+ct U pass_through_mt=16//12 // transparent metatiles
 ct U num_jump_values=30 // size of the screen pixels the player will move up in a frame (jump_values)
 ct U falling_rate_px=2 // pixels the player will fall in a single frame
 
@@ -475,7 +475,7 @@ nmi main_nmi()
     ppu_reset_scroll_16(my_x_scroll, 0)
     
 mode main()
-    goto mode play_level3()  // Initialize game by entering the play level mode
+    goto mode play_level1()  // Initialize game by entering the play level mode
     : preserves
 
 
