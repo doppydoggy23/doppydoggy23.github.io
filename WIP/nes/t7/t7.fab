@@ -45,6 +45,9 @@ ct U max_platforms=10
 ct UU platform_width=16
 ct UU platform_height=8
 
+ct U fade_period=8
+ct U fade_delay=20
+
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -53,6 +56,9 @@ vars /game_vars
     CC/metatiles mt_sw
     CC/metatiles mt_se
     CC/metatiles mt_attr
+
+    CCC/palettes my_palette
+
 
     UU my_x_scroll=0 // this points to the current h. scroll value
     UU maximum_x // this will point to the map maximum x scroll value
@@ -84,6 +90,7 @@ vars /game_vars
     //platforms
     Platform[max_platforms] f_platforms
     U level_num_platforms
+    U current_level
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -103,6 +110,7 @@ fn load_level(CCC/levels my_lvl_pointer)
     // set palette
     load_palette(pal)
     ppu_upload_palette()
+    my_palette=pal
        
     UU mt_size = UU(read U(mymetatiles)) // number of metatiles
     if mt_size == 0
@@ -249,7 +257,6 @@ fn set_level1_vars()
     snake_enemies[7].x_speed=1
     snake_enemies[7].status=0
     // rest of global of vars
-
     my_x_scroll=0 // this points to the current h. scroll value
     scr_bg_update_needed=false
     player_window_x=58 // player character coords locally in screen (not inside map)
@@ -263,6 +270,7 @@ fn set_level1_vars()
     level_num_snake_enemies=8
     level_num_platforms=0
     is_player_on_platform=false
+    current_level=1
     //
 
 
@@ -281,6 +289,7 @@ fn set_level2_vars()
     level_num_snake_enemies=5
     level_num_platforms=3
     is_player_on_platform=false
+    current_level=2
     //enemies
     snake_enemies[0].initial_x=208 // (13,13)-(15,13)
     snake_enemies[0].map_x=snake_enemies[0].initial_x
@@ -356,6 +365,7 @@ fn set_level3_vars()
     level_num_snake_enemies=5
     level_num_platforms=2
     is_player_on_platform=false
+    current_level=3
     //enemies
     snake_enemies[0].initial_x=224 // (14,12)-(17,12)
     snake_enemies[0].map_x=snake_enemies[0].initial_x
@@ -417,6 +427,7 @@ mode play_level1()
     load_level(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     set_level1_vars()
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+    fade_in_black(fade_period, my_palette)
 
     while true
         update_pads()
@@ -434,6 +445,7 @@ mode play_level2()
     load_level(@lev_level2) // the name lev_levelX is defined in the levels.macrofab
     set_level2_vars()
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+    fade_in_black(fade_period, my_palette)
 
     while true
         update_pads()
@@ -452,6 +464,7 @@ mode play_level3()
     load_level(@lev_level3) // the name lev_levelX is defined in the levels.macrofab
     set_level3_vars()
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+    fade_in_black(fade_period, my_palette)
 
     while true
         update_pads()
@@ -461,8 +474,22 @@ mode play_level3()
         update_sprites()
         nmi // Wait for the next NMI
 
+fn play_level (U lvl)
+    if (lvl == 1)
+        goto mode play_level1()  // Initialize game by entering the play level mode
+        : preserves
+    if (lvl == 2)
+        goto mode play_level2()  // Initialize game by entering the play level mode
+        : preserves
+    if (lvl == 3)
+        goto mode play_level3()  // Initialize game by entering the play level mode
+        : preserves
+    //
+    goto mode play_level1()  // by default, go to level 1
+    : preserves
 
 nmi main_nmi()
+    ppu_upload_palette() // needed for fade-ins and fade-outs
     // Update OAM and poll the pads:
     ppu_upload_oam_poll_pads(0)
     // Turn on rendering:
@@ -475,7 +502,7 @@ nmi main_nmi()
     ppu_reset_scroll_16(my_x_scroll, 0)
     
 mode main()
-    goto mode play_level3()  // Initialize game by entering the play level mode
+    goto mode play_level1()  // Initialize game by entering the play level mode
     : preserves
 
 
@@ -604,8 +631,7 @@ fn move_player()
     
     // check if the player is crushed by a platform and a wall
     if (did_touch_wall_up() && is_player_on_platform)
-        goto mode play_level3()  // Initialize game by entering the play level mode
-        : preserves
+        player_was_killed()
 
     // adjust sprite to simulate walking
     if (is_player_on_ground && (!is_player_on_platform))
@@ -673,9 +699,7 @@ fn move_player()
 
     // check if player fell into an abism
     if (player_y>=240)
-        goto mode play_level3()  // Initialize game by entering the play level mode
-        : preserves
-
+        player_was_killed()
 
 // move the enemies through the level
 fn move_enemies()
@@ -693,16 +717,23 @@ fn move_enemies()
     for U i=0; i<level_num_snake_enemies; i+=1
         if (did_crush_enemy(i))
                 snake_enemies[i].status=1
-                //goto mode play_level1()  // Initialize game by entering the play level mode
-                //: preserves
+
+    // check if all enemies are crushed, thus winning
+    U curr_lvl_num_enem_killed=0
+    for U i=0; i<level_num_snake_enemies; i+=1
+        if (snake_enemies[i].status > 0)
+            curr_lvl_num_enem_killed+=1
+    if (curr_lvl_num_enem_killed >= level_num_snake_enemies)
+        play_level(current_level+1)
+
 
     // check if an enemy killed the player
     for U i=0; i<level_num_snake_enemies; i+=1
         if (snake_enemies[i].status == 0)
             if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
                 snake_enemies[i].map_x, snake_enemies[i].map_y, snake_enemies[i].map_x+enemy_char_width, snake_enemies[i].map_y+enemy_char_height) )
-                goto mode play_level3()  // Initialize game by entering the play level mode
-                : preserves
+                //
+                player_was_killed()
 
     // check if a dead enemy has to fall until it dissapears
     for U i=0; i<level_num_snake_enemies; i+=1
@@ -976,3 +1007,9 @@ fn did_touch_wall_left () Bool
         (get_mt_at_pix(player_map_x-1, player_y+player_char_height-1) >= pass_through_mt) )
         return true
     return false
+
+fn player_was_killed()
+    wait(fade_delay)
+    fade_out_black(fade_period)
+    play_level(current_level)
+
