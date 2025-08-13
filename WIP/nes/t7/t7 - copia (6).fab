@@ -342,73 +342,6 @@ fn set_level2_vars()
     f_platforms[2].y_speed=0 
 
 
-fn set_level3_vars()
-    // rest of global of vars
-    my_x_scroll=0 // this points to the current h. scroll value
-    scr_bg_update_needed=false
-    player_window_x=20 // player character coords locally in screen (not inside map)
-    player_map_x=player_window_x // player char coordinates globally (in the map)
-    player_y=120 // only one global y coordinate for the player
-    is_player_jumping=false
-    count_frames_jumping=0
-    is_player_on_ground=false
-    which_player_sprite_show = 0
-    is_player_looking_left = false
-    level_num_snake_enemies=5
-    level_num_platforms=2
-    is_player_on_platform=false
-    //enemies
-    snake_enemies[0].initial_x=224 // (14,12)-(17,12)
-    snake_enemies[0].map_x=snake_enemies[0].initial_x
-    snake_enemies[0].final_x=272 
-    snake_enemies[0].map_y=192
-    snake_enemies[0].x_speed=1
-    snake_enemies[0].status=0
-    //
-    snake_enemies[1].initial_x=464 // (29,12)-(32,12)
-    snake_enemies[1].map_x=snake_enemies[1].initial_x
-    snake_enemies[1].final_x=512 
-    snake_enemies[1].map_y=192
-    snake_enemies[1].x_speed=1
-    snake_enemies[1].status=0
-    //
-    snake_enemies[2].initial_x=768 // (48,7)-(52,7)
-    snake_enemies[2].map_x=snake_enemies[2].initial_x
-    snake_enemies[2].final_x=832 
-    snake_enemies[2].map_y=112
-    snake_enemies[2].x_speed=1
-    snake_enemies[2].status=0
-    //
-    snake_enemies[3].initial_x=848 // (53,7)-(58,7)
-    snake_enemies[3].map_x=snake_enemies[3].initial_x
-    snake_enemies[3].final_x=928 
-    snake_enemies[3].map_y=112
-    snake_enemies[3].x_speed=1
-    snake_enemies[3].status=0
-    //
-    snake_enemies[4].initial_x=944 // (59,7)-(63,7)
-    snake_enemies[4].map_x=snake_enemies[4].initial_x
-    snake_enemies[4].final_x=1008 
-    snake_enemies[4].map_y=112
-    snake_enemies[4].x_speed=1
-    snake_enemies[4].status=0
-    //
-    //platforms
-    f_platforms[0].initial_x=48 // LEVEL2
-    f_platforms[0].map_x=f_platforms[0].initial_x // 3,13-13,13
-    f_platforms[0].map_y=208-1
-    f_platforms[0].final_x=208
-    f_platforms[0].x_speed=1
-    f_platforms[0].y_speed=0 
-    //
-    f_platforms[1].initial_x=288 // LEVEL2
-    f_platforms[1].map_x=f_platforms[1].initial_x // 18,13-28,13
-    f_platforms[1].map_y=208-1
-    f_platforms[1].final_x=448
-    f_platforms[1].x_speed=1
-    f_platforms[1].y_speed=0 
-
-
 
 /*    f_platforms[0].initial_x=96 // TEST1
     f_platforms[0].map_x=f_platforms[0].initial_x // 6,14-6,8
@@ -455,24 +388,6 @@ mode play_level2()
         update_sprites()
         nmi // Wait for the next NMI
 
-// jump here to play level 3
-mode play_level3()
-: nmi main_nmi 
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_level(@lev_level3) // the name lev_levelX is defined in the levels.macrofab
-    set_level3_vars()
-    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
-
-    while true
-        update_pads()
-        move_player() 
-        move_enemies() 
-        move_platforms()
-        update_sprites()
-        nmi // Wait for the next NMI
-
 
 nmi main_nmi()
     // Update OAM and poll the pads:
@@ -487,11 +402,9 @@ nmi main_nmi()
     ppu_reset_scroll_16(my_x_scroll, 0)
     
 mode main()
-    goto mode play_level3()  // Initialize game by entering the play level mode
+    goto mode play_level2()  // Initialize game by entering the play level mode
     : preserves
 
-
-//
 // update the sprites
 fn update_sprites()
     // Our stack index into OAM:
@@ -616,7 +529,7 @@ fn move_player()
     
     // check if the player is crushed by a platform and a wall
     if (did_touch_wall_up() && is_player_on_platform)
-        goto mode play_level3()  // Initialize game by entering the play level mode
+        goto mode play_level2()  // Initialize game by entering the play level mode
         : preserves
 
     // adjust sprite to simulate walking
@@ -685,7 +598,7 @@ fn move_player()
 
     // check if player fell into an abism
     if (player_y>=240)
-        goto mode play_level3()  // Initialize game by entering the play level mode
+        goto mode play_level2()  // Initialize game by entering the play level mode
         : preserves
 
 
@@ -713,7 +626,7 @@ fn move_enemies()
         if (snake_enemies[i].status == 0)
             if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
                 snake_enemies[i].map_x, snake_enemies[i].map_y, snake_enemies[i].map_x+enemy_char_width, snake_enemies[i].map_y+enemy_char_height) )
-                goto mode play_level3()  // Initialize game by entering the play level mode
+                goto mode play_level2()  // Initialize game by entering the play level mode
                 : preserves
 
     // check if a dead enemy has to fall until it dissapears
