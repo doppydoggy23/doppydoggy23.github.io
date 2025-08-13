@@ -2,7 +2,6 @@
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
 //ToDo: change the hardwritten "goto mode play_level1()"" and "goto mode play_level2()"" for variables pointing to the current level
 //ToDo: why are platforms 1 pixel lower than they should?
-//ToDo: remove the "if (is_player_on_platform) // solving a little bug if (!did_touch_wall_left_plat()) button_left_pressed() else" from the move_player func
 
 mapfab(raw, "t7.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -408,17 +407,6 @@ fn set_level3_vars()
     f_platforms[1].x_speed=1
     f_platforms[1].y_speed=0 
 
-
-
-/*    f_platforms[0].initial_x=96 // TEST1
-    f_platforms[0].map_x=f_platforms[0].initial_x // 6,14-6,8
-    f_platforms[0].final_x=96
-    f_platforms[0].x_speed=0
-    f_platforms[0].initial_y=224
-    f_platforms[0].map_y=f_platforms[0].initial_y // 6,14-6,8 //initial-down final-up
-    f_platforms[0].final_y=128
-    f_platforms[0].y_speed=-1
-*/
 
 // jump here to play level 1
 mode play_level1()
@@ -880,22 +868,6 @@ fn get_mt_at_pix(UU x, UU y) U
     U mt=lvl1_mt_map{disp}
     return mt
 
-// returns if the player is  touching a wall to its right
-// it only works right with player_x_move_inc=1
-/*fn did_touch_wall_right () Bool
-    if ( (get_mt_at_pix(player_map_x+player_char_width, player_y+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x+player_char_width, player_y+player_char_height-1) >= pass_through_mt) )
-        return true
-    return false
-
-// returns if the player is touching a wall to its left
-// it only works right with player_x_move_inc=1
-fn did_touch_wall_left () Bool
-    if ( (get_mt_at_pix(player_map_x-1, player_y+1) >= pass_through_mt) || 
-        (get_mt_at_pix(player_map_x-1, player_y+player_char_height-1) >= pass_through_mt) )
-        return true
-    return false
-*/
 // returns if the player is touching a wall with its head
 // it only works with num_jump_increment=1
 fn did_touch_wall_up () Bool
@@ -927,13 +899,6 @@ fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU 
             return true
     return false
 
-/* OLD fn did_crush_enemy(U i) Bool
-    if ( ((player_map_x > snake_enemies[i].map_x) && (player_map_x < (snake_enemies[i].map_x+enemy_char_width))) ||
-        (((player_map_x+player_char_width) > snake_enemies[i].map_x) && ((player_map_x+player_char_width) < (snake_enemies[i].map_x+enemy_char_width))) )
-        if (((player_y+player_char_height+1) == snake_enemies[i].map_y) && (!is_player_on_ground))
-            return true
-    return false
-*/
 // returns if the player crushed an enemy
 fn did_crush_enemy(U i) Bool
     if ( ((player_map_x > snake_enemies[i].map_x) && (player_map_x < (snake_enemies[i].map_x+enemy_char_width))) ||
@@ -944,7 +909,7 @@ fn did_crush_enemy(U i) Bool
 
 fn button_left_pressed()
     is_player_looking_left=true
-    if (!did_touch_wall_left_plat())
+    if (!did_touch_wall_left())
         //
         if (player_window_x > x_window_min)
             player_window_x-=player_x_move_inc
@@ -965,7 +930,7 @@ fn button_left_pressed()
 
 fn button_right_pressed()
     is_player_looking_left=false
-    if (!did_touch_wall_right_plat())
+    if (!did_touch_wall_right())
         //
         if ((player_window_x+player_char_width) < x_window_max)
             player_window_x+=player_x_move_inc
@@ -985,7 +950,7 @@ fn button_right_pressed()
         player_map_x+=player_window_x
 
 // these two functions are special, because they solve a little bug with the non _plat versions
-// returns if the player is  touching a wall to its right or left
+// to be used only while player is on a platform
 fn did_touch_wall_right_plat () Bool
     if ( (get_mt_at_pix(player_map_x+player_char_width, player_y) >= pass_through_mt) || 
         (get_mt_at_pix(player_map_x+player_char_width, player_y+player_char_height) >= pass_through_mt) )
@@ -995,5 +960,19 @@ fn did_touch_wall_right_plat () Bool
 fn did_touch_wall_left_plat () Bool
     if ( (get_mt_at_pix(player_map_x-1, player_y) >= pass_through_mt) || 
         (get_mt_at_pix(player_map_x-1, player_y+player_char_height) >= pass_through_mt) )
+        return true
+    return false
+
+// returns if the player is  touching a wall to its right
+fn did_touch_wall_right () Bool
+    if ( (get_mt_at_pix(player_map_x+player_char_width, player_y+1) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x+player_char_width, player_y+player_char_height-1) >= pass_through_mt) )
+        return true
+    return false
+
+// returns if the player is touching a wall to its left
+fn did_touch_wall_left () Bool
+    if ( (get_mt_at_pix(player_map_x-1, player_y+1) >= pass_through_mt) || 
+        (get_mt_at_pix(player_map_x-1, player_y+player_char_height-1) >= pass_through_mt) )
         return true
     return false
