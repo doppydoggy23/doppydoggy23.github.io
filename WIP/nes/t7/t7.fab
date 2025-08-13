@@ -475,7 +475,7 @@ nmi main_nmi()
     ppu_reset_scroll_16(my_x_scroll, 0)
     
 mode main()
-    goto mode play_level1()  // Initialize game by entering the play level mode
+    goto mode play_level3()  // Initialize game by entering the play level mode
     : preserves
 
 
