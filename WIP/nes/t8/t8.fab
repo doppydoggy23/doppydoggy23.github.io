@@ -7,7 +7,7 @@ realized too late and my collision detection code is basically a workarround.
 
 mapfab(raw, "t8.mapfab", "chr", "palette", "metatiles", "level")
 
-audio(puf1_music, "test1.txt")
+audio(puf1_music, "test3.txt")
 audio(puf1_sfx, "testsfx1.txt", "testsfx1.nsf")
 
 ct UU x_window_min=75//50 // the player character will move within these x coords without causing x scroll
