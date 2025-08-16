@@ -1,7 +1,9 @@
-//ToDo: check why did_touch_wall_left/right only work with player_map_y+1
+/*
+There is a known bug for which sprites are shown 1 pixel lower than they should. Unfortunately I
+realized too late and my collision detection code is basically a workarround.
+*/
+
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
-//ToDo: change the hardwritten "goto mode play_level1()"" and "goto mode play_level2()"" for variables pointing to the current level
-//ToDo: why are platforms 1 pixel lower than they should?
 
 mapfab(raw, "t8.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -418,6 +420,46 @@ fn set_level3_vars()
     f_platforms[1].x_speed=1
     f_platforms[1].y_speed=0 
 
+fn set_level4_vars()
+    // rest of global of vars
+    my_x_scroll=0 // this points to the current h. scroll value
+    scr_bg_update_needed=false
+    player_window_x=10 // player character coords locally in screen (not inside map)
+    player_map_x=player_window_x // player char coordinates globally (in the map)
+    player_y=30 // only one global y coordinate for the player
+    is_player_jumping=false
+    count_frames_jumping=0
+    is_player_on_ground=false
+    which_player_sprite_show = 0
+    is_player_looking_left = false
+    level_num_snake_enemies=1
+    level_num_platforms=2
+    is_player_on_platform=false
+    current_level=4
+    //enemies
+    snake_enemies[0].initial_x=272 // (17,7)-(19,7)
+    snake_enemies[0].map_x=snake_enemies[0].initial_x
+    snake_enemies[0].final_x=304 
+    snake_enemies[0].map_y=112
+    snake_enemies[0].x_speed=1
+    snake_enemies[0].status=0
+
+    //
+    //platforms
+    f_platforms[0].initial_x=64 // LEVEL2
+    f_platforms[0].map_x=f_platforms[0].initial_x // 4,8-8,8
+    f_platforms[0].map_y=128-1
+    f_platforms[0].final_x=128
+    f_platforms[0].x_speed=1
+    f_platforms[0].y_speed=0 
+    //
+    f_platforms[1].initial_x=128 // LEVEL2
+    f_platforms[1].map_y=144-1
+    f_platforms[1].final_x=192
+    f_platforms[1].map_x=f_platforms[1].final_x // 12,9-8,9
+    f_platforms[1].x_speed=-1
+    f_platforms[1].y_speed=0 
+
 
 // jump here to play level 1
 mode play_level1()
@@ -475,6 +517,25 @@ mode play_level3()
         update_sprites()
         nmi // Wait for the next NMI
 
+// jump here to play level 4
+mode play_level4()
+: nmi main_nmi 
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_level(@lev_level4) // the name lev_levelX is defined in the levels.macrofab
+    set_level4_vars()
+    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+    fade_in_black(fade_period, my_palette)
+
+    while true
+        update_pads()
+        move_player() 
+        move_enemies() 
+        move_platforms()
+        update_sprites()
+        nmi // Wait for the next NMI
+
 fn play_level (U lvl)
     if (lvl == 1)
         show_level_intro_scr(1)
@@ -487,6 +548,10 @@ fn play_level (U lvl)
     if (lvl == 3)
         show_level_intro_scr(3)
         goto mode play_level3()  // Initialize game by entering the play level mode
+        : preserves
+    if (lvl == 4)
+        show_level_intro_scr(4)
+        goto mode play_level4()  // Initialize game by entering the play level mode
         : preserves
     //
     show_level_intro_scr(1)
@@ -508,7 +573,7 @@ nmi main_nmi()
     
 mode main()
 : nmi main_nmi 
-    play_level(1)
+    play_level(4)
 
 
 //
