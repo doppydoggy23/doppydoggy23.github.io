@@ -6,9 +6,11 @@
 
 // This example plays a song, using the left and right buttons to change its speed.
 
-audio(puf1_music, "danger_streets.txt")
+audio(puf1_music, "test1.txt")
+//audio(puf1_music, "danger_streets.txt")
 //audio(puf1_sfx)
-audio(puf1_sfx, "sfx.txt", "sfx.nsf")
+//audio(puf1_sfx, "sfx.txt", "sfx.nsf")
+audio(puf1_sfx, "testsfx1.txt", "testsfx1.nsf")
 
 nmi main_nmi()
     ppu_upload_oam_poll_pads(0)

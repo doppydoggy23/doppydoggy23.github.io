@@ -7,8 +7,6 @@ realized too late and my collision detection code is basically a workarround.
 
 mapfab(raw, "t8.mapfab", "chr", "palette", "metatiles", "level")
 
-audio(puf1_music, "test1.txt")
-audio(puf1_sfx, "testsfx1.txt", "testsfx1.nsf")
 
 ct UU x_window_min=75//50 // the player character will move within these x coords without causing x scroll
 ct UU x_window_max=181//206
@@ -471,7 +469,6 @@ mode play_level1()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     set_level1_vars()
-    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -490,7 +487,6 @@ mode play_level2()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level2) // the name lev_levelX is defined in the levels.macrofab
     set_level2_vars()
-    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -510,7 +506,6 @@ mode play_level3()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level3) // the name lev_levelX is defined in the levels.macrofab
     set_level3_vars()
-    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -530,7 +525,6 @@ mode play_level4()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level4) // the name lev_levelX is defined in the levels.macrofab
     set_level4_vars()
-    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -576,12 +570,9 @@ nmi main_nmi()
         nmi_update_screen_bg()
     //
     ppu_reset_scroll_16(my_x_scroll, 0)
-    //
-    puf.process(PUF_DEFAULT) // process sound
     
 mode main()
 : nmi main_nmi 
-    puf.init(system) // it only works put in a single mode
     play_level(4)
 
 
@@ -752,7 +743,6 @@ fn move_player()
         is_player_jumping=true
         is_player_on_ground=false
         is_player_on_platform=false
-        puf.play_sfx(0) // play jump sfx
 
     // simulate gravity (player falling slowly)
     if ( (!is_player_on_ground) && (!is_player_jumping) )
@@ -804,7 +794,7 @@ fn move_enemies()
         if (snake_enemies[i].status > 0)
             curr_lvl_num_enem_killed+=1
     if (curr_lvl_num_enem_killed >= level_num_snake_enemies)
-        player_passed_level()
+        play_level(current_level+1)
 
 
     // check if an enemy killed the player
@@ -1089,7 +1079,6 @@ fn did_touch_wall_left () Bool
     return false
 
 fn player_was_killed()
-    puf.stop(0)
     wait(fade_delay)
     fade_out_black(fade_period)
     play_level(current_level)
@@ -1109,6 +1098,3 @@ fn show_level_intro_scr(U lvl)
     fade_in_black(fade_period, my_palette)
     wait(lvl_intro_delay)
 
-fn player_passed_level()
-    puf.stop(0)
-    play_level(current_level+1)
