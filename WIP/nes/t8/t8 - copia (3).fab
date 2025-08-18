@@ -618,7 +618,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi 
     puf.init(system) // it only works put in a single mode
-    play_level(4)
+    play_level(3)
 
 
 //
@@ -875,7 +875,7 @@ fn move_enemies()
     // check if an enemy killed the player
     for U i=0; i<level_num_snake_enemies; i+=1
         if (snake_enemies[i].status == 0)
-            if ( intersect(player_map_x+enemy_tolerance, player_y+enemy_tolerance, player_map_x+player_char_width-enemy_tolerance, player_y+player_char_height-enemy_tolerance, 
+            if ( intersect(player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height, 
                 snake_enemies[i].map_x, snake_enemies[i].map_y, snake_enemies[i].map_x+enemy_char_width, snake_enemies[i].map_y+enemy_char_height) )
                 //
                 player_was_killed()
@@ -911,6 +911,7 @@ fn move_enemies()
                 )
                 //
                 player_was_killed()
+
 
 
 // move the platforms
@@ -1105,7 +1106,7 @@ fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU 
 fn did_crush_enemy(U i) Bool
     if ( ((player_map_x > snake_enemies[i].map_x) && (player_map_x < (snake_enemies[i].map_x+enemy_char_width))) ||
         (((player_map_x+player_char_width) > snake_enemies[i].map_x) && ((player_map_x+player_char_width) < (snake_enemies[i].map_x+enemy_char_width))) )
-        if ( ((player_y+player_char_height) >= snake_enemies[i].map_y) && ((player_y+player_char_height) <= (snake_enemies[i].map_y+enemy_tolerance)) )
+        if ( ((player_y+player_char_height+enemy_tolerance) >= snake_enemies[i].map_y) && ((player_y+player_char_height) <= (snake_enemies[i].map_y+enemy_tolerance)) )
             return true
     return false
 
