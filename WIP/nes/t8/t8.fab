@@ -721,24 +721,24 @@ fn update_sprites()
             U spy=spikes[si].map_y.a
             U spattrs=1 // https://www.nesdev.org/wiki/PPU_OAM
             //
-            set_oam_x(i, spx)     // x-position
+            set_oam_x(i, spx)     // x-position //OLD172, 173, 188, 189
             set_oam_y(i, spy) // y-position
-            set_oam_p(i, 172)    // tile
+            set_oam_p(i, 170)    // tile
             set_oam_a(i, spattrs)      // options
             i += 4
             set_oam_x(i, spx+8)     // x-position
             set_oam_y(i, spy) // y-position
-            set_oam_p(i, 173)    // tile
+            set_oam_p(i, 171)    // tile
             set_oam_a(i, spattrs)      // options
             i += 4
             set_oam_x(i, spx)     // x-position
             set_oam_y(i, spy+8) // y-position
-            set_oam_p(i, 188)    // tile
+            set_oam_p(i, 186)    // tile
             set_oam_a(i, spattrs)      // options
             i += 4
             set_oam_x(i, spx+8)     // x-position
             set_oam_y(i, spy+8) // y-position
-            set_oam_p(i, 189)    // tile
+            set_oam_p(i, 187)    // tile
             set_oam_a(i, spattrs)      // options
             i += 4
 
