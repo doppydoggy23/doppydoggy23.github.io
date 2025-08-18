@@ -5,6 +5,7 @@ realized too late and my collision detection code is basically a workarround.
 
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
 // ToDo: in the intersect fucntion, check if the second is within the first rectangle too, or use pubby's
+// ToDo: there is a bug I can't reproduce that kills the player before it has crushed an enemy
 
 mapfab(raw, "t8.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -618,7 +619,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi 
     puf.init(system) // it only works put in a single mode
-    play_level(4)
+    play_level(1)
 
 
 //
