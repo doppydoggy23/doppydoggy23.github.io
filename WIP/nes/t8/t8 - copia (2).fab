@@ -4,7 +4,6 @@ realized too late and my collision detection code is basically a workarround.
 */
 
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
-// ToDo: in the intersect fucntion, check if the second is within the first rectangle too, or use pubby's
 
 mapfab(raw, "t8.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -54,20 +53,6 @@ ct U fade_period=8
 ct U fade_delay=20
 ct U lvl_intro_delay=100
 
-struct Spike
-    UU map_x
-    UU map_y
-    UU initial_x
-    UU initial_y
-    UU final_x
-    UU final_y
-    S x_speed
-    S y_speed
-//
-ct UU spike_tolerance=2 // how many pixels should the player get into it to get killed
-ct U max_spikes=10 // 
-ct UU spike_width=16
-ct UU spike_height=16
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -111,8 +96,6 @@ vars /game_vars
     Platform[max_platforms] f_platforms
     U level_num_platforms
     U current_level
-    Spike[max_spikes] spikes
-    U level_num_spikes
 
 /*
 Writes the initial 32x30 screen. Take note the mapfab is (16*4)H x 16V. 
@@ -293,7 +276,6 @@ fn set_level1_vars()
     level_num_platforms=0
     is_player_on_platform=false
     current_level=1
-    level_num_spikes=0
     //
 
 
@@ -313,7 +295,6 @@ fn set_level2_vars()
     level_num_platforms=3
     is_player_on_platform=false
     current_level=2
-    level_num_spikes=0
     //enemies
     snake_enemies[0].initial_x=208 // (13,13)-(15,13)
     snake_enemies[0].map_x=snake_enemies[0].initial_x
@@ -390,7 +371,6 @@ fn set_level3_vars()
     level_num_platforms=2
     is_player_on_platform=false
     current_level=3
-    level_num_spikes=2
     //enemies
     snake_enemies[0].initial_x=224 // (14,12)-(17,12)
     snake_enemies[0].map_x=snake_enemies[0].initial_x
@@ -441,21 +421,6 @@ fn set_level3_vars()
     f_platforms[1].final_x=448
     f_platforms[1].x_speed=1
     f_platforms[1].y_speed=0 
-    //
-    //spikes
-    spikes[0].initial_x=128 //8,12
-    spikes[0].initial_y=192 //8,12
-    spikes[0].map_x=spikes[0].initial_x
-    spikes[0].map_y=spikes[0].initial_y
-    spikes[0].x_speed=0
-    spikes[0].y_speed=0
-    //
-    spikes[1].initial_x=368 //23,12
-    spikes[1].initial_y=192 //23,12
-    spikes[1].map_x=spikes[1].initial_x
-    spikes[1].map_y=spikes[1].initial_y
-    spikes[1].x_speed=0
-    spikes[1].y_speed=0
 
 fn set_level4_vars()
     // rest of global of vars
@@ -473,7 +438,6 @@ fn set_level4_vars()
     level_num_platforms=2
     is_player_on_platform=false
     current_level=4
-    level_num_spikes=0
     //enemies
     snake_enemies[0].initial_x=272 // (17,7)-(19,7)
     snake_enemies[0].map_x=snake_enemies[0].initial_x
@@ -618,7 +582,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi 
     puf.init(system) // it only works put in a single mode
-    play_level(3)
+    play_level(4)
 
 
 //
@@ -713,42 +677,12 @@ fn update_sprites()
             set_oam_a(i, pattrs)      // options
             i += 4
 
-    //draw spikes
-    for U si=0; si<level_num_spikes; si+=1
-        if ( (spikes[si].map_x > my_x_scroll) && ((spikes[si].map_x+spike_width) < (my_x_scroll+256)) )
-            UU sex=spikes[si].map_x-my_x_scroll
-            U spx=sex.a
-            U spy=spikes[si].map_y.a
-            U spattrs=1 // https://www.nesdev.org/wiki/PPU_OAM
-            //
-            set_oam_x(i, spx)     // x-position
-            set_oam_y(i, spy) // y-position
-            set_oam_p(i, 172)    // tile
-            set_oam_a(i, spattrs)      // options
-            i += 4
-            set_oam_x(i, spx+8)     // x-position
-            set_oam_y(i, spy) // y-position
-            set_oam_p(i, 173)    // tile
-            set_oam_a(i, spattrs)      // options
-            i += 4
-            set_oam_x(i, spx)     // x-position
-            set_oam_y(i, spy+8) // y-position
-            set_oam_p(i, 188)    // tile
-            set_oam_a(i, spattrs)      // options
-            i += 4
-            set_oam_x(i, spx+8)     // x-position
-            set_oam_y(i, spy+8) // y-position
-            set_oam_p(i, 189)    // tile
-            set_oam_a(i, spattrs)      // options
-            i += 4
-
-
     // Clear the remainder of OAM
     hide_oam(i)
 
 // this function calculates the movements of the player character
 fn move_player()
-    //
+
     //check if we are on a platform
     is_player_on_platform=false
     for U i=0; i<level_num_platforms; i+=1
@@ -872,6 +806,7 @@ fn move_enemies()
     if (curr_lvl_num_enem_killed >= level_num_snake_enemies)
         player_passed_level()
 
+
     // check if an enemy killed the player
     for U i=0; i<level_num_snake_enemies; i+=1
         if (snake_enemies[i].status == 0)
@@ -886,33 +821,6 @@ fn move_enemies()
             snake_enemies[i].map_y+=1
             if (snake_enemies[i].map_y >= 240)
                 snake_enemies[i].status=2 // dead and no more movements
-    
-    // move spikes
-    for U i=0; i<level_num_spikes; i+=1
-        if (spikes[i].x_speed !=0)
-            spikes[i].map_x+=spikes[i].x_speed
-            if (spikes[i].map_x <= spikes[i].initial_x)
-                spikes[i].x_speed=1
-            if (spikes[i].map_x >= spikes[i].final_x)
-                spikes[i].x_speed=-1
-        if (spikes[i].y_speed !=0)
-            spikes[i].map_y+=spikes[i].y_speed
-            if (spikes[i].map_y <= spikes[i].initial_y)
-                spikes[i].y_speed=1
-            if (spikes[i].map_y >= spikes[i].final_y)
-                spikes[i].y_speed=-1
-
-    // check if a spike killed the player
-    for U i=0; i<level_num_spikes; i+=1
-        if ( intersect(
-                spikes[i].map_x+spike_tolerance, spikes[i].map_y+spike_tolerance, 
-                spikes[i].map_x+spike_width-spike_tolerance, spikes[i].map_y+spike_height-spike_tolerance,
-                player_map_x, player_y, player_map_x+player_char_width, player_y+player_char_height)
-                )
-                //
-                player_was_killed()
-
-
 
 // move the platforms
 fn move_platforms()
@@ -1093,7 +1001,7 @@ fn is_player_on_the_air() Bool
         return true
     return false
 
-// returns if 2 rectangles intersect. Smaller rectangle first
+// returns if 2 rectangles intersect
 fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU r2y2) Bool
     if ( (r1x1 >= r2x1) && (r1x1 <= r2x2) ||
         (r1x2 >= r2x1) && ( r1x2 <= r2x2) )
@@ -1204,4 +1112,3 @@ fn show_level_intro_scr(U lvl)
 fn player_passed_level()
     puf.stop(0)
     play_level(current_level+1)
-
