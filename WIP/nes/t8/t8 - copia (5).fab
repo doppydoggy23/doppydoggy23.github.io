@@ -4,21 +4,19 @@ realized too late and my collision detection code is basically a workarround.
 */
 
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
-// ToDo: in the intersect fucntion, check if the second is within the first rectangle too, or use pubby's code
+// ToDo: in the intersect fucntion, check if the second is within the first rectangle too, or use pubby's
+// ToDo: there is a bug I can't reproduce that kills the player before it has crushed an enemy
 // ToDo: remove the had-coded value when checking if a player crushed an enemy. It works, but it's ugly
-// ToDo: is it normal behaviour to get screen artifacts if I stop the music in the middle of an sfx?
-// ToDo: remove player_x_move_inc ?
-
+// ToDo: remove ct player_x_move_inc ?
 
 mapfab(raw, "t8.mapfab", "chr", "palette", "metatiles", "level")
 
-audio(puf1_music, "music.txt")
-audio(puf1_sfx, "sfx.txt", "sfx.nsf")
+audio(puf1_music, "test3.txt")
+audio(puf1_sfx, "testsfx1.txt", "testsfx1.nsf")
 
 ct UU x_window_min=75//50 // the player character will move within these x coords without causing x scroll
 ct UU x_window_max=181//206
-ct UU player_x_move_inc=1 
-
+ct UU player_x_move_inc=1 // the char will move these many pixels in x at a time
 ct UU player_char_width=16
 ct UU player_char_height=16
 
@@ -73,14 +71,6 @@ ct UU spike_tolerance=2 // how many pixels should the player get into it to get 
 ct U max_spikes=10 // 
 ct UU spike_width=16
 ct UU spike_height=16
-
-
-ct U SFX_JUMP=0
-ct U SFX_ENEMY_KILL=1
-ct U SFX_PLAYER_KILL=2
-
-ct U PLAYER_KILLED_WAIT=100 //time to wait when the player was killed
-ct U PLAYER_WON_WAIT=100 //time to wait when the player passed the level
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -520,7 +510,7 @@ mode play_level1()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     set_level1_vars()
-    puf.play_track(current_level&1)
+    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -539,7 +529,7 @@ mode play_level2()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level2) // the name lev_levelX is defined in the levels.macrofab
     set_level2_vars()
-    puf.play_track(current_level&1)
+    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -559,7 +549,7 @@ mode play_level3()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level3) // the name lev_levelX is defined in the levels.macrofab
     set_level3_vars()
-    puf.play_track(current_level&1)
+    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -579,7 +569,7 @@ mode play_level4()
     hide_oam(0)// Clear OAM to start fresh
     load_level(@lev_level4) // the name lev_levelX is defined in the levels.macrofab
     set_level4_vars()
-    puf.play_track(current_level&1)
+    puf.play_track(0)
     {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
     fade_in_black(fade_period, my_palette)
 
@@ -626,7 +616,7 @@ nmi main_nmi()
     //
     ppu_reset_scroll_16(my_x_scroll, 0)
     //
-    puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
+    puf.process(PUF_DEFAULT) // process sound
     
 mode main()
 : nmi main_nmi 
@@ -831,7 +821,7 @@ fn move_player()
         is_player_jumping=true
         is_player_on_ground=false
         is_player_on_platform=false
-        puf.play_sfx(SFX_JUMP) // play jump sfx
+        puf.play_sfx(0) // play jump sfx
 
     // simulate gravity (player falling slowly)
     if ( (!is_player_on_ground) && (!is_player_jumping) )
@@ -883,7 +873,6 @@ fn move_enemies()
         if (snake_enemies[i].status > 0)
             curr_lvl_num_enem_killed+=1
     if (curr_lvl_num_enem_killed >= level_num_snake_enemies)
-        wait(PLAYER_WON_WAIT)
         player_passed_level()
 
     // check if an enemy killed the player or the player killed an enemy
@@ -892,12 +881,9 @@ fn move_enemies()
             if ( intersect(player_map_x+enemy_tolerance, player_y+enemy_tolerance, player_map_x+player_char_width-enemy_tolerance, player_y+player_char_height-enemy_tolerance, 
                 snake_enemies[i].map_x, snake_enemies[i].map_y, snake_enemies[i].map_x+enemy_char_width, snake_enemies[i].map_y+enemy_char_height) )
                 //
-                if ((player_y+player_char_height) < (snake_enemies[i].map_y+4)) 
-                    snake_enemies[i].status=1 // player killed enemy
-                    puf.play_sfx(SFX_ENEMY_KILL)
+                if ((player_y+player_char_height) < (snake_enemies[i].map_y+4))
+                    snake_enemies[i].status=1
                 else
-                    puf.play_sfx(SFX_PLAYER_KILL) // enemy killed the player
-                    wait(PLAYER_KILLED_WAIT)
                     player_was_killed()
 
     // check if a dead enemy has to fall until it dissapears
