@@ -510,13 +510,13 @@ fn set_level4_vars()
     which_player_sprite_show = 0
     is_player_looking_left = false
     level_num_snake_enemies=0
-    level_num_platforms=2
+    level_num_platforms=4
     is_player_on_platform=false
     current_level=4
     level_num_spikes=0
-    level_num_snails=1
+    level_num_snails=3
     //enemies
-    snails[0].initial_x=272 // (17,7)-(19,7)
+    snails[0].initial_x=240 // (15,7)-(19,7)
     snails[0].map_x=snails[0].initial_x
     snails[0].final_x=304 
     snails[0].map_y=112
@@ -525,20 +525,52 @@ fn set_level4_vars()
     snails[0].frame_counter=0
     snails[0].is_green=true
     //
+    snails[1].initial_x=496 // (31,7)-(35,7)
+    snails[1].map_x=snails[1].initial_x
+    snails[1].final_x=560 
+    snails[1].map_y=112
+    snails[1].x_speed=1
+    snails[1].status=0
+    snails[1].frame_counter=0
+    snails[1].is_green=true
+    //
+    snails[2].initial_x=880 // (55,8)-(60,8)
+    snails[2].map_x=snails[2].initial_x
+    snails[2].final_x=960 
+    snails[2].map_y=128
+    snails[2].x_speed=1
+    snails[2].status=0
+    snails[2].frame_counter=0
+    snails[2].is_green=true
+    //
     //platforms
-    f_platforms[0].initial_x=64 // LEVEL2
+    f_platforms[0].initial_x=64 
     f_platforms[0].map_x=f_platforms[0].initial_x // 4,8-8,8
     f_platforms[0].map_y=128-1
     f_platforms[0].final_x=128
     f_platforms[0].x_speed=1
     f_platforms[0].y_speed=0 
     //
-    f_platforms[1].initial_x=128 // LEVEL2
+    f_platforms[1].initial_x=128 
     f_platforms[1].map_y=144-1
     f_platforms[1].final_x=192
     f_platforms[1].map_x=f_platforms[1].final_x // 12,9-8,9
     f_platforms[1].x_speed=-1
     f_platforms[1].y_speed=0 
+    //
+    f_platforms[2].initial_x=320 
+    f_platforms[2].map_y=128-1
+    f_platforms[2].final_x=384
+    f_platforms[2].map_x=f_platforms[2].initial_x // 20,8-24,8
+    f_platforms[2].x_speed=1
+    f_platforms[2].y_speed=0 
+    //
+    f_platforms[3].initial_x=384 
+    f_platforms[3].map_y=144-1
+    f_platforms[3].final_x=448
+    f_platforms[3].map_x=f_platforms[3].final_x // 24,9-28,9
+    f_platforms[3].x_speed=-1
+    f_platforms[3].y_speed=0 
 
 
 // jump here to play level 1
