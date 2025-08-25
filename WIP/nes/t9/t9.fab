@@ -607,8 +607,8 @@ fn set_level5_vars()
     level_num_platforms=0
     is_player_on_platform=false
     current_level=5
-    level_num_spikes=0
-    level_num_snails=1
+    level_num_spikes=6
+    level_num_snails=4
     //enemies
     snails[0].initial_x=928 // (58,12)-(63,12)
     snails[0].map_x=snails[0].initial_x
@@ -619,6 +619,89 @@ fn set_level5_vars()
     snails[0].frame_counter=0
     snails[0].is_green=true
     //
+    snails[1].initial_x=384 // (24,12)-(26,12)
+    snails[1].map_x=snails[1].initial_x
+    snails[1].final_x=416
+    snails[1].map_y=192
+    snails[1].x_speed=1
+    snails[1].status=0
+    snails[1].frame_counter=0
+    snails[1].is_green=true
+    //
+    snails[2].initial_x=464 // (29,9)-(34,9)
+    snails[2].map_x=snails[2].initial_x
+    snails[2].final_x=544 
+    snails[2].map_y=144
+    snails[2].x_speed=1
+    snails[2].status=0
+    snails[2].frame_counter=0
+    snails[2].is_green=true
+    //
+    snails[3].initial_x=576 // (36,7)-(41,7)
+    snails[3].map_x=snails[3].initial_x
+    snails[3].final_x=656 
+    snails[3].map_y=112
+    snails[3].x_speed=1
+    snails[3].status=0
+    snails[3].frame_counter=0
+    snails[3].is_green=true
+    //
+    //spikes
+    spikes[0].initial_x=96 // 6,9 6,12 
+    spikes[0].initial_y=144
+    spikes[0].map_x=spikes[0].initial_x
+    spikes[0].map_y=spikes[0].initial_y
+    spikes[0].final_x=96
+    spikes[0].final_y=192
+    spikes[0].x_speed=0
+    spikes[0].y_speed=1
+    //
+    spikes[1].initial_x=144 // 9,9 9,12 
+    spikes[1].initial_y=144
+    spikes[1].map_x=spikes[1].initial_x
+    spikes[1].map_y=spikes[1].initial_y
+    spikes[1].final_x=144
+    spikes[1].final_y=192
+    spikes[1].x_speed=0
+    spikes[1].y_speed=1
+    //
+    spikes[2].initial_x=192 //  12,9 12,12
+    spikes[2].initial_y=144
+    spikes[2].map_x=spikes[2].initial_x
+    spikes[2].map_y=spikes[2].initial_y
+    spikes[2].final_x=192
+    spikes[2].final_y=192
+    spikes[2].x_speed=0
+    spikes[2].y_speed=1
+    //
+    spikes[3].initial_x=768 //  48,9 48,12
+    spikes[3].initial_y=144
+    spikes[3].map_x=spikes[3].initial_x
+    spikes[3].map_y=spikes[3].initial_y
+    spikes[3].final_x=768
+    spikes[3].final_y=192
+    spikes[3].x_speed=0
+    spikes[3].y_speed=1
+    //
+    spikes[4].initial_x=816 //  51,9 48,12
+    spikes[4].initial_y=144
+    spikes[4].map_x=spikes[4].initial_x
+    spikes[4].map_y=spikes[4].initial_y
+    spikes[4].final_x=816
+    spikes[4].final_y=192
+    spikes[4].x_speed=0
+    spikes[4].y_speed=1
+    //
+    spikes[5].initial_x=864 //  54,9 48,12
+    spikes[5].initial_y=144
+    spikes[5].map_x=spikes[5].initial_x
+    spikes[5].map_y=spikes[5].initial_y
+    spikes[5].final_x=864
+    spikes[5].final_y=192
+    spikes[5].x_speed=0
+    spikes[5].y_speed=1
+    //
+
 
 
 
