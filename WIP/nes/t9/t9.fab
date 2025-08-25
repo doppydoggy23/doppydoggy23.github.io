@@ -513,7 +513,7 @@ fn set_level4_vars()
     level_num_platforms=4
     is_player_on_platform=false
     current_level=4
-    level_num_spikes=0
+    level_num_spikes=2
     level_num_snails=3
     //enemies
     snails[0].initial_x=240 // (15,7)-(19,7)
@@ -571,6 +571,26 @@ fn set_level4_vars()
     f_platforms[3].map_x=f_platforms[3].final_x // 24,9-28,9
     f_platforms[3].x_speed=-1
     f_platforms[3].y_speed=0 
+    //spikes
+    spikes[0].initial_x=592 // 37,8 42,8
+    spikes[0].initial_y=128 
+    spikes[0].map_x=spikes[0].initial_x
+    spikes[0].map_y=spikes[0].initial_y
+    spikes[0].final_x=672
+    spikes[0].final_y=spikes[0].initial_y
+    spikes[0].x_speed=1
+    spikes[0].y_speed=0
+    //
+    spikes[1].initial_x=729 // 45,7 49,7
+    spikes[1].initial_y=112 
+    spikes[1].map_x=spikes[1].initial_x
+    spikes[1].map_y=spikes[1].initial_y
+    spikes[1].final_x=784
+    spikes[1].final_y=spikes[1].initial_y
+    spikes[1].x_speed=1
+    spikes[1].y_speed=0
+    //
+
 
 
 // jump here to play level 1
