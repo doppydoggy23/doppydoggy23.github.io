@@ -591,6 +591,35 @@ fn set_level4_vars()
     spikes[1].y_speed=0
     //
 
+fn set_level5_vars()
+    // rest of global of vars
+    my_x_scroll=0 // this points to the current h. scroll value
+    scr_bg_update_needed=false
+    player_window_x=10 // player character coords locally in screen (not inside map)
+    player_map_x=player_window_x // player char coordinates globally (in the map)
+    player_y=30 // only one global y coordinate for the player
+    is_player_jumping=false
+    count_frames_jumping=0
+    is_player_on_ground=false
+    which_player_sprite_show = 0
+    is_player_looking_left = false
+    level_num_snake_enemies=0
+    level_num_platforms=0
+    is_player_on_platform=false
+    current_level=5
+    level_num_spikes=0
+    level_num_snails=1
+    //enemies
+    snails[0].initial_x=928 // (58,12)-(63,12)
+    snails[0].map_x=snails[0].initial_x
+    snails[0].final_x=1008 
+    snails[0].map_y=192
+    snails[0].x_speed=1
+    snails[0].status=0
+    snails[0].frame_counter=0
+    snails[0].is_green=true
+    //
+
 
 
 // jump here to play level 1
@@ -672,6 +701,26 @@ mode play_level4()
         update_sprites()
         nmi // Wait for the next NMI
 
+// jump here to play level 5
+mode play_level5()
+: nmi main_nmi 
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_level(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
+    set_level5_vars()
+    puf.play_track(current_level&1)
+    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+    fade_in_black(fade_period, my_palette)
+
+    while true
+        update_pads()
+        move_player() 
+        move_enemies() 
+        move_platforms()
+        update_sprites()
+        nmi // Wait for the next NMI
+
 fn play_level (U lvl)
     if (lvl == 1)
         show_level_intro_scr(1)
@@ -688,6 +737,10 @@ fn play_level (U lvl)
     if (lvl == 4)
         show_level_intro_scr(4)
         goto mode play_level4()  // Initialize game by entering the play level mode
+        : preserves
+    if (lvl == 5)
+        show_level_intro_scr(5)
+        goto mode play_level5()  // Initialize game by entering the play level mode
         : preserves
     //
     show_level_intro_scr(1)
@@ -712,7 +765,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi 
     puf.init(system) // it only works put in a single mode
-    play_level(4)
+    play_level(5)
 
 
 //
