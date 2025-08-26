@@ -956,12 +956,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi 
     puf.init(system) // it only works put in a single mode
-    //play_level(6)
-    show_start_scr()
-    while (true)
-        update_pads()
-        if pads[0].pressed & BUTTON_START
-            play_level(6)
+    play_level(6)
 
 
 //
@@ -1638,13 +1633,4 @@ fn show_level_intro_scr(U lvl)
 fn player_passed_level()
     puf.stop(0)
     play_level(current_level+1)
-
-fn show_start_scr()
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    my_x_scroll=0
-    load_level(@lev_start) // the name lev_level1 is defined in the levels.macrofab
-    ppu_reset_scroll_16(my_x_scroll, 0)
-    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
 
