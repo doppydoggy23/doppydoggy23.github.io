@@ -98,6 +98,16 @@ struct Snail
 ct U max_snails=10
 ct U MAX_SNAIL_FRAMES=60 // how many frames before snail color change
 
+struct Bird
+    UU map_x
+    UU map_y
+    UU initial_y
+    UU final_y
+    S y_speed
+    U status // 0-alive 1-killed and falling 2-killed and off the screen
+
+ct U max_birds=10
+
 
 vars /game_vars
     CCC/levels lvl1_mt_map // level 1 metatile map and its tiles correspondence
@@ -131,6 +141,7 @@ vars /game_vars
     // otro U[16] chr_sprt_table = U[16](37, 38, 53, 54, 39, 40, 55, 56,   231, 230, 247, 246, 229, 228, 245, 244) // chr table of player sprites 1 & 2
     U[20] e_chr_sprt_table = U[20](234, 235, 250, 251, 232, 233, 248, 249,     235, 234, 251, 250, 233, 232, 249, 248,      251, 250, 235, 234) // chr table of snake enemies sprites 1 & 2
     U[20] s_chr_sprt_table = U[20](224, 225, 240, 241, 172, 173, 188, 189,     225, 224, 241, 240, 173, 172, 189, 188,      241, 240, 225, 224) // chr table of snail enemies sprites 1 & 2
+    U[12] b_chr_sprt_table = U[12](110, 111, 126, 127,      78, 79, 94, 95,      127, 126, 111, 110) // chr table of bird enemies sprites 1 & 2
     U which_player_sprite_show = 0
     Bool is_player_looking_left = false
     Bool is_player_on_platform=false
@@ -149,6 +160,9 @@ vars /game_vars
     //snails
     Snail [max_snails] snails
     U level_num_snails
+    //birds
+    Bird [max_birds] birds
+    U level_num_birds
 
 
 /*
@@ -332,6 +346,7 @@ fn set_level1_vars()
     current_level=1
     level_num_spikes=0
     level_num_snails=0
+    level_num_birds=0
     //
 
 
@@ -353,6 +368,7 @@ fn set_level2_vars()
     current_level=2
     level_num_spikes=0
     level_num_snails=0
+    level_num_birds=0
     //enemies
     snake_enemies[0].initial_x=208 // (13,13)-(15,13)
     snake_enemies[0].map_x=snake_enemies[0].initial_x
@@ -431,6 +447,7 @@ fn set_level3_vars()
     current_level=3
     level_num_spikes=2
     level_num_snails=0
+    level_num_birds=0    
     //enemies
     snake_enemies[0].initial_x=224 // (14,12)-(17,12)
     snake_enemies[0].map_x=snake_enemies[0].initial_x
@@ -515,6 +532,7 @@ fn set_level4_vars()
     current_level=4
     level_num_spikes=2
     level_num_snails=3
+    level_num_birds=0
     //enemies
     snails[0].initial_x=240 // (15,7)-(19,7)
     snails[0].map_x=snails[0].initial_x
@@ -609,6 +627,7 @@ fn set_level5_vars()
     current_level=5
     level_num_spikes=6
     level_num_snails=4
+    level_num_birds=0
     //enemies
     snails[0].initial_x=928 // (58,12)-(63,12)
     snails[0].map_x=snails[0].initial_x
@@ -720,6 +739,7 @@ fn set_level6_vars()
     current_level=6
     level_num_spikes=2
     level_num_snails=1
+    level_num_birds=0
     //enemies 
     //snails
     snails[0].initial_x=896 // (56,13)-(61,13)
@@ -785,6 +805,43 @@ fn set_level6_vars()
     spikes[1].x_speed=1
     spikes[1].y_speed=0
     //
+
+fn set_level7_vars()
+    // rest of global of vars
+    my_x_scroll=0 // this points to the current h. scroll value
+    scr_bg_update_needed=false
+    player_window_x=10 // player character coords locally in screen (not inside map)
+    player_map_x=player_window_x // player char coordinates globally (in the map)
+    player_y=30 // only one global y coordinate for the player
+    is_player_jumping=false
+    count_frames_jumping=0
+    is_player_on_ground=false
+    which_player_sprite_show = 0
+    is_player_looking_left = false
+    level_num_snake_enemies=0
+    level_num_platforms=0
+    is_player_on_platform=false
+    current_level=7
+    level_num_spikes=0
+    level_num_snails=1
+    level_num_birds=1
+    //enemies 
+    //snails
+    snails[0].initial_x=256 // (16,11)-(22,11)
+    snails[0].map_x=snails[0].initial_x
+    snails[0].final_x=352 
+    snails[0].map_y=176
+    snails[0].x_speed=1
+    snails[0].status=0
+    snails[0].frame_counter=0
+    snails[0].is_green=true
+    //birds
+    birds[0].map_x=144 // 9,12
+    birds[0].initial_y=192
+    birds[0].map_y=birds[0].initial_y
+    birds[0].final_y=birds[0].initial_y-50
+    birds[0].y_speed=-1
+    birds[0].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
 
 
 // jump here to play level 1
@@ -906,6 +963,26 @@ mode play_level6()
         update_sprites()
         nmi // Wait for the next NMI
 
+// jump here to play level 7
+mode play_level7()
+: nmi main_nmi 
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_level(@lev_level7) // the name lev_levelX is defined in the levels.macrofab
+    set_level7_vars()
+    puf.play_track(current_level&1)
+    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+    fade_in_black(fade_period, my_palette)
+
+    while true
+        update_pads()
+        move_player() 
+        move_enemies() 
+        move_platforms()
+        update_sprites()
+        nmi // Wait for the next NMI
+
 //
 
 fn play_level (U lvl)
@@ -932,6 +1009,10 @@ fn play_level (U lvl)
     if (lvl == 6)
         show_level_intro_scr(6)
         goto mode play_level6()  // Initialize game by entering the play level mode
+        : preserves
+    if (lvl == 7)
+        show_level_intro_scr(7)
+        goto mode play_level7()  // Initialize game by entering the play level mode
         : preserves
     //
     show_level_intro_scr(1)
@@ -961,7 +1042,7 @@ mode main()
     while (true)
         update_pads()
         if pads[0].pressed & BUTTON_START
-            play_level(6)
+            play_level(7)
 
 
 //
@@ -1125,6 +1206,52 @@ fn update_sprites()
             set_oam_a(i, attrs)      // options
             i += 4
 
+    // draw birds
+    for U ei=0; ei<level_num_birds; ei+=1
+        if ( (birds[ei].status < 2) && (birds[ei].map_x > my_x_scroll) && ((birds[ei].map_x+enemy_char_width) < (my_x_scroll+256)) )
+            UU tex=birds[ei].map_x-my_x_scroll
+            U ex=tex.a
+            U ey=birds[ei].map_y.a
+            U attrs=2 // https://www.nesdev.org/wiki/PPU_OAM
+/*            if (snails[ei].is_green)
+                attrs=2
+            U which_sprite=(snails[ei].map_x.a>>4)&1
+            //
+            if (snails[ei].x_speed < 0) // going left
+                attrs|=%01000000 // flip h
+                which_sprite+=2
+            //
+            if (snails[ei].status == 1) //falling enemy
+                attrs|=%11000000 // flip h&v
+                which_sprite=4 // flip h&v 
+*/
+            U which_sprite=(birds[ei].map_y.a>>4)&1
+            which_sprite<<=2
+            if (birds[ei].status == 1) //falling enemy
+                attrs|=%11000000 // flip v&h
+                which_sprite=8 // flip v&h
+
+            //
+            set_oam_x(i, ex)     // x-position
+            set_oam_y(i, ey) // y-position
+            set_oam_p(i, b_chr_sprt_table[which_sprite])    // tile
+            set_oam_a(i, attrs)      // options
+            i += 4
+            set_oam_x(i, ex+8)     // x-position
+            set_oam_y(i, ey) // y-position
+            set_oam_p(i, b_chr_sprt_table[which_sprite+1])    // tile
+            set_oam_a(i, attrs)      // options
+            i += 4
+            set_oam_x(i, ex)     // x-position
+            set_oam_y(i, ey+8) // y-position
+            set_oam_p(i, b_chr_sprt_table[which_sprite+2])    // tile
+            set_oam_a(i, attrs)      // options
+            i += 4
+            set_oam_x(i, ex+8)     // x-position
+            set_oam_y(i, ey+8) // y-position
+            set_oam_p(i, b_chr_sprt_table[which_sprite+3])    // tile
+            set_oam_a(i, attrs)      // options
+            i += 4
 
     // Clear the remainder of OAM
     hide_oam(i)
@@ -1257,7 +1384,15 @@ fn move_enemies()
                 snails[i].x_speed=1
             if (snails[i].map_x >= snails[i].final_x)
                 snails[i].x_speed=-1
-
+    //
+    for U i=0; i<level_num_birds; i+=1
+        if (birds[i].status == 0)
+            birds[i].map_y+=birds[i].y_speed
+            //
+            if (birds[i].map_y >= birds[i].initial_y)
+                birds[i].y_speed=-1
+            if (birds[i].map_y <= birds[i].final_y)
+                birds[i].y_speed=1
 
     // check if player crushed an enemy, killing it
 /*OLD    for U i=0; i<level_num_snake_enemies; i+=1
@@ -1267,6 +1402,7 @@ fn move_enemies()
     // check if all enemies are crushed, thus winning
     U curr_lvl_num_snakes_killed=0
     U curr_lvl_num_snails_killed=0
+    U curr_lvl_num_birds_killed=0
     for U i=0; i<level_num_snake_enemies; i+=1
         if (snake_enemies[i].status > 0)
             curr_lvl_num_snakes_killed+=1
@@ -1275,7 +1411,11 @@ fn move_enemies()
         if (snails[i].status > 0)
             curr_lvl_num_snails_killed+=1
     //
-    if ((curr_lvl_num_snakes_killed+curr_lvl_num_snails_killed) >= (level_num_snake_enemies+level_num_snails))
+    for U i=0; i<level_num_birds; i+=1
+        if (birds[i].status > 0)
+            curr_lvl_num_birds_killed+=1
+    //
+    if ((curr_lvl_num_snakes_killed+curr_lvl_num_snails_killed+curr_lvl_num_birds_killed) >= (level_num_snake_enemies+level_num_snails+level_num_birds))
         wait(PLAYER_WON_WAIT)
         player_passed_level()
 
@@ -1306,6 +1446,19 @@ fn move_enemies()
                     puf.play_sfx(SFX_PLAYER_KILL) // enemy killed the player
                     wait(PLAYER_KILLED_WAIT)
                     player_was_killed()
+    // birds
+    for U i=0; i<level_num_birds; i+=1
+        if (birds[i].status == 0)
+            if ( intersect(player_map_x+enemy_tolerance, player_y+enemy_tolerance, player_map_x+player_char_width-enemy_tolerance, player_y+player_char_height-enemy_tolerance, 
+                birds[i].map_x, birds[i].map_y, birds[i].map_x+enemy_char_width, birds[i].map_y+enemy_char_height) )
+                //
+                if ((player_y+player_char_height) < (birds[i].map_y+5))
+                    birds[i].status=1 // player killed enemy
+                    puf.play_sfx(SFX_ENEMY_KILL)
+                else
+                    puf.play_sfx(SFX_PLAYER_KILL) // enemy killed the player
+                    wait(PLAYER_KILLED_WAIT)
+                    player_was_killed()
 
 
     // check if a dead enemy has to fall until it dissapears
@@ -1321,6 +1474,12 @@ fn move_enemies()
             snails[i].map_y+=1
             if (snails[i].map_y >= 240)
                 snails[i].status=2 // dead and no more movements
+    //birds
+    for U i=0; i<level_num_birds; i+=1
+        if (birds[i].status == 1)
+            birds[i].map_y+=1
+            if (birds[i].map_y >= 240)
+                birds[i].status=2 // dead and no more movements
     
     // move spikes
     for U i=0; i<level_num_spikes; i+=1
