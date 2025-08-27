@@ -823,8 +823,8 @@ fn set_level7_vars()
     is_player_on_platform=false
     current_level=7
     level_num_spikes=0
-    level_num_snails=1
-    level_num_birds=1
+    level_num_snails=4
+    level_num_birds=3
     //enemies 
     //snails
     snails[0].initial_x=256 // (16,11)-(22,11)
@@ -835,6 +835,34 @@ fn set_level7_vars()
     snails[0].status=0
     snails[0].frame_counter=0
     snails[0].is_green=true
+    //
+    snails[1].initial_x=512 // (32,4)-(42,4)
+    snails[1].map_x=snails[1].initial_x
+    snails[1].final_x=672 
+    snails[1].map_y=64
+    snails[1].x_speed=1
+    snails[1].status=0
+    snails[1].frame_counter=0
+    snails[1].is_green=true
+    //
+    snails[2].initial_x=560 // (35,9)-(43,9)
+    snails[2].map_x=snails[2].initial_x
+    snails[2].final_x=688 
+    snails[2].map_y=144
+    snails[2].x_speed=1
+    snails[2].status=0
+    snails[2].frame_counter=0
+    snails[2].is_green=true
+    //
+    snails[3].initial_x=512 // (32,14)-(42,14)
+    snails[3].map_x=snails[3].initial_x
+    snails[3].final_x=672 
+    snails[3].map_y=208
+    snails[3].x_speed=1
+    snails[3].status=0
+    snails[3].frame_counter=0
+    snails[3].is_green=true
+    //
     //birds
     birds[0].map_x=144 // 9,12
     birds[0].initial_y=192
@@ -842,6 +870,21 @@ fn set_level7_vars()
     birds[0].final_y=birds[0].initial_y-50
     birds[0].y_speed=-1
     birds[0].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
+    //
+    birds[1].map_x=864 // 54,12
+    birds[1].initial_y=192
+    birds[1].map_y=birds[1].initial_y
+    birds[1].final_y=birds[1].initial_y-50
+    birds[1].y_speed=-1
+    birds[1].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
+    //
+    birds[2].map_x=960 // 60,12
+    birds[2].initial_y=192
+    birds[2].map_y=birds[2].initial_y
+    birds[2].final_y=birds[2].initial_y-50
+    birds[2].y_speed=-1
+    birds[2].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
+    //
 
 
 // jump here to play level 1
