@@ -5,7 +5,7 @@ realized too late and my collision detection code is basically a workarround.
 
 //ToDo: if we remove the (+enemy_char_width) from visibility check of enemies and activate no draw of row 0, it's smoother
 // ToDo: in the intersect fucntion, check if the second is within the first rectangle too, or use pubby's code
-// ToDo: remove the had-coded value when checking if a player crushed an enemy. It works, but it's ugly
+// ToDo: remove the hard-coded value when checking if a player crushed an enemy. It works, but it's ugly
 // ToDo: is it normal behaviour to get screen artifacts if I stop the music in the middle of an sfx?
 // ToDo: remove player_x_move_inc ?
 
@@ -886,6 +886,86 @@ fn set_level7_vars()
     birds[2].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
     //
 
+fn set_level8_vars()
+    // rest of global of vars
+    my_x_scroll=0 // this points to the current h. scroll value
+    scr_bg_update_needed=false
+    player_window_x=10 // player character coords locally in screen (not inside map)
+    player_map_x=player_window_x // player char coordinates globally (in the map)
+    player_y=30 // only one global y coordinate for the player
+    is_player_jumping=false
+    count_frames_jumping=0
+    is_player_on_ground=false
+    which_player_sprite_show = 0
+    is_player_looking_left = false
+    level_num_snake_enemies=0
+    level_num_platforms=0
+    is_player_on_platform=false
+    current_level=8
+    level_num_spikes=1
+    level_num_snails=3
+    level_num_birds=3
+    //enemies 
+    //snails
+    snails[0].initial_x=544 // (34,9)-(38,9)
+    snails[0].map_x=snails[0].initial_x
+    snails[0].final_x=608 
+    snails[0].map_y=144
+    snails[0].x_speed=1
+    snails[0].status=0
+    snails[0].frame_counter=0
+    snails[0].is_green=true
+    //
+    snails[1].initial_x=656 // (41,9)-(45,9)
+    snails[1].map_x=snails[1].initial_x
+    snails[1].final_x=720 
+    snails[1].map_y=144
+    snails[1].x_speed=1
+    snails[1].status=0
+    snails[1].frame_counter=0
+    snails[1].is_green=true
+    //
+    snails[2].initial_x=912 // (57,6)-(63,6)
+    snails[2].map_x=snails[2].initial_x
+    snails[2].final_x=1008 
+    snails[2].map_y=96
+    snails[2].x_speed=1
+    snails[2].status=0
+    snails[2].frame_counter=0
+    snails[2].is_green=true
+    //
+    //birds
+    birds[0].map_x=128 // 8,12
+    birds[0].initial_y=192
+    birds[0].map_y=birds[0].initial_y
+    birds[0].final_y=birds[0].initial_y-50
+    birds[0].y_speed=-1
+    birds[0].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
+    //
+    birds[1].map_x=624 // 39,12
+    birds[1].initial_y=192
+    birds[1].map_y=birds[1].initial_y
+    birds[1].final_y=birds[1].initial_y-50
+    birds[1].y_speed=-1
+    birds[1].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
+    //
+    birds[2].map_x=848 // 53,9
+    birds[2].initial_y=144
+    birds[2].map_y=birds[2].initial_y
+    birds[2].final_y=birds[2].initial_y-50
+    birds[2].y_speed=-1
+    birds[2].status=0 // 0-alive 1-killed and falling 2-killed and off the screen
+    //
+    //spikes
+    spikes[0].initial_x=64 // 4,12 12,12 
+    spikes[0].initial_y=192 
+    spikes[0].map_x=spikes[0].initial_x
+    spikes[0].map_y=spikes[0].initial_y
+    spikes[0].final_x=192
+    spikes[0].final_y=spikes[0].initial_y
+    spikes[0].x_speed=1
+    spikes[0].y_speed=0
+
 
 // jump here to play level 1
 mode play_level1()
@@ -1026,6 +1106,26 @@ mode play_level7()
         update_sprites()
         nmi // Wait for the next NMI
 
+// jump here to play level 8
+mode play_level8()
+: nmi main_nmi 
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_level(@lev_level8) // the name lev_levelX is defined in the levels.macrofab
+    set_level8_vars()
+    puf.play_track(current_level&1)
+    {PPUCTRL}(PPUCTRL_NMI_ON)// Re-enable NMI
+    fade_in_black(fade_period, my_palette)
+
+    while true
+        update_pads()
+        move_player() 
+        move_enemies() 
+        move_platforms()
+        update_sprites()
+        nmi // Wait for the next NMI
+
 //
 
 fn play_level (U lvl)
@@ -1057,6 +1157,10 @@ fn play_level (U lvl)
         show_level_intro_scr(7)
         goto mode play_level7()  // Initialize game by entering the play level mode
         : preserves
+    if (lvl == 8)
+        show_level_intro_scr(8)
+        goto mode play_level8()  // Initialize game by entering the play level mode
+        : preserves
     //
     show_level_intro_scr(1)
     goto mode play_level1()  // by default, go to level 1
@@ -1085,7 +1189,7 @@ mode main()
     while (true)
         update_pads()
         if pads[0].pressed & BUTTON_START
-            play_level(7)
+            play_level(1)
 
 
 //
@@ -1256,18 +1360,6 @@ fn update_sprites()
             U ex=tex.a
             U ey=birds[ei].map_y.a
             U attrs=2 // https://www.nesdev.org/wiki/PPU_OAM
-/*            if (snails[ei].is_green)
-                attrs=2
-            U which_sprite=(snails[ei].map_x.a>>4)&1
-            //
-            if (snails[ei].x_speed < 0) // going left
-                attrs|=%01000000 // flip h
-                which_sprite+=2
-            //
-            if (snails[ei].status == 1) //falling enemy
-                attrs|=%11000000 // flip h&v
-                which_sprite=4 // flip h&v 
-*/
             U which_sprite=(birds[ei].map_y.a>>4)&1
             which_sprite<<=2
             if (birds[ei].status == 1) //falling enemy
@@ -1437,11 +1529,6 @@ fn move_enemies()
             if (birds[i].map_y <= birds[i].final_y)
                 birds[i].y_speed=1
 
-    // check if player crushed an enemy, killing it
-/*OLD    for U i=0; i<level_num_snake_enemies; i+=1
-        if (did_crush_enemy(i))
-                snake_enemies[i].status=1
-*/
     // check if all enemies are crushed, thus winning
     U curr_lvl_num_snakes_killed=0
     U curr_lvl_num_snails_killed=0
@@ -1738,14 +1825,6 @@ fn intersect (UU r1x1, UU r1y1, UU r1x2, UU r1y2, UU r2x1, UU r2y1, UU r2x2, UU 
             return true
     return false
 
-// returns if the player crushed an enemy
-/* REMOVE? fn did_crush_enemy(U i) Bool
-    if ( ((player_map_x > snake_enemies[i].map_x) && (player_map_x < (snake_enemies[i].map_x+enemy_char_width))) ||
-        (((player_map_x+player_char_width) > snake_enemies[i].map_x) && ((player_map_x+player_char_width) < (snake_enemies[i].map_x+enemy_char_width))) )
-        if ( ((player_y+player_char_height) >= snake_enemies[i].map_y) && ((player_y+player_char_height) <= (snake_enemies[i].map_y+enemy_tolerance)) )
-            return true
-    return false
-*/
 fn button_left_pressed()
     is_player_looking_left=true
     if (!did_touch_wall_left())
