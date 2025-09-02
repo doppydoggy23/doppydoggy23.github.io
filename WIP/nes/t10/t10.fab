@@ -139,18 +139,28 @@ mode main()
     // Wait forever, one frame at a time:
     while true
         update_pads()
-        //move_player() 
+        move_player() 
         update_sprites()
         nmi // Wait for the next NMI
+
+fn move_player ()
+    if pads[0].held & BUTTON_LEFT
+        ball.xpos -= 1
+    if pads[0].held & BUTTON_RIGHT
+        ball.xpos += 1
+    if pads[0].held & BUTTON_UP
+        ball.ypos -= 1
+    if pads[0].held & BUTTON_DOWN
+        ball.ypos += 1
 
 fn update_sprites()
     // Our stack index into OAM:
     U i = 0
 
     // update balls position
-    ball.xpos+=ball.xinc
+/*DEBUG    ball.xpos+=ball.xinc
     ball.ypos+=ball.yinc
-
+*/
     // check collisions
     if get_metatile_at_pix(ball.xpos, ball.ypos) > 0
         collision_col=(ball.xpos>>4)
@@ -248,6 +258,54 @@ fn manage_collision (U col_col, U col_row)
         collision_row=col_row
         updated_metatile=1 // garbage BG
         is_collision_pending=true
+        U coll_x=col_col<<4
+        U coll_y=col_row<<4
+/*DEBUG        if (overlap(make_rect(coll_x+1,coll_y+1, 15, 2),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, upper side
+            updated_metatile=10 // convert it to: only lower brick
+            ball.yinc=-1 // bounce up
+            return
+*/
+/* WHY ONLY THIS WORKS        if (ball.xpos>=coll_x)&&(ball.xpos<=(coll_x+15)) || ((ball.xpos+8)>=coll_x)&&((ball.xpos+8)<=(coll_x+15))
+            if ((ball.ypos<coll_y)&&((ball.ypos+8)<=coll_y+2))
+                updated_metatile=10 // convert it to: only lower brick
+                ball.yinc=-1 // bounce up
+                return
+*/        //
+
+
+
+
+ /* DEBUG       if (overlap(make_rect(coll_x+1,coll_y+1+8+6, 15, 2),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, lower side
+            updated_metatile=9 // convert it to: only upper brick
+            ball.yinc=+1 // bounce down
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1, 2, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, left side
+            updated_metatile=10 // convert it to: only lower brick
+            ball.xinc=-1 // bounce left
+            return
+        //
+        if (overlap(make_rect(coll_x+1+13,coll_y+1, 2, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, right side
+            updated_metatile=10 // convert it to: only lower brick
+            ball.xinc=1 // bounce right
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8, 2, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, left side
+            updated_metatile=9 // convert it to: only upper brick
+            ball.xinc=-1 // bounce left
+            return
+        //
+        if (overlap(make_rect(coll_x+1+13,coll_y+1+8, 2, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, right side
+            updated_metatile=9 // convert it to: only upper brick
+            ball.xinc=1 // bounce right
+            return
+        //
+*/
+        if ( rect_overlap(coll_x+1,coll_y+3, coll_x+15, coll_y+1, ball.xpos, ball.ypos+8, ball.xpos+8, ball.ypos) ) //upper brick, upper side
+            updated_metatile=10 // convert it to: only lower brick
+            ball.yinc=-1 // bounce up
+            return
+
         return
     //
     if (col_col==0)
@@ -259,3 +317,13 @@ fn manage_collision (U col_col, U col_row)
     if (col_row==14)
         ball.yinc=-1
     
+/*
+Rectangle 1 (rec1): defined by its bottom-left corner (x1, y1) and top-right corner (x2, y2). 
+Rectangle 2 (rec2): defined by its bottom-left corner (x3, y3) and top-right corner (x4, y4). 
+*/
+fn rect_overlap (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
+    return !((x4 <= x1) || (x3 >= x2) || (y4 <= y1) || (y3 >= y2))
+
+/*fn rect_overlap (U x1, U y2, U x2, U y1, U x3, U y4, U x4, U y3) Bool
+    return !(x4 <= x1 || x3 >= x2 || y4 <= y1 || y3 >= y2)
+*/
