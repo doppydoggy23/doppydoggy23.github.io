@@ -24,10 +24,9 @@ vars /game_vars
 
     // we temporary need to store the collision 
     // to update the map/GFX mem during VBLANK
-    Bool is_collision_pending=false
-    U collision_col
-    U collision_row
-    U updated_metatile
+    //Bool is_collision_pending=false
+    //U collision_col
+    //U collision_row
 
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
@@ -110,10 +109,10 @@ fn load_screen(CCC/levels my_lvl_pointer)
 
 nmi main_nmi()
     // we need to update GFXs while NMI, so we do this now
-    if is_collision_pending
-        set_metatile_at_colrow(collision_col, collision_row, updated_metatile)
+/*    if is_collision_pending
+        set_metatile_at_colrow(collision_col, collision_row, TOUCHED_WALL_MT)
         is_collision_pending=false
-
+*/
     // Update OAM and poll the pads:
     ppu_upload_oam_poll_pads(0)
 
@@ -152,22 +151,16 @@ fn update_sprites()
     ball.ypos+=ball.yinc
 
     // check collisions
-    if get_metatile_at_pix(ball.xpos, ball.ypos) > 0
-        collision_col=(ball.xpos>>4)
-        collision_row=(ball.ypos>>4)
-        manage_collision (collision_col, collision_row)
-    if get_metatile_at_pix((ball.xpos+8), ball.ypos) > 0
-        collision_col=((ball.xpos+8)>>4)
-        collision_row=(ball.ypos>>4)
-        manage_collision (collision_col, collision_row)
-    if get_metatile_at_pix(ball.xpos, (ball.ypos+8)) > 0
-        collision_col=(ball.xpos>>4)
-        collision_row=((ball.ypos+8)>>4)
-        manage_collision (collision_col, collision_row)
-    if get_metatile_at_pix((ball.xpos+8), (ball.ypos+8)) > 0
-        collision_col=((ball.xpos+8)>>4)
-        collision_row=((ball.ypos+8)>>4)
-        manage_collision (collision_col, collision_row)
+    if get_metatile_at_pix((ball.xpos+4), ball.ypos) > 0
+        ball.yinc=1
+        //collision_col=((balls_pos_x[n])>>4)
+        //collision_row=(balls_pos_y[n]>>4)
+    if get_metatile_at_pix((ball.xpos+4), (ball.ypos+8)) > 0
+        ball.yinc=-1
+    if get_metatile_at_pix(ball.xpos, (ball.ypos+4)) > 0
+        ball.xinc=1
+    if get_metatile_at_pix((ball.xpos+8), (ball.ypos+4)) > 0
+        ball.xinc=-1
 
     // Push sprites
     set_oam_x(i, ball.xpos)     // x-position
@@ -186,12 +179,6 @@ fn get_metatile_at_pix (U px, U py) U
     UU lvlmtm=(((py>>4)<<4)+(px>>4))
     U t=level_mt_map{lvlmtm}
     return t
-/*
-
-returns the map metatile at screen column/row
-*/
-fn get_metatile_at_col_row (U col, U row) U
-    return level_mt_map{(row<<4)+col}
 
 /*
 Sets the row,col metatile to a new value.
@@ -239,23 +226,3 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
     ppu_reset_addr($2000+960+attr_addr_disp)
     {PPUDATA}(new_attr)
 
-// manages collision with a metatile at col/row
-fn manage_collision (U col_col, U col_row)
-    U colli_metatile=get_metatile_at_col_row(col_col, col_row)
-    //
-    if (colli_metatile==11) // two 8-wide horizontal blocks
-        collision_col=col_col
-        collision_row=col_row
-        updated_metatile=1 // garbage BG
-        is_collision_pending=true
-        return
-    //
-    if (col_col==0)
-        ball.xinc=1
-    if (col_col==15)
-        ball.xinc=-1
-    if (col_row==0)
-        ball.yinc=1
-    if (col_row==14)
-        ball.yinc=-1
-    
