@@ -158,9 +158,9 @@ fn update_sprites()
     U i = 0
 
     // update balls position
-/*DEBUG    ball.xpos+=ball.xinc
+    ball.xpos+=ball.xinc
     ball.ypos+=ball.yinc
-*/
+
     // check collisions
     U my_collision_col
     U my_collision_row
@@ -266,17 +266,6 @@ fn manage_collision (U col_col, U col_row)
             collision_row=col_row
             is_collision_pending=true
             return
-
-/* WHY ONLY THIS WORKS        if (ball.xpos>=coll_x)&&(ball.xpos<=(coll_x+15)) || ((ball.xpos+8)>=coll_x)&&((ball.xpos+8)<=(coll_x+15))
-            if ((ball.ypos<coll_y)&&((ball.ypos+8)<=coll_y+2))
-                updated_metatile=10 // convert it to: only lower brick
-                ball.yinc=-1 // bounce up
-                return
-*/        //
-
-
-
-
         if (overlap(make_rect(coll_x+1,coll_y+1+8+4, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, lower side
             updated_metatile=9 // convert it to: only upper brick
             ball.yinc=+1 // bounce down
@@ -293,30 +282,106 @@ fn manage_collision (U col_col, U col_row)
             is_collision_pending=true
             return
         //
-        if (overlap(make_rect(coll_x+1+13,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, right side
+        if (overlap(make_rect(coll_x+1+12,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, right side
             updated_metatile=10 // convert it to: only lower brick
             ball.xinc=1 // bounce right
             collision_col=col_col
             collision_row=col_row
             is_collision_pending=true
             return
-/*        //
-        if (overlap(make_rect(coll_x+1,coll_y+1+8, 2, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, left side
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, left side
             updated_metatile=9 // convert it to: only upper brick
             ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
             return
         //
-        if (overlap(make_rect(coll_x+1+13,coll_y+1+8, 2, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, right side
+        if (overlap(make_rect(coll_x+1+12,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, right side
             updated_metatile=9 // convert it to: only upper brick
             ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
             return
         //
-*/
-/*DEBUG        if ( rect_overlap2(coll_x+1,coll_y+1, coll_x+15, coll_y+3, ball.xpos, ball.ypos, ball.xpos+8, ball.ypos+8) ) //upper brick, upper side
-            updated_metatile=10 // convert it to: only lower brick
-            ball.yinc=-1 // bounce up
+        return
+    //
+    if (colli_metatile==10) // only lower brick
+        U coll_x=col_col<<4
+        U coll_y=col_row<<4
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, upper side
+            updated_metatile=0 // convert it to: only upper brick
+            ball.yinc=-1 // bounce down
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
             return
-*/
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8+4, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, lower side
+            updated_metatile=0 // convert it to: only upper brick
+            ball.yinc=+1 // bounce down
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, left side
+            updated_metatile=0 // convert it to: only upper brick
+            ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1+12,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, right side
+            updated_metatile=0 // convert it to: only upper brick
+            ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        return
+    //
+    if (colli_metatile==9) // only upper brick blocks
+        U coll_x=col_col<<4
+        U coll_y=col_row<<4
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, upper side
+            updated_metatile=0 // convert it to: only lower brick
+            ball.yinc=-1 // bounce up
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+5, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, lower side
+            updated_metatile=0 // convert it to: only lower brick
+            ball.yinc=1 // bounce up
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, left side
+            updated_metatile=0 // convert it to: only lower brick
+            ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1+12,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, right side
+            updated_metatile=0 // convert it to: only lower brick
+            ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
         return
     //
     if (col_col==0)
