@@ -162,22 +162,24 @@ fn update_sprites()
     ball.ypos+=ball.yinc
 */
     // check collisions
+    U my_collision_col
+    U my_collision_row
     if get_metatile_at_pix(ball.xpos, ball.ypos) > 0
-        collision_col=(ball.xpos>>4)
-        collision_row=(ball.ypos>>4)
-        manage_collision (collision_col, collision_row)
+        my_collision_col=(ball.xpos>>4)
+        my_collision_row=(ball.ypos>>4)
+        manage_collision (my_collision_col, my_collision_row)
     if get_metatile_at_pix((ball.xpos+8), ball.ypos) > 0
-        collision_col=((ball.xpos+8)>>4)
-        collision_row=(ball.ypos>>4)
-        manage_collision (collision_col, collision_row)
+        my_collision_col=((ball.xpos+8)>>4)
+        my_collision_row=(ball.ypos>>4)
+        manage_collision (my_collision_col, my_collision_row)
     if get_metatile_at_pix(ball.xpos, (ball.ypos+8)) > 0
-        collision_col=(ball.xpos>>4)
-        collision_row=((ball.ypos+8)>>4)
-        manage_collision (collision_col, collision_row)
+        my_collision_col=(ball.xpos>>4)
+        my_collision_row=((ball.ypos+8)>>4)
+        manage_collision (my_collision_col, my_collision_row)
     if get_metatile_at_pix((ball.xpos+8), (ball.ypos+8)) > 0
-        collision_col=((ball.xpos+8)>>4)
-        collision_row=((ball.ypos+8)>>4)
-        manage_collision (collision_col, collision_row)
+        my_collision_col=((ball.xpos+8)>>4)
+        my_collision_row=((ball.ypos+8)>>4)
+        manage_collision (my_collision_col, my_collision_row)
 
     // Push sprites
     set_oam_x(i, ball.xpos)     // x-position
@@ -254,14 +256,14 @@ fn manage_collision (U col_col, U col_row)
     U colli_metatile=get_metatile_at_col_row(col_col, col_row)
     //
     if (colli_metatile==11) // two 8-wide horizontal blocks
-        collision_col=col_col
-        collision_row=col_row
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, upper side
             updated_metatile=10 // convert it to: only lower brick
             ball.yinc=-1 // bounce up
+            collision_col=col_col
+            collision_row=col_row
             is_collision_pending=true
             return
 
@@ -278,18 +280,24 @@ fn manage_collision (U col_col, U col_row)
         if (overlap(make_rect(coll_x+1,coll_y+1+8+4, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, lower side
             updated_metatile=9 // convert it to: only upper brick
             ball.yinc=+1 // bounce down
+            collision_col=col_col
+            collision_row=col_row
             is_collision_pending=true
             return
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, left side
             updated_metatile=10 // convert it to: only lower brick
             ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
             is_collision_pending=true
             return
         //
         if (overlap(make_rect(coll_x+1+13,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, right side
             updated_metatile=10 // convert it to: only lower brick
             ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
             is_collision_pending=true
             return
 /*        //
@@ -338,6 +346,5 @@ Rectangle 2 (rec2): defined by its bottom-left corner (x3, y3) and top-right cor
 /*fn rect_overlap (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
     return !((x4 <= x1) || (x3 >= x2) || (y4 <= y1) || (y3 >= y2))
 */
-/*fn rect_overlap (U x1, U y2, U x2, U y1, U x3, U y4, U x4, U y3) Bool
+fn rect_overlap (U x1, U y2, U x2, U y1, U x3, U y4, U x4, U y3) Bool
     return !(x4 <= x1 || x3 >= x2 || y4 <= y1 || y3 >= y2)
-*/
