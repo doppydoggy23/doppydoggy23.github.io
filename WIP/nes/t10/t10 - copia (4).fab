@@ -222,10 +222,6 @@ returns the map metatile at screen column/row
 fn get_metatile_at_col_row (U col, U row) U
     return level_mt_map{(row<<4)+col}
 
-// sets the new mt at ram map only (not gfx mem)
-fn set_mt_at_colrow_map_only (UU x, UU y, U new_mt)
-    level_mt_map{((y<<4)+x)}=new_mt
-
 /*
 Sets the row,col metatile to a new value.
 This is done in the collisions_map variable because
@@ -276,39 +272,132 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
 fn manage_collision (U col_col, U col_row)
     U colli_metatile=get_metatile_at_col_row(col_col, col_row)
     //
-    if (colli_metatile>=8)&&(colli_metatile<=11) // two 8-wide horizontal blocks metatile
+    if (colli_metatile==11) // two 8-wide horizontal blocks metatile
         U coll_x=col_col<<4
         U coll_y=col_row<<4
-        U set=(colli_metatile-8)
         //
-        if ((set & 1) > 0) // is there an upper block we have to check?
-            if (overlap(make_rect(coll_x+1,coll_y+1, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                set &= 2
-                if (set==0)
-                    updated_metatile=0
-                else
-                    updated_metatile=set+8
-                //ball.xinc=1 // bounce right
-                collision_col=col_col
-                collision_row=col_row
-                is_collision_pending=true
-                calculate_ball_bounce_b1 ( coll_x+1,coll_y+1 )
+        if (overlap(make_rect(coll_x+1,coll_y+1, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, upper side
+            updated_metatile=10 // convert it to: only lower brick
+            ball.yinc=-1 // bounce up
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        if (overlap(make_rect(coll_x+1,coll_y+1+8+4, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, lower side
+            updated_metatile=9 // convert it to: only upper brick
+            ball.yinc=+1 // bounce down
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
         //
-        if (is_collision_pending) // this might not be necessary since the next frame will take care of it
-            set=(updated_metatile-8)
+        if (overlap(make_rect(coll_x+1,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, left side
+            updated_metatile=10 // convert it to: only lower brick
+            ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
         //
-        if ((set & 2) > 0) // is there a lower block we have to check?
-            if (overlap(make_rect(coll_x+1,coll_y+1+8, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                set &= 1
-                if (set==0)
-                    updated_metatile=0
-                else
-                    updated_metatile=set+8
-                //ball.xinc=1 // bounce right
-                collision_col=col_col
-                collision_row=col_row
-                is_collision_pending=true
-                calculate_ball_bounce_b1 ( coll_x+1,coll_y+1+8 )
+        if (overlap(make_rect(coll_x+1+12,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, right side
+            updated_metatile=10 // convert it to: only lower brick
+            ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, left side
+            updated_metatile=9 // convert it to: only upper brick
+            ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1+12,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, right side
+            updated_metatile=9 // convert it to: only upper brick
+            ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        return
+    //
+    if (colli_metatile==10) // only lower brick metatile
+        U coll_x=col_col<<4
+        U coll_y=col_row<<4
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, upper side
+            updated_metatile=0 // convert it to:blank
+            ball.yinc=-1 // bounce down
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8+4, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, lower side
+            updated_metatile=0 // convert it to: blank
+            ball.yinc=+1 // bounce down
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, left side
+            updated_metatile=0 // convert it to: blank
+            ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1+12,coll_y+1+8, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower brick, right side
+            updated_metatile=0 // convert it to: blank
+            ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        return
+    //
+    if (colli_metatile==9) // only upper brick metatile
+        U coll_x=col_col<<4
+        U coll_y=col_row<<4
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, upper side
+            updated_metatile=0 // convert it to: blank
+            ball.yinc=-1 // bounce up
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1+5, 15, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, lower side
+            updated_metatile=0 // convert it to: blank
+            ball.yinc=1 // bounce up
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, left side
+            updated_metatile=0 // convert it to: blank
+            ball.xinc=-1 // bounce left
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
+        //
+        if (overlap(make_rect(coll_x+1+12,coll_y+1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper brick, right side
+            updated_metatile=0 // convert it to: blank
+            ball.xinc=1 // bounce right
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
+            return
         //
         return
     //
@@ -341,18 +430,3 @@ Rectangle 2 (rec2): defined by its bottom-left corner (x3, y3) and top-right cor
 */
 fn rect_overlap (U x1, U y2, U x2, U y1, U x3, U y4, U x4, U y3) Bool
     return !(x4 <= x1 || x3 >= x2 || y4 <= y1 || y3 >= y2)
-
-// calculates the boucing of the ball once it hits a block type b1 (1x2)
-fn calculate_ball_bounce_b1 (U x1, U y1)
-    if (overlap(make_rect(x1, y1, 14, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
-        ball.yinc=-1 // bounce up
-        return
-    if (overlap(make_rect(x1, y1+6, 14, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower side
-        ball.yinc=1 // bounce up
-        return
-    if (overlap(make_rect(x1, y1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //left side
-        ball.xinc=-1 // bounce left
-        return
-    if (overlap(make_rect(x1+14, y1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //right side
-        ball.xinc=1 // bounce right
-        return
