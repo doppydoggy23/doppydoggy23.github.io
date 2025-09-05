@@ -344,7 +344,7 @@ fn rect_overlap (U x1, U y2, U x2, U y1, U x3, U y4, U x4, U y3) Bool
 
 // calculates the boucing of the ball once it hits a block type b1 (1x2)
 fn calculate_ball_bounce_b1 (U x1, U y1)
-/*OLD    if (overlap(make_rect(x1, y1, 14, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
+    if (overlap(make_rect(x1, y1, 14, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
         ball.yinc=-1 // bounce up
         //return
     if (overlap(make_rect(x1, y1+6, 14, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower side
@@ -356,34 +356,3 @@ fn calculate_ball_bounce_b1 (U x1, U y1)
     if (overlap(make_rect(x1+14, y1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //right side
         ball.xinc=1 // bounce right
         //return
-*/    
-    Bool up=false
-    Bool down=false
-    Bool left=false
-    Bool right=false
-    // first the sides
-    if (overlap(make_rect(x1+1, y1, 12, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
-        ball.yinc=-1 // bounce up
-        up=true
-    if (overlap(make_rect(x1+1, y1+6, 12, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower side
-        ball.yinc=1 // bounce up
-        down=true
-    if (overlap(make_rect(x1, y1+1, 1, 4),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //left side
-        ball.xinc=-1 // bounce left
-        left=true
-    if (overlap(make_rect(x1+14, y1+1, 1, 4),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //right side
-        ball.xinc=1 // bounce right
-        right=true
-    // now the corners
-    if (overlap(make_rect(x1, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!left) ) //upper left corner
-        ball.xinc=-1 
-        ball.yinc=-1 
-    if (overlap(make_rect(x1, y1+6, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!left)) // lower left corner
-        ball.xinc=-1 
-        ball.yinc=1
-    if (overlap(make_rect(x1+14, y1+6, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!right)) // lower right corner
-        ball.yinc=1 
-        ball.xinc=1 
-    if (overlap(make_rect(x1+14, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!right) ) //upper right corner
-        ball.xinc=1 
-        ball.yinc=-1
