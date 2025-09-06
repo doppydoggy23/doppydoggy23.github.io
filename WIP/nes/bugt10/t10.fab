@@ -29,6 +29,9 @@ vars /game_vars
     U collision_row
     U updated_metatile
 
+    Bool did_calculate_different=false // this var will hold the value of true if [new_calculate_ball_bounce_b1] and [old_calculate_ball_bounce_b1] make a different calculation
+                                        // and display a zero (0) sprite at the top left corner of the screen
+
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
 Its only argument is a pointer to the levels struct 
@@ -164,23 +167,7 @@ fn update_sprites()
     // check collisions
     U my_collision_col
     U my_collision_row
-/*DEBUG    if get_metatile_at_pix(ball.xpos+4, ball.ypos) > 0 // front
-        my_collision_col=((ball.xpos+4)>>4)
-        my_collision_row=(ball.ypos>>4)
-        manage_collision (my_collision_col, my_collision_row)
-    if get_metatile_at_pix((ball.xpos), ball.ypos+4) > 0 //left
-        my_collision_col=(ball.xpos>>4)
-        my_collision_row=((ball.ypos+4)>>4)
-        manage_collision (my_collision_col, my_collision_row)
-    if get_metatile_at_pix(ball.xpos+8, (ball.ypos+4)) > 0 // right
-        my_collision_col=((ball.xpos+8)>>4)
-        my_collision_row=((ball.ypos+4)>>4)
-        manage_collision (my_collision_col, my_collision_row)
-    if get_metatile_at_pix((ball.xpos+4), (ball.ypos+8)) > 0 // back
-        my_collision_col=((ball.xpos+4)>>4)
-        my_collision_row=((ball.ypos+8)>>4)
-        manage_collision (my_collision_col, my_collision_row)
-*/
+
     if get_metatile_at_pix(ball.xpos, ball.ypos) > 0
         my_collision_col=(ball.xpos>>4)
         my_collision_row=(ball.ypos>>4)
@@ -204,6 +191,14 @@ fn update_sprites()
     set_oam_p(i, BALL_SPRITE)    // tile
     set_oam_a(i, 0)      // options
     i += 4
+
+    if (did_calculate_different)
+        set_oam_x(i, 0)     // x-position
+        set_oam_y(i, 0) // y-position
+        set_oam_p(i, 176)    // tile
+        set_oam_a(i, 0)      // options
+        i += 4
+
 
     // Clear the remainder of OAM
     hide_oam(i)
@@ -292,10 +287,17 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
-                calculate_ball_bounce_b1 ( coll_x+1,coll_y+1 )
-        //
-        if (is_collision_pending) // this might not be necessary since the next frame will take care of it
-            set=(updated_metatile-8)
+
+                // here is the bug, old_calculate_ball_bounce_b1 and new_calculate_ball_bounce_b1
+                // give different [ball.xinc] and [ball.yinc] values when they should be the same
+                old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
+                S old_xinc_value=ball.xinc
+                S old_yinc_value=ball.yinc
+                new_calculate_ball_bounce_b1 (coll_x+1,coll_y+1, 14, 6)
+                // show the warning zero (0) sprite at (0,0) corner
+                if (ball.xinc!=old_xinc_value)||(ball.yinc!=old_yinc_value)
+                    did_calculate_different=true                    
+
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
             if (overlap(make_rect(coll_x+1,coll_y+1+8, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
@@ -308,7 +310,17 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
-                calculate_ball_bounce_b1 ( coll_x+1,coll_y+1+8 )
+
+                // here is the bug, old_calculate_ball_bounce_b1 and new_calculate_ball_bounce_b1
+                // give different [ball.xinc] and [ball.yinc] values when they should be the same
+                old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
+                S old_xinc_value=ball.xinc
+                S old_yinc_value=ball.yinc
+                new_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8, 14, 6)
+                // show the warning zero (0) sprite at (0,0) corner
+                if (ball.xinc!=old_xinc_value)||(ball.yinc!=old_yinc_value)
+                    did_calculate_different=true                    
+
         //
         return
     //
@@ -321,42 +333,46 @@ fn manage_collision (U col_col, U col_row)
     if (col_row==14)
         ball.yinc=-1
 
-fn rect_overlap2 (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
-    if ((x1 < x3)&&(x2 < x3))
-        return false
-    if ((x1 > x4)&&(x2 > x4))
-        return false
-    if ((y1 < y3)&&(y2 < y3))
-        return false
-    if ((y1 > y4)&&(y2 > y4))
-        return false
-    return true
 
-/*
-Rectangle 1 (rec1): defined by its bottom-left corner (x1, y1) and top-right corner (x2, y2). 
-Rectangle 2 (rec2): defined by its bottom-left corner (x3, y3) and top-right corner (x4, y4). 
-*/
-/*fn rect_overlap (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
-    return !((x4 <= x1) || (x3 >= x2) || (y4 <= y1) || (y3 >= y2))
-*/
-fn rect_overlap (U x1, U y2, U x2, U y1, U x3, U y4, U x4, U y3) Bool
-    return !(x4 <= x1 || x3 >= x2 || y4 <= y1 || y3 >= y2)
 
-// calculates the boucing of the ball once it hits a block type b1 (1x2)
-fn calculate_ball_bounce_b1 (U x1, U y1)
-/*OLD    if (overlap(make_rect(x1, y1, 14, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
+// calculates the boucing of the ball once it hits a rectangular block 1x2
+// ToDo: possible compiler bug? why doesn't it work like old_calculate_ball_bounce_b1? DO NOT USE
+
+fn new_calculate_ball_bounce_b1 (U x1, U y1, U width, U height)
+    Bool up=false
+    Bool down=false
+    Bool left=false
+    Bool right=false
+    // first the sides
+    if (overlap(make_rect((x1+1), y1, (width-2), 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
         ball.yinc=-1 // bounce up
-        //return
-    if (overlap(make_rect(x1, y1+6, 14, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower side
+        up=true
+    if (overlap(make_rect((x1+1), (y1+height), (width-2), 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower side
         ball.yinc=1 // bounce up
-        //return
-    if (overlap(make_rect(x1, y1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //left side
+        down=true
+    if (overlap(make_rect(x1, (y1+1), 1, (height-2)),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //left side
         ball.xinc=-1 // bounce left
-        //return
-    if (overlap(make_rect(x1+14, y1, 1, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //right side
+        left=true
+    if (overlap(make_rect((x1+width), (y1+1), 1, (height-2)),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //right side
         ball.xinc=1 // bounce right
-        //return
-*/    
+        right=true
+    // now the corners
+    if (overlap(make_rect(x1, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!left) ) //upper left corner
+        ball.xinc=-1 
+        ball.yinc=-1 
+    if (overlap(make_rect(x1, (y1+height), 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!left)) // lower left corner
+        ball.xinc=-1 
+        ball.yinc=1
+    if (overlap(make_rect((x1+width), (y1+height), 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!right)) // lower right corner
+        ball.yinc=1 
+        ball.xinc=1 
+    if (overlap(make_rect((x1+width), y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!right) ) //upper right corner
+        ball.xinc=1 
+        ball.yinc=-1
+
+
+// calculates the boucing of the ball once it hits a rectangular block 1x2
+fn old_calculate_ball_bounce_b1 (U x1, U y1)
     Bool up=false
     Bool down=false
     Bool left=false
@@ -385,5 +401,38 @@ fn calculate_ball_bounce_b1 (U x1, U y1)
         ball.yinc=1 
         ball.xinc=1 
     if (overlap(make_rect(x1+14, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!right) ) //upper right corner
+        ball.xinc=1 
+        ball.yinc=-1
+
+// calculates the boucing of the ball once it hits a square block 2x2
+fn old_calculate_ball_bounce_b2 (U x1, U y1)
+    Bool up=false
+    Bool down=false
+    Bool left=false
+    Bool right=false
+    // first the sides
+    if (overlap(make_rect(x1+1, y1, 4, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
+        ball.yinc=-1 // bounce up
+        up=true
+    if (overlap(make_rect(x1+1, y1+6, 4, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower side
+        ball.yinc=1 // bounce up
+        down=true
+    if (overlap(make_rect(x1, y1+1, 1, 4),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //left side
+        ball.xinc=-1 // bounce left
+        left=true
+    if (overlap(make_rect(x1+6, y1+1, 1, 4),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //right side
+        ball.xinc=1 // bounce right
+        right=true
+    // now the corners
+    if (overlap(make_rect(x1, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!left) ) //upper left corner
+        ball.xinc=-1 
+        ball.yinc=-1 
+    if (overlap(make_rect(x1, y1+6, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!left)) // lower left corner
+        ball.xinc=-1 
+        ball.yinc=1
+    if (overlap(make_rect(x1+6, y1+6, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!right)) // lower right corner
+        ball.yinc=1 
+        ball.xinc=1 
+    if (overlap(make_rect(x1+6, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!right) ) //upper right corner
         ball.xinc=1 
         ball.yinc=-1
