@@ -363,60 +363,6 @@ fn manage_collision (U col_col, U col_row)
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1+8)
         //
         return
-    
-    // 1x1 blocks that take 3 transformations to break
-    if (colli_metatile==28) // 
-        U coll_x=col_col<<4
-        U coll_y=col_row<<4
-        //
-        if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            updated_metatile=0
-            collision_col=col_col
-            collision_row=col_row
-            is_collision_pending=true
-            old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
-        //
-        return
-    if (colli_metatile==29) // 
-        U coll_x=col_col<<4
-        U coll_y=col_row<<4
-        //
-        if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            updated_metatile=28
-            collision_col=col_col
-            collision_row=col_row
-            is_collision_pending=true
-            old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
-        //
-        return
-    if (colli_metatile==30) // 
-        U coll_x=col_col<<4
-        U coll_y=col_row<<4
-        //
-        if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            updated_metatile=29
-            collision_col=col_col
-            collision_row=col_row
-            is_collision_pending=true
-            old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
-        //
-        return
-
-    // 1x1 block that transforms into 4 mini blocks
-    if (colli_metatile==31) // two 8-wide horizontal blocks metatile
-        U coll_x=col_col<<4
-        U coll_y=col_row<<4
-        //
-        if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            updated_metatile=27
-            collision_col=col_col
-            collision_row=col_row
-            is_collision_pending=true
-            old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
-        //
-        return
-
-    //
     // to reach this point, the caller function must have detected a non-zero mt (collision detected)
     if (col_col==0)
         ball.xinc=1
@@ -518,7 +464,7 @@ fn old_calculate_ball_bounce_b1 (U x1, U y1)
         ball.xinc=1 
         ball.yinc=-1
 
-// calculates the boucing of the ball once it hits a small mini square block 2x2
+// calculates the boucing of the ball once it hits a square block 2x2
 fn old_calculate_ball_bounce_b2 (U x1, U y1)
     Bool up=false
     Bool down=false
@@ -548,38 +494,5 @@ fn old_calculate_ball_bounce_b2 (U x1, U y1)
         ball.yinc=1 
         ball.xinc=1 
     if (overlap(make_rect(x1+6, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!right) ) //upper right corner
-        ball.xinc=1 
-        ball.yinc=-1
-
-// calculates the boucing of the ball once it hits a square big block 1x1
-fn old_calculate_ball_bounce_b3 (U x1, U y1)
-    Bool up=false
-    Bool down=false
-    Bool left=false
-    Bool right=false
-    // first the sides
-    if (overlap(make_rect(x1+1, y1, 12, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //upper side
-        ball.yinc=-1 // bounce up
-        up=true
-    if (overlap(make_rect(x1+1, y1+14, 12, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //lower side
-        ball.yinc=1 // bounce up
-        down=true
-    if (overlap(make_rect(x1, y1+1, 1, 12),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //left side
-        ball.xinc=-1 // bounce left
-        left=true
-    if (overlap(make_rect(x1+14, y1+1, 1, 12),make_rect(ball.xpos,ball.ypos, 8, 8)) ) //right side
-        ball.xinc=1 // bounce right
-        right=true
-    // now the corners
-    if (overlap(make_rect(x1, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!left) ) //upper left corner
-        ball.xinc=-1 
-        ball.yinc=-1 
-    if (overlap(make_rect(x1, y1+14, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!left)) // lower left corner
-        ball.xinc=-1 
-        ball.yinc=1
-    if (overlap(make_rect(x1+14, y1+14, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!down) && (!right)) // lower right corner
-        ball.yinc=1 
-        ball.xinc=1 
-    if (overlap(make_rect(x1+14, y1, 1, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) && (!up) && (!right) ) //upper right corner
         ball.xinc=1 
         ball.yinc=-1
