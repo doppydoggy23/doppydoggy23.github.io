@@ -363,14 +363,14 @@ fn manage_collision (U col_col, U col_row)
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1+8)
         //
         return
-    //
+    // to reach this point, the caller function must have detected a non-zero mt (collision detected)
     if (col_col==0)
         ball.xinc=1
     if (col_col==15)
         ball.xinc=-1
     if (col_row==0)
         ball.yinc=1
-    if (col_row==14)
+    if (col_row>=14)
         ball.yinc=-1
 
 
