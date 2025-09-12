@@ -1,6 +1,4 @@
 
-//ToDo: There is a bug that, when 2 blocks are hit at the same time, since only one block can be updated in ram/PPU at a time, the collisions are calculated, but the block doesn't dissapear.
-
 mapfab(raw, "t10.mapfab", "chr", "palette", "metatiles", "level")
 //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
 
@@ -142,7 +140,6 @@ mode main()
     while true
         update_pads()
         move_player() 
-        update_game_elements()
         update_sprites()
         nmi // Wait for the next NMI
 
@@ -156,19 +153,39 @@ fn move_player ()
     if pads[0].held & BUTTON_DOWN
         ball.ypos += 1
 
-/*    if (pads[0].pressed & BUTTON_A)
+    if (pads[0].pressed & BUTTON_A)
         ball.xpos+=ball.xinc
         ball.ypos+=ball.yinc
-*/
 
-fn update_game_elements()
-    ball.xpos+=ball.xinc
+
+fn update_sprites()
+    // Our stack index into OAM:
+    U i = 0
+
+    // update balls position
+/*    ball.xpos+=ball.xinc
     ball.ypos+=ball.yinc
-
+*/
     // check collisions
     U my_collision_col
     U my_collision_row
-
+/*DEBUG    if get_metatile_at_pix(ball.xpos+4, ball.ypos) > 0 // front
+        my_collision_col=((ball.xpos+4)>>4)
+        my_collision_row=(ball.ypos>>4)
+        manage_collision (my_collision_col, my_collision_row)
+    if get_metatile_at_pix((ball.xpos), ball.ypos+4) > 0 //left
+        my_collision_col=(ball.xpos>>4)
+        my_collision_row=((ball.ypos+4)>>4)
+        manage_collision (my_collision_col, my_collision_row)
+    if get_metatile_at_pix(ball.xpos+8, (ball.ypos+4)) > 0 // right
+        my_collision_col=((ball.xpos+8)>>4)
+        my_collision_row=((ball.ypos+4)>>4)
+        manage_collision (my_collision_col, my_collision_row)
+    if get_metatile_at_pix((ball.xpos+4), (ball.ypos+8)) > 0 // back
+        my_collision_col=((ball.xpos+4)>>4)
+        my_collision_row=((ball.ypos+8)>>4)
+        manage_collision (my_collision_col, my_collision_row)
+*/
     if get_metatile_at_pix(ball.xpos, ball.ypos) > 0
         my_collision_col=(ball.xpos>>4)
         my_collision_row=(ball.ypos>>4)
@@ -185,11 +202,6 @@ fn update_game_elements()
         my_collision_col=((ball.xpos+8)>>4)
         my_collision_row=((ball.ypos+8)>>4)
         manage_collision (my_collision_col, my_collision_row)
-
-
-fn update_sprites()
-    // Our stack index into OAM:
-    U i = 0
 
     // Push sprites
     set_oam_x(i, ball.xpos)     // x-position
