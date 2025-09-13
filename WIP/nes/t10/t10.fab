@@ -1,5 +1,5 @@
 
-//ToDo: There is a bug that, when 2 blocks are hit at the same time, since only one block can be updated in ram/PPU at a time, the collisions are calculated, but the block doesn't dissapear.
+//ToDo: There is a bug that, when 2 blocks are hit at the same time, since currently only one block can be updated in ram/PPU at a frame, the collisions are calculated, but the block doesn't dissapear.
 
 mapfab(raw, "t10.mapfab", "chr", "palette", "metatiles", "level")
 //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
@@ -12,8 +12,19 @@ struct BallInfo
     S xinc
     S yinc
 
+ct U HBAR_MIN_X=16
+ct U HBAR_MAX_X=256-16-24
+ct U HBAR_X_SPEED=2
+ct U BAR1_Y=240-16
+ct U BAR1_DEFA_X=128-16
+
+struct Bar1Info
+    U xpos
+    U ypos
+
 vars /game_vars
     BallInfo ball
+    Bar1Info bar1
 
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
 
@@ -137,6 +148,9 @@ mode main()
     ball.yinc=-1
     ball.xpos=200
     ball.ypos=200
+    //
+    bar1.xpos=BAR1_DEFA_X
+    bar1.ypos=BAR1_Y
 
     // Wait forever, one frame at a time:
     while true
@@ -148,13 +162,21 @@ mode main()
 
 fn move_player ()
     if pads[0].held & BUTTON_LEFT
-        ball.xpos -= 1
+        //ball.xpos -= 1
+        if ((bar1.xpos-HBAR_X_SPEED)>=HBAR_MIN_X)
+            bar1.xpos-=HBAR_X_SPEED
+        else
+            bar1.xpos=HBAR_MIN_X
     if pads[0].held & BUTTON_RIGHT
-        ball.xpos += 1
+        //ball.xpos += 1
+        if ((bar1.xpos+HBAR_X_SPEED)<=HBAR_MAX_X)
+            bar1.xpos+=HBAR_X_SPEED
+        else
+            bar1.xpos=HBAR_MAX_X
     if pads[0].held & BUTTON_UP
-        ball.ypos -= 1
+        //ball.ypos -= 1
     if pads[0].held & BUTTON_DOWN
-        ball.ypos += 1
+        //ball.ypos += 1
 
 /*    if (pads[0].pressed & BUTTON_A)
         ball.xpos+=ball.xinc
@@ -186,16 +208,44 @@ fn update_game_elements()
         my_collision_row=((ball.ypos+8)>>4)
         manage_collision (my_collision_col, my_collision_row)
 
+    // bounce ball with margins
+    if (ball.xpos<=16)
+        set_xinc_pos_right()//ball.xinc=1
+    if (ball.xpos>=256-16-8)
+        set_xinc_neg_left()//ball.xinc=-1
+    if (ball.ypos<=16)
+        set_yinc_pos_down()//ball.yinc=1
+    if (ball.ypos>=240-8)
+        set_yinc_neg_up()//ball.yinc=-1
+
 
 fn update_sprites()
     // Our stack index into OAM:
     U i = 0
 
-    // Push sprites
+    // Push sprites, ball first
     set_oam_x(i, ball.xpos)     // x-position
     set_oam_y(i, ball.ypos) // y-position
     set_oam_p(i, BALL_SPRITE)    // tile
     set_oam_a(i, 0)      // options
+    i += 4
+
+    // now the bars
+    U barattrs=1
+    set_oam_x(i, bar1.xpos)     // x-position
+    set_oam_y(i, bar1.ypos) // y-position
+    set_oam_p(i, 4)    // tile
+    set_oam_a(i, barattrs)      // options
+    i += 4
+    set_oam_x(i, bar1.xpos+8)     // x-position
+    set_oam_y(i, bar1.ypos) // y-position
+    set_oam_p(i, 5)    // tile
+    set_oam_a(i, barattrs)      // options
+    i += 4
+    set_oam_x(i, bar1.xpos+16)     // x-position
+    set_oam_y(i, bar1.ypos) // y-position
+    set_oam_p(i, 6)    // tile
+    set_oam_a(i, barattrs)      // options
     i += 4
 
     // Clear the remainder of OAM
@@ -411,7 +461,7 @@ fn manage_collision (U col_col, U col_row)
 
     //
     // to reach this point, the caller function must have detected a non-zero mt (collision detected)
-    if (col_col==0)
+/*    if (col_col==0)
         set_xinc_pos_right()//ball.xinc=1
     if (col_col==15)
         set_xinc_neg_left()//ball.xinc=-1
@@ -419,7 +469,7 @@ fn manage_collision (U col_col, U col_row)
         set_yinc_pos_down()//ball.yinc=1
     if (col_row>=14)
         set_yinc_neg_up()//ball.yinc=-1
-
+*/
 
 fn rect_overlap2 (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
     if ((x1 < x3)&&(x2 < x3))
