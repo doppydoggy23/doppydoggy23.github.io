@@ -208,6 +208,11 @@ fn update_game_elements()
         my_collision_row=((ball.ypos+8)>>4)
         manage_collision (my_collision_col, my_collision_row)
 
+    // check if the ball hits the stick
+    if (overlap(make_rect(bar1.xpos, bar1.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )
+        set_yinc_neg_up() //ball.yinc=-1 // bounce up
+
+
     // bounce ball with margins
     if (ball.xpos<=16)
         set_xinc_pos_right()//ball.xinc=1
