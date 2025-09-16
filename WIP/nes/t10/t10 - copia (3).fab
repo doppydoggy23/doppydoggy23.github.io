@@ -1,6 +1,5 @@
 
 //ToDo: There is a bug that, when 2 blocks are hit at the same time, since currently only one block can be updated in ram/PPU at a frame, the collisions are calculated, but the block doesn't dissapear.
-//ToDo: There is a bug that, when the ball hits the bar, the ball moves slower than the stick, changing the angle several times if the stick is moving
 
 mapfab(raw, "t10.mapfab", "chr", "palette", "metatiles", "level")
 //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
@@ -12,13 +11,6 @@ struct BallInfo
     U ypos
     S xinc
     S yinc
-    U yinc_step //how many frames before we do an yinc+1
-    U yinc_step_counter //frame counter
-    U ball_speed_up_counter // frame counter
-    U ball_speed_up_factor // how many frames we speed up the ball to maintain the correct speed despite ballInfo.yinc_step
-    // for ball.yinc_step=0, ball.ball_speed_up_factor=5
-    // for ball.yinc_step=1, ball.ball_speed_up_factor=2
-    // for ball.yinc_step=2, ball.ball_speed_up_factor=0
 
 ct U HBAR_MIN_X=16
 ct U HBAR_MAX_X=256-16-24
@@ -33,7 +25,6 @@ struct Bar1Info
 vars /game_vars
     BallInfo ball
     Bar1Info bar1
-    U[3] speed_up_step_factor_table = U[3](5, 2, 0) 
 
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
 
@@ -157,10 +148,6 @@ mode main()
     ball.yinc=-1
     ball.xpos=200
     ball.ypos=200
-    ball.yinc_step=0
-    ball.ball_speed_up_factor=speed_up_step_factor_table[ball.yinc_step]
-    ball.yinc_step_counter=0
-    ball.ball_speed_up_counter=0
     //
     bar1.xpos=BAR1_DEFA_X
     bar1.ypos=BAR1_Y
@@ -196,13 +183,9 @@ fn move_player ()
         ball.ypos+=ball.yinc
 */
 
-fn update_ball ()
+fn update_game_elements()
     ball.xpos+=ball.xinc
-    if (ball.yinc_step_counter >= ball.yinc_step)
-        ball.ypos+=ball.yinc
-        ball.yinc_step_counter=0
-    else
-        ball.yinc_step_counter+=1
+    ball.ypos+=ball.yinc
 
     // check collisions
     U my_collision_col
@@ -226,23 +209,8 @@ fn update_ball ()
         manage_collision (my_collision_col, my_collision_row)
 
     // check if the ball hits the stick
-    if (overlap(make_rect(bar1.xpos, bar1.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
+    if (overlap(make_rect(bar1.xpos, bar1.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )
         set_yinc_neg_up() //ball.yinc=-1 // bounce up
-        // 
-        if (ball.xpos < bar1.xpos)
-            if (is_xinc_pos_right())
-                change_ball_angle (2)
-            else
-                change_ball_angle (1)
-            set_xinc_neg_left()
-        if (ball.xpos+8 > bar1.xpos+24)
-            if (is_xinc_neg_left())
-                change_ball_angle (2)
-            else
-                change_ball_angle (1)
-            set_xinc_pos_right()
-        if ( (ball.xpos >= (bar1.xpos+8-2)) && (ball.xpos <= (bar1.xpos+8+2)) )
-            change_ball_angle (0)
 
 
     // bounce ball with margins
@@ -254,17 +222,6 @@ fn update_ball ()
         set_yinc_pos_down()//ball.yinc=1
     if (ball.ypos>=240-8)
         set_yinc_neg_up()//ball.yinc=-1
-
-
-fn update_game_elements()
-    //
-    update_ball()
-    if (ball.ball_speed_up_counter >= ball.ball_speed_up_factor)
-        update_ball() 
-        ball.ball_speed_up_counter=0
-    else
-        ball.ball_speed_up_counter+=1
-    //
 
 
 fn update_sprites()
@@ -519,7 +476,6 @@ fn manage_collision (U col_col, U col_row)
         set_yinc_neg_up()//ball.yinc=-1
 */
 
-/*
 fn rect_overlap2 (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
     if ((x1 < x3)&&(x2 < x3))
         return false
@@ -530,7 +486,7 @@ fn rect_overlap2 (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
     if ((y1 > y4)&&(y2 > y4))
         return false
     return true
-*/
+
 /*
 Rectangle 1 (rec1): defined by its bottom-left corner (x1, y1) and top-right corner (x2, y2). 
 Rectangle 2 (rec2): defined by its bottom-left corner (x3, y3) and top-right corner (x4, y4). 
@@ -538,10 +494,9 @@ Rectangle 2 (rec2): defined by its bottom-left corner (x3, y3) and top-right cor
 /*fn rect_overlap (U x1, U y1, U x2, U y2, U x3, U y3, U x4, U y4) Bool
     return !((x4 <= x1) || (x3 >= x2) || (y4 <= y1) || (y3 >= y2))
 */
-/*
 fn rect_overlap (U x1, U y2, U x2, U y1, U x3, U y4, U x4, U y3) Bool
     return !(x4 <= x1 || x3 >= x2 || y4 <= y1 || y3 >= y2)
-*/
+
 // calculates the boucing of the ball once it hits a rectangular block 1x2
 // ToDo: possible compiler bug? why doesn't it work like old_calculate_ball_bounce_b1? DO NOT USE
 /*
@@ -688,22 +643,3 @@ fn set_xinc_neg_left()
 
 fn set_xinc_pos_right()
         ball.xinc=1 
-
-fn is_xinc_pos_right() Bool
-    if (ball.xinc > 0)
-        return true
-    return false
-
-fn is_xinc_neg_left() Bool
-    if (ball.xinc < 0)
-        return true
-    return false
-
-/*
-There are only 2 possible angles, 0, 1 or 2.
-Since we don't use floating point, we simulate non integer increments of ball.xpos and ball.ypos incrementing ball.ypos only every 0, 1, or 2 frames,
-therefore, we need to adjust the ball speed to maintain an aparently equal ball speed at all times.
-*/
-fn change_ball_angle (U angle)
-    ball.yinc_step=angle
-    ball.ball_speed_up_factor=speed_up_step_factor_table[ball.yinc_step]
