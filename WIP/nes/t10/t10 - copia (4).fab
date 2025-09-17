@@ -382,38 +382,35 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
 fn manage_collision (U col_col, U col_row)
     U colli_metatile=get_metatile_at_col_row(col_col, col_row)
     //
-    // pink blocks
-    //
     if (colli_metatile>=8)&&(colli_metatile<=11) // two 8-wide horizontal blocks metatile
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         U set=(colli_metatile-8)
+        //
         if ((set & 1) > 0) // is there an upper block we have to check?
             if (overlap(make_rect(coll_x+1,coll_y+1, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==1)
-                    set &= 2
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+8
-                    //ball.xinc=1 // bounce right
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
+                set &= 2
+                if (set==0)
+                    updated_metatile=0
+                else
+                    updated_metatile=set+8
+                //ball.xinc=1 // bounce right
+                collision_col=col_col
+                collision_row=col_row
+                is_collision_pending=true
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
             if (overlap(make_rect(coll_x+1,coll_y+1+8, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==1)
-                    set &= 1
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+8
-                    //ball.xinc=1 // bounce right
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
+                set &= 1
+                if (set==0)
+                    updated_metatile=0
+                else
+                    updated_metatile=set+8
+                //ball.xinc=1 // bounce right
+                collision_col=col_col
+                collision_row=col_row
+                is_collision_pending=true
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
@@ -423,71 +420,66 @@ fn manage_collision (U col_col, U col_row)
         U coll_y=col_row<<4
         U set=(colli_metatile-12)
         //
-        if ((set & 1) > 0) // upper left
+        if ((set & 1) > 0) // is there an upper block we have to check?
             if (overlap(make_rect(coll_x+1,coll_y+1, 6, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==1)
-                    set &= %1111110
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+12
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
+                set &= %1111110
+                if (set==0)
+                    updated_metatile=0
+                else
+                    updated_metatile=set+12
+                collision_col=col_col
+                collision_row=col_row
+                is_collision_pending=true
                 old_calculate_ball_bounce_b2 (coll_x+1,coll_y+1)
         //
-        if ((set & 2) > 0) // upper right
+        if ((set & 2) > 0) // is there a lower block we have to check?
             if (overlap(make_rect(coll_x+1+8,coll_y+1, 6, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==1)
-                    set &= %11111101
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+12
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
+                set &= %11111101
+                if (set==0)
+                    updated_metatile=0
+                else
+                    updated_metatile=set+12
+                collision_col=col_col
+                collision_row=col_row
+                is_collision_pending=true
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1)
         //
-        if ((set & 4) > 0) // lower left
+        if ((set & 4) > 0) // is there a lower block we have to check?
             if (overlap(make_rect(coll_x+1,coll_y+1+8, 6, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==1)
-                    set &= %11111011
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+12
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
+                set &= %11111011
+                if (set==0)
+                    updated_metatile=0
+                else
+                    updated_metatile=set+12
+                collision_col=col_col
+                collision_row=col_row
+                is_collision_pending=true
                 old_calculate_ball_bounce_b2 (coll_x+1,coll_y+1+8)
         //
-        if ((set & 8) > 0) // lower right
+        if ((set & 8) > 0) // is there a lower block we have to check?
             if (overlap(make_rect(coll_x+1+8,coll_y+1+8, 6, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==1)
-                    set &= %11110111
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+12
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
+                set &= %11110111
+                if (set==0)
+                    updated_metatile=0
+                else
+                    updated_metatile=set+12
+                collision_col=col_col
+                collision_row=col_row
+                is_collision_pending=true
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1+8)
         //
         return
-    //
+    
     // 1x1 blocks that take 3 transformations to break
     if (colli_metatile==28) // 
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            if (ball.color==1)
-                updated_metatile=0
-                collision_col=col_col
-                collision_row=col_row
-                is_collision_pending=true
+            updated_metatile=0
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -496,11 +488,10 @@ fn manage_collision (U col_col, U col_row)
         U coll_y=col_row<<4
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            if (ball.color==1)
-                updated_metatile=28
-                collision_col=col_col
-                collision_row=col_row
-                is_collision_pending=true
+            updated_metatile=28
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -509,99 +500,25 @@ fn manage_collision (U col_col, U col_row)
         U coll_y=col_row<<4
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            if (ball.color==1)
-                updated_metatile=29
-                collision_col=col_col
-                collision_row=col_row
-                is_collision_pending=true
+            updated_metatile=29
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
-    //
+
     // 1x1 block that transforms into 4 mini blocks
     if (colli_metatile==31) // two 8-wide horizontal blocks metatile
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            if (ball.color==1)
-                updated_metatile=27
-                collision_col=col_col
-                collision_row=col_row
-                is_collision_pending=true
+            updated_metatile=27
+            collision_col=col_col
+            collision_row=col_row
+            is_collision_pending=true
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
-        //
-        return
-    //
-    // blue blocks
-    //
-    if (colli_metatile>=32)&&(colli_metatile<=35) // two 8-wide horizontal blocks metatile
-        U coll_x=col_col<<4
-        U coll_y=col_row<<4
-        U set=(colli_metatile-8)
-        if ((set & 1) > 0) // is there an upper block we have to check?
-            if (overlap(make_rect(coll_x+1,coll_y+1, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==2)
-                    set &= 2
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+8
-                    //ball.xinc=1 // bounce right
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
-                old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
-        //
-        if ((set & 2) > 0) // is there a lower block we have to check?
-            if (overlap(make_rect(coll_x+1,coll_y+1+8, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==2)
-                    set &= 1
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+8
-                    //ball.xinc=1 // bounce right
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
-                old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
-        //
-        return
-    //
-    // green blocks
-    //
-    if (colli_metatile>=36)&&(colli_metatile<=39) // two 8-wide horizontal blocks metatile
-        U coll_x=col_col<<4
-        U coll_y=col_row<<4
-        U set=(colli_metatile-8)
-        if ((set & 1) > 0) // is there an upper block we have to check?
-            if (overlap(make_rect(coll_x+1,coll_y+1, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==3)
-                    set &= 2
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+8
-                    //ball.xinc=1 // bounce right
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
-                old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
-        //
-        if ((set & 2) > 0) // is there a lower block we have to check?
-            if (overlap(make_rect(coll_x+1,coll_y+1+8, 14, 6),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-                if (ball.color==3)
-                    set &= 1
-                    if (set==0)
-                        updated_metatile=0
-                    else
-                        updated_metatile=set+8
-                    //ball.xinc=1 // bounce right
-                    collision_col=col_col
-                    collision_row=col_row
-                    is_collision_pending=true
-                old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
 
