@@ -1,9 +1,6 @@
 
 //ToDo: There is a bug that, when 2 blocks are hit at the same time, since currently only one block can be updated in ram/PPU at a frame, the collisions are calculated, but the block doesn't dissapear.
 //ToDo: There is a bug that, when the ball hits the bar, the ball moves slower than the stick, changing the angle several times if the stick is moving
-//ToDo: ball bouncing when it hits the sides of the stick is unimplemented
-//ToDo: there is a bug that makes possible that the ball gets stuck bouncing between 2 blocks positions
-//ToDo: in messen, the coloration of the stick is not uniform all the time. It bounces between pink and the other colors.
 
 mapfab(raw, "t10.mapfab", "chr", "palette", "metatiles", "level")
 //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
@@ -138,27 +135,23 @@ nmi main_nmi()
     if is_collision_pending
         set_metatile_at_colrow(collision_col, collision_row, updated_metatile)
         is_collision_pending=false
+
     // Update OAM and poll the pads:
     ppu_upload_oam_poll_pads(0)
+
     // Turn on rendering:
     {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+
     // Reset the scroll
     ppu_reset_scroll(0, 0)
     
 mode main()
 : nmi main_nmi
-    play_level(1)
 
-
-mode play_level1()
-: nmi main_nmi
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    //
     load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
+
     // initialize vars
     ball.xinc=1
     ball.yinc=-1
@@ -172,7 +165,7 @@ mode play_level1()
     //
     bar1.xpos=BAR1_DEFA_X
     bar1.ypos=BAR1_Y
-    //
+
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -181,19 +174,6 @@ mode play_level1()
         update_sprites()
         nmi // Wait for the next NMI
 
-fn play_level (U lvl)
-    if (lvl == 1)
-        //show_level_intro_scr(1)
-        goto mode play_level1()  // Initialize game by entering the play level mode
-        : preserves
-    //default
-    //show_level_intro_scr(1)
-    goto mode play_level1()  // by default, go to level 1
-    : preserves
-
-//
-// game mechanics functions
-//
 fn move_player ()
     if pads[0].held & BUTTON_LEFT
         //ball.xpos -= 1
@@ -213,13 +193,10 @@ fn move_player ()
         //ball.ypos += 1
 
     bar1.color=1 //pink
-    ball.color=1
     if (pads[0].held & BUTTON_A)
         bar1.color=2 // blue
-        ball.color=2 // blue
     if (pads[0].held & BUTTON_B)
         bar1.color=3 // green
-        ball.color=3 // blue
         
 
 /*    if (pads[0].pressed & BUTTON_A)
