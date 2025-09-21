@@ -259,7 +259,7 @@ fn update_ball ()
     // check if the ball hits the stick
     if (overlap(make_rect(bar1.xpos, bar1.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
         set_yinc_neg_up() //ball.yinc=-1 // bounce up
-        ball.color=bar1.color //change ball color
+        //ball.color=bar1.color //change ball color
         // 
         if (ball.xpos < bar1.xpos)
             if (is_xinc_pos_right())
