@@ -26,16 +26,24 @@ ct U HBAR_MIN_X=16
 ct U HBAR_MAX_X=256-16-24
 ct U HBAR_X_SPEED=2
 ct U BAR1_Y=240-16
+ct U BAR1_Y_UP=8
 ct U BAR1_DEFA_X=128-16
 
-struct Bar1Info
+struct BarDownInfo
     U xpos
     U ypos
-    U color // 0 black, 1 pink, 2 blue, 3 green
+//    U color // 0 black, 1 pink, 2 blue, 3 green
+//    Bool active
+
+struct BarUpInfo
+    //U xpos we'll get the x position from ballDown, and the y from a constant
+    //U ypos
+    Bool active
 
 vars /game_vars
     BallInfo ball
-    Bar1Info bar1
+    BarDownInfo bardown
+    BarUpInfo barup
     U[3] speed_up_step_factor_table = U[3](5, 2, 0) 
 
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
@@ -170,8 +178,11 @@ mode play_level1()
     ball.ball_speed_up_counter=0
     ball.color=1
     //
-    bar1.xpos=BAR1_DEFA_X
-    bar1.ypos=BAR1_Y
+    bardown.xpos=BAR1_DEFA_X
+    bardown.ypos=BAR1_Y
+    //barUp.xpos=BAR1_DEFA_X
+    //barUp.ypos=BAR1_Y_UP
+    barup.active=true
     //
     // Wait forever, one frame at a time:
     while true
@@ -197,28 +208,26 @@ fn play_level (U lvl)
 fn move_player ()
     if pads[0].held & BUTTON_LEFT
         //ball.xpos -= 1
-        if ((bar1.xpos-HBAR_X_SPEED)>=HBAR_MIN_X)
-            bar1.xpos-=HBAR_X_SPEED
+        if ((bardown.xpos-HBAR_X_SPEED)>=HBAR_MIN_X)
+            bardown.xpos-=HBAR_X_SPEED
         else
-            bar1.xpos=HBAR_MIN_X
+            bardown.xpos=HBAR_MIN_X
     if pads[0].held & BUTTON_RIGHT
         //ball.xpos += 1
-        if ((bar1.xpos+HBAR_X_SPEED)<=HBAR_MAX_X)
-            bar1.xpos+=HBAR_X_SPEED
+        if ((bardown.xpos+HBAR_X_SPEED)<=HBAR_MAX_X)
+            bardown.xpos+=HBAR_X_SPEED
         else
-            bar1.xpos=HBAR_MAX_X
+            bardown.xpos=HBAR_MAX_X
     if pads[0].held & BUTTON_UP
         //ball.ypos -= 1
     if pads[0].held & BUTTON_DOWN
         //ball.ypos += 1
 
-    bar1.color=1 //pink
+    //barDown.color=1 //pink
     ball.color=1
     if (pads[0].held & BUTTON_A)
-        bar1.color=2 // blue
         ball.color=2 // blue
     if (pads[0].held & BUTTON_B)
-        bar1.color=3 // green
         ball.color=3 // blue
         
 
@@ -257,23 +266,23 @@ fn update_ball ()
         manage_collision (my_collision_col, my_collision_row)
 
     // check if the ball hits the stick
-    if (overlap(make_rect(bar1.xpos, bar1.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
+    if (overlap(make_rect(bardown.xpos, bardown.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
         set_yinc_neg_up() //ball.yinc=-1 // bounce up
         //ball.color=bar1.color //change ball color
         // 
-        if (ball.xpos < bar1.xpos)
+        if (ball.xpos < bardown.xpos)
             if (is_xinc_pos_right())
                 change_ball_angle (2)
             else
                 change_ball_angle (1)
             set_xinc_neg_left()
-        if (ball.xpos+8 > bar1.xpos+24)
+        if (ball.xpos+8 > bardown.xpos+24)
             if (is_xinc_neg_left())
                 change_ball_angle (2)
             else
                 change_ball_angle (1)
             set_xinc_pos_right()
-        if ( (ball.xpos >= (bar1.xpos+8-2)) && (ball.xpos <= (bar1.xpos+8+2)) )
+        if ( (ball.xpos >= (bardown.xpos+8-2)) && (ball.xpos <= (bardown.xpos+8+2)) )
             change_ball_angle (0)
 
 
@@ -317,22 +326,41 @@ fn update_sprites()
     i += 4
 
     // now the bars
-    U barattrs=bar1.color
-    set_oam_x(i, bar1.xpos)     // x-position
-    set_oam_y(i, bar1.ypos) // y-position
+    U barattrs=ball.color
+    set_oam_x(i, bardown.xpos)     // x-position
+    set_oam_y(i, bardown.ypos) // y-position
     set_oam_p(i, 4)    // tile
     set_oam_a(i, barattrs)      // options
     i += 4
-    set_oam_x(i, bar1.xpos+8)     // x-position
-    set_oam_y(i, bar1.ypos) // y-position
+    set_oam_x(i, bardown.xpos+8)     // x-position
+    set_oam_y(i, bardown.ypos) // y-position
     set_oam_p(i, 5)    // tile
     set_oam_a(i, barattrs)      // options
     i += 4
-    set_oam_x(i, bar1.xpos+16)     // x-position
-    set_oam_y(i, bar1.ypos) // y-position
+    set_oam_x(i, bardown.xpos+16)     // x-position
+    set_oam_y(i, bardown.ypos) // y-position
     set_oam_p(i, 6)    // tile
     set_oam_a(i, barattrs)      // options
     i += 4
+
+    if (barup.active)
+        barattrs=ball.color | 128 // flip v
+        set_oam_x(i, bardown.xpos)     // x-position
+        set_oam_y(i, BAR1_Y_UP) // y-position
+        set_oam_p(i, 4)    // tile
+        set_oam_a(i, barattrs)      // options
+        i += 4
+        set_oam_x(i, bardown.xpos+8)     // x-position
+        set_oam_y(i, BAR1_Y_UP) // y-position
+        set_oam_p(i, 5)    // tile
+        set_oam_a(i, barattrs)      // options
+        i += 4
+        set_oam_x(i, bardown.xpos+16)     // x-position
+        set_oam_y(i, BAR1_Y_UP) // y-position
+        set_oam_p(i, 6)    // tile
+        set_oam_a(i, barattrs)      // options
+        i += 4
+
 
     // Clear the remainder of OAM
     hide_oam(i)
