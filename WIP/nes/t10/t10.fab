@@ -95,23 +95,23 @@ fn load_screen(CCC/levels my_lvl_pointer)
     mt_attr+=mt_size
     // now every pointer points where it should
 
-    U i=0
+    UU i=0
     ppu_reset_addr($2000)
     
     // upload namespace data
     for U y=0; y<15; y+=1
         for U x=0; x<16; x+=1
             U my_metatile=my_lvl_pointer{i}
-            U nw_tile=mt_nw{my_metatile}
-            U ne_tile=mt_ne{my_metatile}
+            U nw_tile=mt_nw[my_metatile]
+            U ne_tile=mt_ne[my_metatile]
             {PPUDATA}(nw_tile)
             {PPUDATA}(ne_tile)
             i+=1
         i=i-16
         for U x=0; x<16; x+=1
             U my_metatile=my_lvl_pointer{i}
-            U sw_tile=mt_sw{my_metatile}
-            U se_tile=mt_se{my_metatile}
+            U sw_tile=mt_sw[my_metatile]
+            U se_tile=mt_se[my_metatile]
             {PPUDATA}(sw_tile)
             {PPUDATA}(se_tile)
             i+=1
@@ -122,22 +122,22 @@ fn load_screen(CCC/levels my_lvl_pointer)
     for U y=0; y<15; y+=2
         for U x=0; x<16; x+=2
             U my_metatile=my_lvl_pointer{i}
-            U my_attr=mt_attr{my_metatile}
+            U my_attr=mt_attr[my_metatile]
             //
             my_metatile=my_lvl_pointer{i+1}
-            my_attr|=(mt_attr{my_metatile}<<2)
+            my_attr|=(mt_attr[my_metatile]<<2)
             //
             my_metatile=my_lvl_pointer{i+16}
-            my_attr|=(mt_attr{my_metatile}<<4)
+            my_attr|=(mt_attr[my_metatile]<<4)
             //
             my_metatile=my_lvl_pointer{i+17}
-            my_attr|=(mt_attr{my_metatile}<<6)
+            my_attr|=(mt_attr[my_metatile]<<6)
             i+=2
             {PPUDATA}(my_attr)
         i+=16
             
     // copy the level metatiles map to RAM
-    for U iv=0; iv<(16*15); iv+=1
+    for UU iv=0; iv<(16*15); iv+=1
         level_mt_map{iv}=my_lvl_pointer{iv}
 
 
@@ -164,7 +164,8 @@ mode play_level1()
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
     //
-    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+//    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
+    load_screen(@lev_test1) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
     // initialize vars
@@ -189,7 +190,7 @@ mode play_level1()
         update_pads()
         move_player() 
         update_game_elements()
-        update_sprites()
+        update_sprites() 
         nmi // Wait for the next NMI
 
 fn play_level (U lvl)
@@ -265,9 +266,9 @@ fn update_ball ()
         my_collision_row=((ball.ypos+8)>>4)
         manage_collision (my_collision_col, my_collision_row)
 
-    // check if the ball hits the stick
+    // check if the ball hits the lower stick
     if (overlap(make_rect(bardown.xpos, bardown.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
-        set_yinc_neg_up() //ball.yinc=-1 // bounce up
+        set_yinc_neg_up()  // bounce up
         //ball.color=bar1.color //change ball color
         // 
         if (ball.xpos < bardown.xpos)
@@ -282,8 +283,30 @@ fn update_ball ()
             else
                 change_ball_angle (1)
             set_xinc_pos_right()
-        if ( (ball.xpos >= (bardown.xpos+8-2)) && (ball.xpos <= (bardown.xpos+8+2)) )
+        if ( (ball.xpos >= (bardown.xpos+8)) && (ball.xpos <= (bardown.xpos+16)) ) 
             change_ball_angle (0)
+
+    // check if the ball hits the upper stick
+    if (barup.active)
+        if (overlap(make_rect(bardown.xpos, BAR1_Y_UP+7, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
+            set_yinc_pos_down()  // bounce down
+            //ball.yinc=1
+            //ball.color=bar1.color //change ball color
+            // 
+            if (ball.xpos < bardown.xpos)
+                if (is_xinc_pos_right())
+                    change_ball_angle (2)
+                else
+                    change_ball_angle (1)
+                set_xinc_neg_left()
+            if (ball.xpos+8 > bardown.xpos+24)
+                if (is_xinc_neg_left())
+                    change_ball_angle (2)
+                else
+                    change_ball_angle (1)
+                set_xinc_pos_right()
+            if ( (ball.xpos >= (bardown.xpos+8)) && (ball.xpos <= (bardown.xpos+16)) ) 
+                change_ball_angle (0)
 
 
     // bounce ball with margins
@@ -291,10 +314,19 @@ fn update_ball ()
         set_xinc_pos_right()//ball.xinc=1
     if (ball.xpos>=256-16-8)
         set_xinc_neg_left()//ball.xinc=-1
-    if (ball.ypos<=16)
-        set_yinc_pos_down()//ball.yinc=1
-    if (ball.ypos>=240-8)
+    //
+    if (barup.active)
+        if (ball.ypos<=8-2-1) // no idea why I have to add this extra -1
+            set_yinc_pos_down()//ball.yinc=1
+            // ball PINCHED
+    else
+        if (ball.ypos<=16)
+            set_yinc_pos_down()//ball.yinc=1
+            // ball NOT pinched
+    //
+    if (ball.ypos>=240-8-8+2)
         set_yinc_neg_up()//ball.yinc=-1
+        //ball pinched
 
 
 fn update_game_elements()
@@ -377,12 +409,13 @@ fn get_metatile_at_pix (U px, U py) U
 returns the map metatile at screen column/row
 */
 fn get_metatile_at_col_row (U col, U row) U
-    return level_mt_map{(row<<4)+col}
+    UU disp=(row<<4)+col
+    return level_mt_map{disp}
 
 // sets the new mt at ram map only (not gfx mem)
-fn set_mt_at_colrow_map_only (UU x, UU y, U new_mt)
+/*fn set_mt_at_colrow_map_only (UU x, UU y, U new_mt)
     level_mt_map{((y<<4)+x)}=new_mt
-
+*/
 /*
 Sets the row,col metatile to a new value.
 This is done in the collisions_map variable because
@@ -400,28 +433,28 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
     UU gfx_addr=((y<<6)+(x<<1))
     gfx_addr+=$2000
     ppu_reset_addr(gfx_addr)    
-    {PPUDATA}( mt_nw{new_mt} )
-    {PPUDATA}( mt_ne{new_mt} )
+    {PPUDATA}( mt_nw[new_mt] )
+    {PPUDATA}( mt_ne[new_mt] )
     gfx_addr+=32
     ppu_reset_addr(gfx_addr)    
-    {PPUDATA}( mt_sw{new_mt} )
-    {PPUDATA}( mt_se{new_mt} )
+    {PPUDATA}( mt_sw[new_mt] )
+    {PPUDATA}( mt_se[new_mt] )
 
     //calculate the new 2x2 metatiles block attributes byte
     UU mt_m_disp=(((y & %11111110) <<4)+(x & %11111110))
     U mt_2x2_pos=U(((y&1)<<1)|(x & 1))
     //
     U my_metatile=level_mt_map{mt_m_disp}
-    U new_attr=mt_attr{my_metatile}
+    U new_attr=mt_attr[my_metatile]
     //
     my_metatile=level_mt_map{mt_m_disp+1}
-    new_attr|=(mt_attr{my_metatile}<<2)
+    new_attr|=(mt_attr[my_metatile]<<2)
     //
     my_metatile=level_mt_map{mt_m_disp+16}
-    new_attr|=(mt_attr{my_metatile}<<4)
+    new_attr|=(mt_attr[my_metatile]<<4)
     //
     my_metatile=level_mt_map{mt_m_disp+17}
-    new_attr|=(mt_attr{my_metatile}<<6)
+    new_attr|=(mt_attr[my_metatile]<<6)
     //
 
     //now access the attributes(palettes) address
