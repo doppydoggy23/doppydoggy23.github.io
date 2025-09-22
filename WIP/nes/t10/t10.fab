@@ -283,7 +283,7 @@ fn update_ball ()
             else
                 change_ball_angle (1)
             set_xinc_pos_right()
-        if ( (ball.xpos >= (bardown.xpos+8)) && (ball.xpos <= (bardown.xpos+16)) ) 
+        if ( (ball.xpos >= (bardown.xpos+8-2)) && (ball.xpos <= (bardown.xpos+8+2)) ) 
             change_ball_angle (0)
 
     // check if the ball hits the upper stick
@@ -305,7 +305,7 @@ fn update_ball ()
                 else
                     change_ball_angle (1)
                 set_xinc_pos_right()
-            if ( (ball.xpos >= (bardown.xpos+8)) && (ball.xpos <= (bardown.xpos+16)) ) 
+            if ( (ball.xpos >= (bardown.xpos+8-2)) && (ball.xpos <= (bardown.xpos+8+2)) ) 
                 change_ball_angle (0)
 
 
