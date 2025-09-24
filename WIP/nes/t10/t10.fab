@@ -296,8 +296,11 @@ fn move_player ()
 
 fn update_ball ()
     //
-    if (num_zeroed_blocks >= num_erasable_blocks)
-        play_level(current_level+1)
+    if (num_zeroed_blocks >= num_erasable_blocks) // next level
+        play_level(current_level+1) 
+    if (energy==0) // repeat level
+        play_level(current_level)
+
 
     ball.xpos+=ball.xinc
     if (ball.yinc_step_counter >= ball.yinc_step)
