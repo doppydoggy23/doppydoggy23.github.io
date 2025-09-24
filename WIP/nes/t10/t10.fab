@@ -380,6 +380,9 @@ fn update_ball ()
         if (ball.ypos<=8-2-1) // no idea why I have to add this extra -1
             set_yinc_pos_down()//ball.yinc=1
             // ball PINCHED
+            ball.ypos=8-2-1+1
+            if energy>0
+                energy-=1
     else
         if (ball.ypos<=16)
             set_yinc_pos_down()//ball.yinc=1
@@ -388,6 +391,9 @@ fn update_ball ()
     if (ball.ypos>=240-8-8+2)
         set_yinc_neg_up()//ball.yinc=-1
         //ball pinched
+        ball.ypos=240-8-8+2-1
+        if energy>0
+            energy-=1
 
 
 fn update_game_elements()
@@ -962,6 +968,10 @@ fn is_xinc_neg_left() Bool
         return true
     return false
 
+fn inc_ball_ypos()
+    ball.ypos+=1
+fn dec_ball_ypos()
+    ball.ypos-=1
 /*
 There are only 2 possible angles, 0, 1 or 2.
 Since we don't use floating point, we simulate non integer increments of ball.xpos and ball.ypos incrementing ball.ypos only every 0, 1, or 2 frames,
