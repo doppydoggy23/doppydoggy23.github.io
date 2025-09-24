@@ -29,6 +29,8 @@ ct U BAR1_Y=240-16
 ct U BAR1_Y_UP=8
 ct U BAR1_DEFA_X=128-16
 
+ct U DEFAU_ENERGY=6
+
 struct BarDownInfo
     U xpos
     U ypos
@@ -48,6 +50,7 @@ vars /game_vars
     U num_erasable_blocks
     U num_zeroed_blocks
     U current_level
+    U energy
 
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
 
@@ -193,6 +196,7 @@ mode play_level1()
     num_erasable_blocks=10+10+30 // 10 single block blue, 10 single blockgreen and 30 double block pink
     num_zeroed_blocks=0
     current_level=1
+    energy=DEFAU_ENERGY
     //
     // Wait forever, one frame at a time:
     while true
@@ -230,6 +234,7 @@ mode play_level2()
     num_erasable_blocks=4+9+7+25// 4 big square, 9 single block green, 7 single block blue, 25 single block pink
     num_zeroed_blocks=0
     current_level=2
+    energy=DEFAU_ENERGY
     //
     // Wait forever, one frame at a time:
     while true
@@ -449,6 +454,26 @@ fn update_sprites()
         set_oam_a(i, barattrs)      // options
         i += 4
 
+    // now the energy level
+    set_oam_x(i, 0)     // x-position
+    set_oam_y(i, 150+8) // y-position
+    set_oam_p(i, 43+2)    // tile
+    set_oam_a(i, 0)      // options
+    i += 4
+    set_oam_x(i, 8)     // x-position
+    set_oam_y(i, 150+8) // y-position
+    set_oam_p(i, 44+2)    // tile
+    set_oam_a(i, 0)      // options
+    i += 4
+    //
+    U eypos=150
+    for U ii=0; ii<energy; ii+=1
+        set_oam_x(i, 4)     // x-position
+        set_oam_y(i, eypos) // y-position
+        set_oam_p(i, 27)    // tile
+        set_oam_a(i, 0)      // options
+        i += 4
+        eypos-=8
 
     // Clear the remainder of OAM
     hide_oam(i)
