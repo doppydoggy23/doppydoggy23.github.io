@@ -3,6 +3,7 @@
 //ToDo: There is a bug that, when the ball hits the bar, the ball moves slower than the stick, changing the angle several times if the stick is moving
 //ToDo: ball bouncing when it hits the sides of the stick is unimplemented
 //ToDo: there is a bug that makes possible that the ball gets stuck bouncing between 2 blocks positions
+//ToDo: in messen, the coloration of the stick is not uniform all the time. It bounces between pink and the other colors.
 
 mapfab(raw, "t10.mapfab", "chr", "palette", "metatiles", "level")
 //mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
@@ -30,8 +31,6 @@ ct U BAR1_DEFA_X=128-16
 
 ct U DEFAU_ENERGY=6
 
-ct U AB_BUTT_CNTD=5
-
 struct BarDownInfo
     U xpos
     U ypos
@@ -52,8 +51,6 @@ vars /game_vars
     U num_zeroed_blocks
     U current_level
     U energy
-    U a_button_countdown
-    U b_button_countdown
 
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
 
@@ -200,8 +197,6 @@ mode play_level1()
     num_zeroed_blocks=0
     current_level=1
     energy=DEFAU_ENERGY
-    a_button_countdown=0
-    b_button_countdown=0
     //
     // Wait forever, one frame at a time:
     while true
@@ -240,9 +235,6 @@ mode play_level2()
     num_zeroed_blocks=0
     current_level=2
     energy=DEFAU_ENERGY
-    a_button_countdown=0
-    b_button_countdown=0
-
     //
     // Wait forever, one frame at a time:
     while true
@@ -289,21 +281,12 @@ fn move_player ()
     if pads[0].held & BUTTON_DOWN
         //ball.ypos += 1
 
-    if a_button_countdown > 0
-        a_button_countdown-=1
-    if b_button_countdown > 0
-        b_button_countdown-=1
-
-    // since NES buttons oscilate between pressed/not pressed when held, 
-    // we implement a countdown before we really paint them pink (not pressed)
-    if ((a_button_countdown==0) && (b_button_countdown==0))
-        ball.color=1 //pink
+    //barDown.color=1 //pink
+    ball.color=1
     if (pads[0].held & BUTTON_A)
         ball.color=2 // blue
-        a_button_countdown=AB_BUTT_CNTD
     if (pads[0].held & BUTTON_B)
         ball.color=3 // blue
-        b_button_countdown=AB_BUTT_CNTD
         
 
 /*    if (pads[0].pressed & BUTTON_A)
