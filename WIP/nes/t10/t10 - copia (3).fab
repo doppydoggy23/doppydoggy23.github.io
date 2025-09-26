@@ -167,7 +167,7 @@ nmi main_nmi()
     
 mode main()
 : nmi main_nmi
-    play_level(4)
+    play_level(1)
 
 //////////
 
@@ -252,89 +252,6 @@ mode play_level2()
         update_sprites() 
         nmi // Wait for the next NMI
 
-
-mode play_level3()
-: nmi main_nmi
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    //
-    load_screen(@lev_level3) // the name lev_level1 is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    // initialize vars
-    ball.xinc=1
-    ball.yinc=-1
-    ball.xpos=200
-    ball.ypos=200
-    ball.yinc_step=0
-    ball.ball_speed_up_factor=speed_up_step_factor_table[ball.yinc_step]
-    ball.yinc_step_counter=0
-    ball.ball_speed_up_counter=0
-    ball.color=1
-    //
-    bardown.xpos=BAR1_DEFA_X
-    bardown.ypos=BAR1_Y
-    barup.active=true
-    //
-    num_erasable_blocks=24
-    num_zeroed_blocks=0
-    current_level=3
-    energy=DEFAU_ENERGY
-    a_button_countdown=0
-    b_button_countdown=0
-    //
-    // Wait forever, one frame at a time:
-    while true
-        update_pads()
-        move_player() 
-        update_game_elements()
-        update_sprites() 
-        nmi // Wait for the next NMI
-
-
-mode play_level4()
-: nmi main_nmi
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    //
-//    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
-    load_screen(@lev_level4) // the name lev_level1 is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    // initialize vars
-    ball.xinc=1
-    ball.yinc=-1
-    ball.xpos=200
-    ball.ypos=200
-    ball.yinc_step=0
-    ball.ball_speed_up_factor=speed_up_step_factor_table[ball.yinc_step]
-    ball.yinc_step_counter=0
-    ball.ball_speed_up_counter=0
-    ball.color=1
-    //
-    bardown.xpos=BAR1_DEFA_X
-    bardown.ypos=BAR1_Y
-    barup.active=false
-    //
-    num_erasable_blocks=20
-    num_zeroed_blocks=0
-    current_level=4
-    energy=DEFAU_ENERGY
-    a_button_countdown=0
-    b_button_countdown=0
-    //
-    // Wait forever, one frame at a time:
-    while true
-        update_pads()
-        move_player() 
-        update_game_elements()
-        update_sprites() 
-        nmi // Wait for the next NMI
-
-
-
 ////////
 
 fn play_level (U lvl)
@@ -345,14 +262,6 @@ fn play_level (U lvl)
     if (lvl == 2)
         //show_level_intro_scr(1)
         goto mode play_level2()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 3)
-        //show_level_intro_scr(1)
-        goto mode play_level3()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 4)
-        //show_level_intro_scr(1)
-        goto mode play_level4()  // Initialize game by entering the play level mode
         : preserves
     //default
     //show_level_intro_scr(1)
@@ -376,9 +285,9 @@ fn move_player ()
         else
             bardown.xpos=HBAR_MAX_X
     if pads[0].held & BUTTON_UP
-        ball.ypos -= 1
+        //ball.ypos -= 1
     if pads[0].held & BUTTON_DOWN
-        ball.ypos += 1
+        //ball.ypos += 1
 
     if a_button_countdown > 0
         a_button_countdown-=1
@@ -700,7 +609,7 @@ fn manage_collision (U col_col, U col_row)
         //
         return
     //
-    if (colli_metatile>=12)&&(colli_metatile<=27) // 4x4 miniblocks
+    if (colli_metatile>=12)&&(colli_metatile<=27) // two 8-wide horizontal blocks metatile
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         U set=(colli_metatile-12)
@@ -817,7 +726,7 @@ fn manage_collision (U col_col, U col_row)
     //
     // blue blocks
     //
-    if (colli_metatile>=32)&&(colli_metatile<=35) // two 8-pixel-wide horizontal blocks metatile
+    if (colli_metatile>=32)&&(colli_metatile<=35) // two 8-wide horizontal blocks metatile
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         U set=(colli_metatile-8)
@@ -828,7 +737,7 @@ fn manage_collision (U col_col, U col_row)
                     if (set==0)
                         updated_metatile=0
                     else
-                        updated_metatile=set+32
+                        updated_metatile=set+8
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
@@ -842,7 +751,7 @@ fn manage_collision (U col_col, U col_row)
                     if (set==0)
                         updated_metatile=0
                     else
-                        updated_metatile=set+32
+                        updated_metatile=set+8
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
@@ -853,7 +762,7 @@ fn manage_collision (U col_col, U col_row)
     //
     // green blocks
     //
-    if (colli_metatile>=36)&&(colli_metatile<=39) // two 8-pixel-wide horizontal blocks metatile
+    if (colli_metatile>=36)&&(colli_metatile<=39) // two 8-wide horizontal blocks metatile
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         U set=(colli_metatile-8)
@@ -864,7 +773,7 @@ fn manage_collision (U col_col, U col_row)
                     if (set==0)
                         updated_metatile=0
                     else
-                        updated_metatile=set+36
+                        updated_metatile=set+8
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
@@ -878,7 +787,7 @@ fn manage_collision (U col_col, U col_row)
                     if (set==0)
                         updated_metatile=0
                     else
-                        updated_metatile=set+36
+                        updated_metatile=set+8
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
@@ -886,17 +795,6 @@ fn manage_collision (U col_col, U col_row)
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
-    //
-    // unbreakable grey block
-    if (colli_metatile==44) // 
-        U coll_x=col_col<<4
-        U coll_y=col_row<<4
-        //
-        if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
-            old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
-        //
-        return
-
 
     //
     // to reach this point, the caller function must have detected a non-zero mt (collision detected)
