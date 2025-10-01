@@ -167,7 +167,7 @@ nmi main_nmi()
     
 mode main()
 : nmi main_nmi
-    play_level(7)
+    play_level(1)
 
 //////////
 
@@ -196,7 +196,7 @@ mode play_level1()
     bardown.ypos=BAR1_Y
     barup.active=true
     //
-    num_erasable_blocks=10+10+30 // 10 single block blue, 10 single blockgreen and 30 double block pink
+    num_erasable_blocks=10+10+22 // 10 single block blue, 10 single blockgreen and 30 double block pink
     num_zeroed_blocks=0
     current_level=1
     energy=DEFAU_ENERGY
