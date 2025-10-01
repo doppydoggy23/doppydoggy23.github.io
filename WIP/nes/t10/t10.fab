@@ -167,7 +167,7 @@ nmi main_nmi()
     
 mode main()
 : nmi main_nmi
-    play_level(1)
+    play_level(9)
 
 //////////
 
@@ -493,6 +493,44 @@ mode play_level8()
         update_sprites() 
         nmi // Wait for the next NMI
 
+mode play_level9()
+: nmi main_nmi
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    //
+    load_screen(@lev_level9) // the name lev_level1 is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+    // initialize vars
+    ball.xinc=1
+    ball.yinc=-1
+    ball.xpos=200
+    ball.ypos=200
+    ball.yinc_step=0
+    ball.ball_speed_up_factor=speed_up_step_factor_table[ball.yinc_step]
+    ball.yinc_step_counter=0
+    ball.ball_speed_up_counter=0
+    ball.color=1
+    //
+    bardown.xpos=BAR1_DEFA_X
+    bardown.ypos=BAR1_Y
+    barup.active=true
+    //
+    num_erasable_blocks=20
+    num_zeroed_blocks=0
+    current_level=9
+    energy=DEFAU_ENERGY
+    a_button_countdown=0
+    b_button_countdown=0
+    //
+    // Wait forever, one frame at a time:
+    while true
+        update_pads()
+        move_player() 
+        update_game_elements()
+        update_sprites() 
+        nmi // Wait for the next NMI
 
 
 
@@ -530,6 +568,10 @@ fn play_level (U lvl)
     if (lvl == 8)
         //show_level_intro_scr(1)
         goto mode play_level8()  // Initialize game by entering the play level mode
+        : preserves
+    if (lvl == 9)
+        //show_level_intro_scr(1)
+        goto mode play_level9()  // Initialize game by entering the play level mode
         : preserves
     //default
     //show_level_intro_scr(1)
