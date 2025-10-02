@@ -5,7 +5,9 @@
 //ToDo: there is a bug that makes possible that the ball gets stuck bouncing between 2 blocks positions
 
 mapfab(raw, "t10.mapfab", "chr", "palette", "metatiles", "level")
-//mapfab(raw, "modproj1.mapfab", "chr", "palette", "metatiles", "level")
+
+audio(puf1_music, "mt2.txt")
+audio(puf1_sfx)
 
 struct BallInfo
     U xpos
@@ -164,10 +166,13 @@ nmi main_nmi()
     {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
     // Reset the scroll
     ppu_reset_scroll(0, 0)
+    //
+    puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
     
 mode main()
 : nmi main_nmi
-    play_level(9)
+    puf.init(system) // it only works put in a single mode
+    play_level(1)
 
 //////////
 
@@ -203,6 +208,7 @@ mode play_level1()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(0)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -242,8 +248,8 @@ mode play_level2()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-
     //
+    puf.play_track(1)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -284,6 +290,7 @@ mode play_level3()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(2)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -325,6 +332,7 @@ mode play_level4()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(0)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -365,6 +373,7 @@ mode play_level5()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(1)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -405,6 +414,7 @@ mode play_level6()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(2)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -445,6 +455,7 @@ mode play_level7()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(0)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -485,6 +496,7 @@ mode play_level8()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(1)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -524,6 +536,7 @@ mode play_level9()
     a_button_countdown=0
     b_button_countdown=0
     //
+    puf.play_track(2)
     // Wait forever, one frame at a time:
     while true
         update_pads()
@@ -594,10 +607,14 @@ fn move_player ()
             bardown.xpos+=HBAR_X_SPEED
         else
             bardown.xpos=HBAR_MAX_X
+
+    // DEBUG. REMOVE
     if pads[0].held & BUTTON_UP
         ball.ypos -= 1
+        num_zeroed_blocks=100
     if pads[0].held & BUTTON_DOWN
         ball.ypos += 1
+    // DEBUG. REMOVE
 
     if a_button_countdown > 0
         a_button_countdown-=1
@@ -624,8 +641,12 @@ fn move_player ()
 fn update_ball ()
     //
     if (num_zeroed_blocks >= num_erasable_blocks) // next level
-        play_level(current_level+1) 
+        puf.stop(0)
+        U nl=current_level+1
+        play_level(nl) 
+
     if (energy==0) // repeat level
+        puf.stop(0)
         play_level(current_level)
 
 
