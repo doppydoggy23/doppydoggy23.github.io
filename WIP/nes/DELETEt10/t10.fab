@@ -172,12 +172,18 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi
     puf.init(system) // it only works put in a single mode
-    play_level(1)
+    play_level1()
 
+    // Wait forever, one frame at a time:
+    while true
+        update_pads()
+        move_player() 
+        update_game_elements()
+        update_sprites() 
+        nmi // Wait for the next NMI
 //////////
 
-mode play_level1()
-: nmi main_nmi
+fn play_level1()
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -209,21 +215,12 @@ mode play_level1()
     b_button_countdown=0
     //
     puf.play_track(0)
-    // Wait forever, one frame at a time:
-    while true
-        update_pads()
-        move_player() 
-        update_game_elements()
-        update_sprites() 
-        nmi // Wait for the next NMI
 
-mode play_level2()
-: nmi main_nmi
+fn play_level2()
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
     //
-//    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     load_screen(@lev_level2) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
@@ -250,17 +247,10 @@ mode play_level2()
     b_button_countdown=0
     //
     puf.play_track(1)
-    // Wait forever, one frame at a time:
-    while true
-        update_pads()
-        move_player() 
-        update_game_elements()
-        update_sprites() 
-        nmi // Wait for the next NMI
 
 
-mode play_level3()
-: nmi main_nmi
+
+fn play_level3()
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -291,15 +281,8 @@ mode play_level3()
     b_button_countdown=0
     //
     puf.play_track(2)
-    // Wait forever, one frame at a time:
-    while true
-        update_pads()
-        move_player() 
-        update_game_elements()
-        update_sprites() 
-        nmi // Wait for the next NMI
 
-
+/*
 mode play_level4()
 : nmi main_nmi
     {PPUCTRL}(0)  // Reset PPU control register for new level
@@ -545,52 +528,26 @@ mode play_level9()
         update_sprites() 
         nmi // Wait for the next NMI
 
-
+*/
 
 ////////
 
-fn play_level (U lvl)
+/*fn play_level (U lvl)
     if (lvl == 1)
         //show_level_intro_scr(1)
-        goto mode play_level1()  // Initialize game by entering the play level mode
-        : preserves
+        play_level1()  // Initialize game by entering the play level mode
+        return
     if (lvl == 2)
         //show_level_intro_scr(1)
-        goto mode play_level2()  // Initialize game by entering the play level mode
-        : preserves
+        play_level2()  // Initialize game by entering the play level mode
+        return
     if (lvl == 3)
         //show_level_intro_scr(1)
-        goto mode play_level3()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 4)
-        //show_level_intro_scr(1)
-        goto mode play_level4()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 5)
-        //show_level_intro_scr(1)
-        goto mode play_level5()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 6)
-        //show_level_intro_scr(1)
-        goto mode play_level6()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 7)
-        //show_level_intro_scr(1)
-        goto mode play_level7()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 8)
-        //show_level_intro_scr(1)
-        goto mode play_level8()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 9)
-        //show_level_intro_scr(1)
-        goto mode play_level9()  // Initialize game by entering the play level mode
-        : preserves
-    //default
-    //show_level_intro_scr(1)
-    goto mode play_level1()  // by default, go to level 1
-    : preserves
-
+        play_level3()  // Initialize game by entering the play level mode
+        return
+    //
+    play_level1()
+*/
 //
 // game mechanics functions
 //
@@ -642,13 +599,36 @@ fn update_ball ()
     //
     if (num_zeroed_blocks >= num_erasable_blocks) // next level
         puf.stop(0)
-        U nl=current_level+1
-        play_level(nl) 
+        if (current_level == 1)
+            //show_level_intro_scr(1)
+            play_level2()  // Initialize game by entering the play level mode
+            return
+        if (current_level == 2)
+            //show_level_intro_scr(1)
+            play_level3()  // Initialize game by entering the play level mode
+            return
+        if (current_level == 3)
+            //show_level_intro_scr(1)
+            play_level1()  // Initialize game by entering the play level mode
+            return
+        return
 
 
     if (energy==0) // repeat level
         puf.stop(0)
-        play_level(current_level)
+        //play_level(current_level)
+        if (current_level == 1)
+            //show_level_intro_scr(1)
+            play_level1()  // Initialize game by entering the play level mode
+            return
+        if (current_level == 2)
+            //show_level_intro_scr(1)
+            play_level2()  // Initialize game by entering the play level mode
+            return
+        if (current_level == 3)
+            //show_level_intro_scr(1)
+            play_level3()  // Initialize game by entering the play level mode
+            return
 
 
     ball.xpos+=ball.xinc
@@ -832,6 +812,14 @@ fn update_sprites()
         set_oam_a(i, 0)      // options
         i += 4
         eypos-=8
+
+    //DEBUG
+    set_oam_x(i, 0)     // x-position
+    set_oam_y(i, 0) // y-position
+    set_oam_p(i, 176+current_level)    // tile
+    set_oam_a(i, 0)      // options
+    i += 4
+    //DEBUG
 
     // Clear the remainder of OAM
     hide_oam(i)
