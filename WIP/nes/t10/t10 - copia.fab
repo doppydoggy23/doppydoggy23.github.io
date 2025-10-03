@@ -67,7 +67,6 @@ vars /game_vars
     U energy
     U a_button_countdown
     U b_button_countdown
-    Bool did_no_hit
 
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
 
@@ -219,7 +218,6 @@ mode play_level1()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -228,7 +226,6 @@ mode play_level1()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level2()
@@ -262,7 +259,6 @@ mode play_level2()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -271,7 +267,6 @@ mode play_level2()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 
@@ -305,7 +300,6 @@ mode play_level3()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -314,7 +308,6 @@ mode play_level3()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 
@@ -349,7 +342,6 @@ mode play_level4()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -358,7 +350,6 @@ mode play_level4()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 
@@ -392,7 +383,6 @@ mode play_level5()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -401,7 +391,6 @@ mode play_level5()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level6()
@@ -435,7 +424,6 @@ mode play_level6()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -444,7 +432,6 @@ mode play_level6()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 
@@ -478,7 +465,6 @@ mode play_level7()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -487,7 +473,6 @@ mode play_level7()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level8()
@@ -521,7 +506,6 @@ mode play_level8()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -530,7 +514,6 @@ mode play_level8()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level9()
@@ -563,7 +546,6 @@ mode play_level9()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
-    did_no_hit=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -572,7 +554,6 @@ mode play_level9()
         move_player() 
         update_game_elements()
         update_sprites() 
-        calculate_sounds()
         nmi // Wait for the next NMI
 
 
@@ -720,7 +701,7 @@ fn update_ball ()
     // check if the ball hits the lower stick
     if (overlap(make_rect(bardown.xpos, bardown.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
         set_yinc_neg_up()  // bounce up
-        puf.play_sfx(NO_HIT_SFX) // play sound
+        //ball.color=bar1.color //change ball color
         // 
         if (ball.xpos < bardown.xpos)
             if (is_xinc_pos_right())
@@ -741,7 +722,8 @@ fn update_ball ()
     if (barup.active)
         if (overlap(make_rect(bardown.xpos, BAR1_Y_UP+7, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
             set_yinc_pos_down()  // bounce down
-            puf.play_sfx(NO_HIT_SFX) // play sound
+            //ball.yinc=1
+            //ball.color=bar1.color //change ball color
             // 
             if (ball.xpos < bardown.xpos)
                 if (is_xinc_pos_right())
@@ -772,7 +754,6 @@ fn update_ball ()
             ball.ypos=8-2-1+1
             if energy>0
                 energy-=1
-            puf.play_sfx(NO_HIT_SFX) // play sound
     else
         if (ball.ypos<=16)
             set_yinc_pos_down()//ball.yinc=1
@@ -784,8 +765,7 @@ fn update_ball ()
         ball.ypos=240-8-8+2-1
         if energy>0
             energy-=1
-        puf.play_sfx(NO_HIT_SFX) // play sound
-        
+
 
 fn update_game_elements()
     //
@@ -962,8 +942,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
@@ -978,8 +956,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
@@ -1000,8 +976,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // upper right
@@ -1015,8 +989,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1)
         //
         if ((set & 4) > 0) // lower left
@@ -1030,8 +1002,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1,coll_y+1+8)
         //
         if ((set & 8) > 0) // lower right
@@ -1045,8 +1015,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1+8)
         //
         return
@@ -1062,8 +1030,6 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
-            else
-                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1077,8 +1043,6 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
-            else
-                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1092,8 +1056,6 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
-            else
-                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1109,8 +1071,6 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
-            else
-                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1133,8 +1093,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
@@ -1149,8 +1107,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
@@ -1173,8 +1129,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
@@ -1189,8 +1143,6 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
-                else
-                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
@@ -1202,7 +1154,6 @@ fn manage_collision (U col_col, U col_row)
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
-            did_no_hit=true
         //
         return
 
@@ -1411,11 +1362,3 @@ therefore, we need to adjust the ball speed to maintain an aparently equal ball 
 fn change_ball_angle (U angle)
     ball.yinc_step=angle
     ball.ball_speed_up_factor=speed_up_step_factor_table[ball.yinc_step]
-
-fn calculate_sounds()
-    if (is_collision_pending)
-        puf.play_sfx(HIT_SFX)
-    else
-        if (did_no_hit)
-            puf.play_sfx(NO_HIT_SFX)
-    did_no_hit=false
