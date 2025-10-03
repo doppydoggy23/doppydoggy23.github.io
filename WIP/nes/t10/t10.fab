@@ -7,7 +7,8 @@
 mapfab(raw, "t10.mapfab", "chr", "palette", "metatiles", "level")
 
 audio(puf1_music, "mt2.txt")
-audio(puf1_sfx)
+//audio(puf1_sfx)
+audio(puf1_sfx, "sfx1.txt", "sfx1.nsf")
 
 struct BallInfo
     U xpos
@@ -21,6 +22,9 @@ struct BallInfo
     // for ball.yinc_step=0, ball.ball_speed_up_factor=5
     // for ball.yinc_step=1, ball.ball_speed_up_factor=2
     // for ball.yinc_step=2, ball.ball_speed_up_factor=0
+    // to avoid using decimal numbers, we simulate the fraction of a decimal in yinc by moving the ball horizontally more
+    // often than vertically, therefore we need yinc_step, but if we do that, the ball moves slower, therefore we need
+    // to accelarate it by ball_speed_up_factor
     U color // 0 black, 1 pink, 2 blue, 3 green
 
 ct U HBAR_MIN_X=16
@@ -33,6 +37,13 @@ ct U BAR1_DEFA_X=128-16
 ct U DEFAU_ENERGY=6
 
 ct U AB_BUTT_CNTD=5
+
+ct U LOSE_DELAY=100
+ct U WIN_DELAY=100
+ct U NO_HIT_SFX=0
+ct U HIT_SFX=1
+ct U WIN_SFX=2
+ct U LOSE_SFX=3
 
 struct BarDownInfo
     U xpos
@@ -642,12 +653,20 @@ fn update_ball ()
     //
     if (num_zeroed_blocks >= num_erasable_blocks) // next level
         puf.stop(0)
+        //
+        puf.play_sfx(WIN_SFX)
+        wait(WIN_DELAY)
+        //
         U nl=current_level+1
         play_level(nl) 
 
 
     if (energy==0) // repeat level
         puf.stop(0)
+        //
+        puf.play_sfx(LOSE_SFX)
+        wait(LOSE_DELAY)
+        //
         play_level(current_level)
 
 
