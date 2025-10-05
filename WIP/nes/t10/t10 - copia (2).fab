@@ -184,22 +184,7 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi
     puf.init(system) // it only works put in a single mode
-    //
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_start) // the name lev_level1 is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    while true
-        update_pads()
-        //
-        if pads[0].pressed & BUTTON_START
-            play_level(1)
-        nmi // Wait for the next NMI
-    //
-    //play_level(1)
+    play_level(1)
 
 //////////
 
