@@ -44,6 +44,9 @@ ct U NO_HIT_SFX=0
 ct U HIT_SFX=1
 ct U WIN_SFX=2
 ct U LOSE_SFX=3
+ct U SPIKES_SFX=4
+
+ct U LEVEL_SCR_WAIT=100
 
 struct BarDownInfo
     U xpos
@@ -67,6 +70,7 @@ vars /game_vars
     U energy
     U a_button_countdown
     U b_button_countdown
+    Bool did_no_hit
 
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
 
@@ -183,17 +187,33 @@ nmi main_nmi()
 mode main()
 : nmi main_nmi
     puf.init(system) // it only works put in a single mode
-    play_level(1)
+    //
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_screen(@lev_start) // the name lev_level1 is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+    //
+    while true
+        update_pads()
+        //
+        if pads[0].pressed & BUTTON_START
+            play_level(1)
+        nmi // Wait for the next NMI
+    //
+    //play_level(1)
 
 //////////
 
 mode play_level1()
 : nmi main_nmi
+    show_lvl_scr(1)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
     //
-//    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
@@ -218,6 +238,7 @@ mode play_level1()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -226,10 +247,13 @@ mode play_level1()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level2()
 : nmi main_nmi
+    show_lvl_scr(2)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -259,6 +283,7 @@ mode play_level2()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -267,11 +292,14 @@ mode play_level2()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 
 mode play_level3()
 : nmi main_nmi
+    show_lvl_scr(3)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -300,6 +328,7 @@ mode play_level3()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -308,11 +337,14 @@ mode play_level3()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 
 mode play_level4()
 : nmi main_nmi
+    show_lvl_scr(4)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -342,6 +374,7 @@ mode play_level4()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -350,11 +383,14 @@ mode play_level4()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 
 mode play_level5()
 : nmi main_nmi
+    show_lvl_scr(5)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -383,6 +419,7 @@ mode play_level5()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -391,10 +428,13 @@ mode play_level5()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level6()
 : nmi main_nmi
+    show_lvl_scr(6)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -424,6 +464,7 @@ mode play_level6()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -432,11 +473,14 @@ mode play_level6()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 
 mode play_level7()
 : nmi main_nmi
+    show_lvl_scr(7)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -465,6 +509,7 @@ mode play_level7()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -473,10 +518,13 @@ mode play_level7()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level8()
 : nmi main_nmi
+    show_lvl_scr(8)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -506,6 +554,7 @@ mode play_level8()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -514,10 +563,13 @@ mode play_level8()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
 mode play_level9()
 : nmi main_nmi
+    show_lvl_scr(9)// level scr
+    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -546,6 +598,7 @@ mode play_level9()
     energy=DEFAU_ENERGY
     a_button_countdown=0
     b_button_countdown=0
+    did_no_hit=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -554,51 +607,59 @@ mode play_level9()
         move_player() 
         update_game_elements()
         update_sprites() 
+        calculate_sounds()
         nmi // Wait for the next NMI
 
-
+mode play_congrats()
+: nmi main_nmi
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)
+    load_screen(@lev_congrats) // the name lev_level1 is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+    //
+    // Wait forever, one frame at a time:
+    while true
+        update_pads()
+        if pads[0].pressed & BUTTON_START
+            play_level(1)
+        nmi // Wait for the next NMI
 
 ////////
 
 fn play_level (U lvl)
     if (lvl == 1)
-        //show_level_intro_scr(1)
         goto mode play_level1()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 2)
-        //show_level_intro_scr(1)
         goto mode play_level2()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 3)
-        //show_level_intro_scr(1)
         goto mode play_level3()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 4)
-        //show_level_intro_scr(1)
         goto mode play_level4()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 5)
-        //show_level_intro_scr(1)
         goto mode play_level5()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 6)
-        //show_level_intro_scr(1)
         goto mode play_level6()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 7)
-        //show_level_intro_scr(1)
         goto mode play_level7()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 8)
-        //show_level_intro_scr(1)
         goto mode play_level8()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 9)
-        //show_level_intro_scr(1)
         goto mode play_level9()  // Initialize game by entering the play level mode
         : preserves
+    if (lvl == 10)
+        goto mode play_congrats()  // Initialize game by entering the play level mode
+        : preserves
     //default
-    //show_level_intro_scr(1)
     goto mode play_level1()  // by default, go to level 1
     : preserves
 
@@ -701,7 +762,7 @@ fn update_ball ()
     // check if the ball hits the lower stick
     if (overlap(make_rect(bardown.xpos, bardown.ypos, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
         set_yinc_neg_up()  // bounce up
-        //ball.color=bar1.color //change ball color
+        puf.play_sfx(NO_HIT_SFX) // play sound
         // 
         if (ball.xpos < bardown.xpos)
             if (is_xinc_pos_right())
@@ -722,8 +783,7 @@ fn update_ball ()
     if (barup.active)
         if (overlap(make_rect(bardown.xpos, BAR1_Y_UP+7, 24, 1),make_rect(ball.xpos,ball.ypos, 8, 8)) )        
             set_yinc_pos_down()  // bounce down
-            //ball.yinc=1
-            //ball.color=bar1.color //change ball color
+            puf.play_sfx(NO_HIT_SFX) // play sound
             // 
             if (ball.xpos < bardown.xpos)
                 if (is_xinc_pos_right())
@@ -754,6 +814,7 @@ fn update_ball ()
             ball.ypos=8-2-1+1
             if energy>0
                 energy-=1
+            puf.play_sfx(SPIKES_SFX) // play sound
     else
         if (ball.ypos<=16)
             set_yinc_pos_down()//ball.yinc=1
@@ -765,7 +826,8 @@ fn update_ball ()
         ball.ypos=240-8-8+2-1
         if energy>0
             energy-=1
-
+        puf.play_sfx(SPIKES_SFX) // play sound
+        
 
 fn update_game_elements()
     //
@@ -834,12 +896,12 @@ fn update_sprites()
     // now the energy level
     set_oam_x(i, 0)     // x-position
     set_oam_y(i, 150+8) // y-position
-    set_oam_p(i, 43+2)    // tile
+    set_oam_p(i, 43)    // tile
     set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, 8)     // x-position
     set_oam_y(i, 150+8) // y-position
-    set_oam_p(i, 44+2)    // tile
+    set_oam_p(i, 44)    // tile
     set_oam_a(i, 0)      // options
     i += 4
     //
@@ -942,6 +1004,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
@@ -956,6 +1020,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
@@ -976,6 +1042,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // upper right
@@ -989,6 +1057,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1)
         //
         if ((set & 4) > 0) // lower left
@@ -1002,6 +1072,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1,coll_y+1+8)
         //
         if ((set & 8) > 0) // lower right
@@ -1015,6 +1087,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b2 (coll_x+1+8,coll_y+1+8)
         //
         return
@@ -1030,6 +1104,8 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
+            else
+                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1043,6 +1119,8 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
+            else
+                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1056,6 +1134,8 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
+            else
+                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1071,6 +1151,8 @@ fn manage_collision (U col_col, U col_row)
                 collision_col=col_col
                 collision_row=col_row
                 is_collision_pending=true
+            else
+                did_no_hit=true // sound of no brick broken
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
         //
         return
@@ -1093,6 +1175,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
@@ -1107,6 +1191,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
@@ -1129,6 +1215,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1)
         //
         if ((set & 2) > 0) // is there a lower block we have to check?
@@ -1143,6 +1231,8 @@ fn manage_collision (U col_col, U col_row)
                     collision_col=col_col
                     collision_row=col_row
                     is_collision_pending=true
+                else
+                    did_no_hit=true // sound of no brick broken
                 old_calculate_ball_bounce_b1 (coll_x+1,coll_y+1+8)
         //
         return
@@ -1154,6 +1244,7 @@ fn manage_collision (U col_col, U col_row)
         //
         if (overlap(make_rect(coll_x+1,coll_y+1, 14, 14),make_rect(ball.xpos,ball.ypos, 8, 8)) ) // is it a hit?
             old_calculate_ball_bounce_b3 (coll_x+1,coll_y+1)
+            did_no_hit=true
         //
         return
 
@@ -1362,3 +1453,25 @@ therefore, we need to adjust the ball speed to maintain an aparently equal ball 
 fn change_ball_angle (U angle)
     ball.yinc_step=angle
     ball.ball_speed_up_factor=speed_up_step_factor_table[ball.yinc_step]
+
+fn calculate_sounds()
+    if (is_collision_pending)
+        puf.play_sfx(HIT_SFX)
+    else
+        if (did_no_hit)
+            puf.play_sfx(NO_HIT_SFX)
+    did_no_hit=false
+
+// shows the "level X" screen
+fn show_lvl_scr(U lvl)
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)
+    load_screen(@lev_levelscr) // the name lev_level1 is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    ppu_reset_addr($2000+402) // 9,6=(6*32*2)+(9*2)
+    {PPUDATA}(176+lvl)
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+    wait(LEVEL_SCR_WAIT)
+
+

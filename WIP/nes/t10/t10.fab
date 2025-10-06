@@ -44,6 +44,7 @@ ct U NO_HIT_SFX=0
 ct U HIT_SFX=1
 ct U WIN_SFX=2
 ct U LOSE_SFX=3
+ct U SPIKES_SFX=4
 
 ct U LEVEL_SCR_WAIT=100
 
@@ -57,6 +58,13 @@ struct BarUpInfo
     //U xpos we'll get the x position from ballDown, and the y from a constant
     //U ypos
     Bool active
+
+struct StarInfo
+    U frame
+    Bool valid
+    U step_counter
+
+ct U STAR_STEP= 2
 
 vars /game_vars
     BallInfo ball
@@ -86,6 +94,8 @@ vars /game_vars
     U collision_col
     U collision_row
     U updated_metatile
+
+    StarInfo star1 // DEBUG
 
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
@@ -685,6 +695,9 @@ fn move_player ()
         num_zeroed_blocks=100
     if pads[0].pressed & BUTTON_DOWN
         ball.ypos += 1
+        star1.valid=true
+        star1.frame=0
+        star1.step_counter=0
     // DEBUG. REMOVE
 
     if a_button_countdown > 0
@@ -813,7 +826,7 @@ fn update_ball ()
             ball.ypos=8-2-1+1
             if energy>0
                 energy-=1
-            puf.play_sfx(NO_HIT_SFX) // play sound
+            puf.play_sfx(SPIKES_SFX) // play sound
     else
         if (ball.ypos<=16)
             set_yinc_pos_down()//ball.yinc=1
@@ -825,7 +838,7 @@ fn update_ball ()
         ball.ypos=240-8-8+2-1
         if energy>0
             energy-=1
-        puf.play_sfx(NO_HIT_SFX) // play sound
+        puf.play_sfx(SPIKES_SFX) // play sound
         
 
 fn update_game_elements()
@@ -895,12 +908,12 @@ fn update_sprites()
     // now the energy level
     set_oam_x(i, 0)     // x-position
     set_oam_y(i, 150+8) // y-position
-    set_oam_p(i, 43+2)    // tile
+    set_oam_p(i, 43)    // tile
     set_oam_a(i, 0)      // options
     i += 4
     set_oam_x(i, 8)     // x-position
     set_oam_y(i, 150+8) // y-position
-    set_oam_p(i, 44+2)    // tile
+    set_oam_p(i, 44)    // tile
     set_oam_a(i, 0)      // options
     i += 4
     //
@@ -912,6 +925,23 @@ fn update_sprites()
         set_oam_a(i, 0)      // options
         i += 4
         eypos-=8
+
+    //DEBUG
+    if (star1.valid)
+        if (star1.frame>=7)
+            star1.valid=false
+        else
+            set_oam_x(i, 128)     // x-position
+            set_oam_y(i, 128) // y-position
+            set_oam_p(i, 56+star1.frame)    // tile
+            set_oam_a(i, 0)      // options
+            i += 4
+            if (star1.step_counter>=STAR_STEP)
+                star1.frame+=1
+                star1.step_counter=0
+            else
+                star1.step_counter+=1
+    //DEBUG
 
     // Clear the remainder of OAM
     hide_oam(i)
