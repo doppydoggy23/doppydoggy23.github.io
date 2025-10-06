@@ -45,8 +45,6 @@ ct U HIT_SFX=1
 ct U WIN_SFX=2
 ct U LOSE_SFX=3
 
-ct U LEVEL_SCR_WAIT=100
-
 struct BarDownInfo
     U xpos
     U ypos
@@ -207,12 +205,11 @@ mode main()
 
 mode play_level1()
 : nmi main_nmi
-    show_lvl_scr(1)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
     //
+//    load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     load_screen(@lev_level1) // the name lev_level1 is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
@@ -251,8 +248,6 @@ mode play_level1()
 
 mode play_level2()
 : nmi main_nmi
-    show_lvl_scr(2)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -297,8 +292,6 @@ mode play_level2()
 
 mode play_level3()
 : nmi main_nmi
-    show_lvl_scr(3)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -342,8 +335,6 @@ mode play_level3()
 
 mode play_level4()
 : nmi main_nmi
-    show_lvl_scr(4)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -388,8 +379,6 @@ mode play_level4()
 
 mode play_level5()
 : nmi main_nmi
-    show_lvl_scr(5)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -432,8 +421,6 @@ mode play_level5()
 
 mode play_level6()
 : nmi main_nmi
-    show_lvl_scr(6)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -478,8 +465,6 @@ mode play_level6()
 
 mode play_level7()
 : nmi main_nmi
-    show_lvl_scr(7)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -522,8 +507,6 @@ mode play_level7()
 
 mode play_level8()
 : nmi main_nmi
-    show_lvl_scr(8)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -567,8 +550,6 @@ mode play_level8()
 
 mode play_level9()
 : nmi main_nmi
-    show_lvl_scr(9)// level scr
-    //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
@@ -609,56 +590,49 @@ mode play_level9()
         calculate_sounds()
         nmi // Wait for the next NMI
 
-mode play_congrats()
-: nmi main_nmi
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)
-    load_screen(@lev_congrats) // the name lev_level1 is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    // Wait forever, one frame at a time:
-    while true
-        update_pads()
-        if pads[0].pressed & BUTTON_START
-            play_level(1)
-        nmi // Wait for the next NMI
+
 
 ////////
 
 fn play_level (U lvl)
     if (lvl == 1)
+        //show_level_intro_scr(1)
         goto mode play_level1()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 2)
+        //show_level_intro_scr(1)
         goto mode play_level2()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 3)
+        //show_level_intro_scr(1)
         goto mode play_level3()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 4)
+        //show_level_intro_scr(1)
         goto mode play_level4()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 5)
+        //show_level_intro_scr(1)
         goto mode play_level5()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 6)
+        //show_level_intro_scr(1)
         goto mode play_level6()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 7)
+        //show_level_intro_scr(1)
         goto mode play_level7()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 8)
+        //show_level_intro_scr(1)
         goto mode play_level8()  // Initialize game by entering the play level mode
         : preserves
     if (lvl == 9)
+        //show_level_intro_scr(1)
         goto mode play_level9()  // Initialize game by entering the play level mode
         : preserves
-    if (lvl == 10)
-        goto mode play_congrats()  // Initialize game by entering the play level mode
-        : preserves
     //default
+    //show_level_intro_scr(1)
     goto mode play_level1()  // by default, go to level 1
     : preserves
 
@@ -1460,17 +1434,3 @@ fn calculate_sounds()
         if (did_no_hit)
             puf.play_sfx(NO_HIT_SFX)
     did_no_hit=false
-
-// shows the "level X" screen
-fn show_lvl_scr(U lvl)
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)
-    load_screen(@lev_levelscr) // the name lev_level1 is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    ppu_reset_addr($2000+402) // 9,6=(6*32*2)+(9*2)
-    {PPUDATA}(176+lvl)
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    wait(LEVEL_SCR_WAIT)
-
-
