@@ -63,13 +63,8 @@ struct StarInfo
     U frame
     Bool valid
     U step_counter
-    U palette
-    U x
-    U y
 
 ct U STAR_STEP= 2
-ct U MAX_STARS= 10
-ct U NUM_STAR_FRAMES=7
 
 vars /game_vars
     BallInfo ball
@@ -99,11 +94,8 @@ vars /game_vars
     U collision_col
     U collision_row
     U updated_metatile
-    U collision_center_x
-    U collision_center_y
-    U collision_color
 
-    StarInfo[MAX_STARS] stars // the stars that appear when a block is broken
+    StarInfo star1 // DEBUG
 
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
@@ -256,8 +248,6 @@ mode play_level1()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -267,7 +257,6 @@ mode play_level1()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 mode play_level2()
@@ -304,8 +293,6 @@ mode play_level2()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false    
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -315,7 +302,6 @@ mode play_level2()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 
@@ -352,8 +338,6 @@ mode play_level3()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -363,7 +347,6 @@ mode play_level3()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 
@@ -401,8 +384,6 @@ mode play_level4()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -412,7 +393,6 @@ mode play_level4()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 
@@ -449,8 +429,6 @@ mode play_level5()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -460,7 +438,6 @@ mode play_level5()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 mode play_level6()
@@ -497,8 +474,6 @@ mode play_level6()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -508,7 +483,6 @@ mode play_level6()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 
@@ -545,8 +519,6 @@ mode play_level7()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(0)
     // Wait forever, one frame at a time:
@@ -556,7 +528,6 @@ mode play_level7()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 mode play_level8()
@@ -593,8 +564,6 @@ mode play_level8()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(1)
     // Wait forever, one frame at a time:
@@ -604,7 +573,6 @@ mode play_level8()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 mode play_level9()
@@ -640,8 +608,6 @@ mode play_level9()
     a_button_countdown=0
     b_button_countdown=0
     did_no_hit=false
-    for U ii=0; ii<MAX_STARS; ii+=1
-        stars[ii].valid=false
     //
     puf.play_track(2)
     // Wait forever, one frame at a time:
@@ -651,7 +617,6 @@ mode play_level9()
         update_game_elements()
         update_sprites() 
         calculate_sounds()
-        update_stars()
         nmi // Wait for the next NMI
 
 mode play_congrats()
@@ -730,6 +695,9 @@ fn move_player ()
         num_zeroed_blocks=100
     if pads[0].pressed & BUTTON_DOWN
         ball.ypos += 1
+        star1.valid=true
+        star1.frame=0
+        star1.step_counter=0
     // DEBUG. REMOVE
 
     if a_button_countdown > 0
@@ -958,24 +926,22 @@ fn update_sprites()
         i += 4
         eypos-=8
 
-    // now update the stars when a block breaks
-    for U starindex=0; starindex<MAX_STARS; starindex+=1
-        if (stars[starindex].valid)
-            if (stars[starindex].frame>=NUM_STAR_FRAMES)
-                stars[starindex].valid=false
+    //DEBUG
+    if (star1.valid)
+        if (star1.frame>=7)
+            star1.valid=false
+        else
+            set_oam_x(i, 128)     // x-position
+            set_oam_y(i, 128) // y-position
+            set_oam_p(i, 56+star1.frame)    // tile
+            set_oam_a(i, 0)      // options
+            i += 4
+            if (star1.step_counter>=STAR_STEP)
+                star1.frame+=1
+                star1.step_counter=0
             else
-                set_oam_x(i, stars[starindex].x)     // x-position
-                set_oam_y(i, stars[starindex].y) // y-position
-                set_oam_p(i, 56+ (stars[starindex].frame) )    // tile
-                set_oam_a(i, stars[starindex].palette)      // options
-                i += 4
-                if (stars[starindex].step_counter>=STAR_STEP)
-                    stars[starindex].frame+=1
-                    stars[starindex].step_counter=0
-                else
-                    stars[starindex].step_counter+=1
-
-
+                star1.step_counter+=1
+    //DEBUG
 
     // Clear the remainder of OAM
     hide_oam(i)
@@ -1066,9 +1032,6 @@ fn manage_collision (U col_col, U col_row)
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+7
-                    collision_center_y=coll_y+3
-                    collision_color=1
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1085,9 +1048,6 @@ fn manage_collision (U col_col, U col_row)
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+7
-                    collision_center_y=coll_y+8+3
-                    collision_color=1
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1110,9 +1070,6 @@ fn manage_collision (U col_col, U col_row)
                         updated_metatile=set+12
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+3
-                    collision_center_y=coll_y+3
-                    collision_color=1
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1128,9 +1085,6 @@ fn manage_collision (U col_col, U col_row)
                         updated_metatile=set+12
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+8+3
-                    collision_center_y=coll_y+3
-                    collision_color=1
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1146,9 +1100,6 @@ fn manage_collision (U col_col, U col_row)
                         updated_metatile=set+12
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+3
-                    collision_center_y=coll_y+8+3
-                    collision_color=1
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1164,9 +1115,6 @@ fn manage_collision (U col_col, U col_row)
                         updated_metatile=set+12
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+8+3
-                    collision_center_y=coll_y+8+3
-                    collision_color=1
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1184,9 +1132,6 @@ fn manage_collision (U col_col, U col_row)
                 updated_metatile=0
                 collision_col=col_col
                 collision_row=col_row
-                collision_center_x=coll_x+7
-                collision_center_y=coll_y+7
-                collision_color=1
                 is_collision_pending=true
             else
                 did_no_hit=true // sound of no brick broken
@@ -1202,9 +1147,6 @@ fn manage_collision (U col_col, U col_row)
                 updated_metatile=28
                 collision_col=col_col
                 collision_row=col_row
-                collision_center_x=coll_x+7
-                collision_center_y=coll_y+7
-                collision_color=1
                 is_collision_pending=true
             else
                 did_no_hit=true // sound of no brick broken
@@ -1220,9 +1162,6 @@ fn manage_collision (U col_col, U col_row)
                 updated_metatile=29
                 collision_col=col_col
                 collision_row=col_row
-                collision_center_x=coll_x+7
-                collision_center_y=coll_y+7
-                collision_color=1
                 is_collision_pending=true
             else
                 did_no_hit=true // sound of no brick broken
@@ -1231,7 +1170,7 @@ fn manage_collision (U col_col, U col_row)
         return
     //
     // 1x1 block that transforms into 4 mini blocks
-    if (colli_metatile==31) 
+    if (colli_metatile==31) // two 8-wide horizontal blocks metatile
         U coll_x=col_col<<4
         U coll_y=col_row<<4
         //
@@ -1240,9 +1179,6 @@ fn manage_collision (U col_col, U col_row)
                 updated_metatile=27
                 collision_col=col_col
                 collision_row=col_row
-                collision_center_x=coll_x+7
-                collision_center_y=coll_y+7
-                collision_color=1
                 is_collision_pending=true
             else
                 did_no_hit=true // sound of no brick broken
@@ -1267,9 +1203,6 @@ fn manage_collision (U col_col, U col_row)
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+7
-                    collision_center_y=coll_y+3
-                    collision_color=2
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1286,9 +1219,6 @@ fn manage_collision (U col_col, U col_row)
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+7
-                    collision_center_y=coll_y+8+3
-                    collision_color=2
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1313,9 +1243,6 @@ fn manage_collision (U col_col, U col_row)
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+7
-                    collision_center_y=coll_y+3
-                    collision_color=3
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1332,9 +1259,6 @@ fn manage_collision (U col_col, U col_row)
                     //ball.xinc=1 // bounce right
                     collision_col=col_col
                     collision_row=col_row
-                    collision_center_x=coll_x+7
-                    collision_center_y=coll_y+8+3
-                    collision_color=3
                     is_collision_pending=true
                 else
                     did_no_hit=true // sound of no brick broken
@@ -1579,20 +1503,4 @@ fn show_lvl_scr(U lvl)
     {PPUCTRL}(PPUCTRL_NMI_ON)
     wait(LEVEL_SCR_WAIT)
 
-// adds a star where the block exloded
-fn add_star (U x, U y, U palette)
-    for U i=0; i<MAX_STARS; i+=1
-        if (! stars[i].valid)
-            stars[i].valid=true
-            stars[i].x=x
-            stars[i].y=y
-            stars[i].palette=palette
-            stars[i].frame=0
-            stars[i].step_counter=0
-            return
-
-// add the star after block explosion. Only one per frame.            
-fn update_stars()
-    if ( (is_collision_pending) && (updated_metatile!= 28) && (updated_metatile!=29) && (updated_metatile !=27) )
-        add_star(collision_center_x-4, collision_center_y-4, collision_color)
 
