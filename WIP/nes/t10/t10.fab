@@ -724,14 +724,14 @@ fn move_player ()
         else
             bardown.xpos=HBAR_MAX_X
 
-    // DEBUG. REMOVE
+/*    // DEBUG. REMOVE
     if pads[0].pressed & BUTTON_UP
         ball.ypos -= 1
         num_zeroed_blocks=100
     if pads[0].pressed & BUTTON_DOWN
         ball.ypos += 1
     // DEBUG. REMOVE
-
+*/
     if a_button_countdown > 0
         a_button_countdown-=1
     if b_button_countdown > 0
