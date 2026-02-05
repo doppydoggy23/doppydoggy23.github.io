@@ -16,6 +16,48 @@ function initializeUI() {
 
 }
 
+/*
+ * This function is called when the user clicks a new file to be read in memory
+ */
+function readFile(input) {
+    let file = input.files[0];
+
+/*    let textInfo="File name: "+file.name;
+
+    document.getElementById('textresultparagraph').innerText=textInfo;
+
+*/  
+    let reader = new FileReader();
+
+/*    reader.readAsText(file);
+    reader.onload = function() {
+        console.log(reader.result);
+    };*/
+
+    reader.readAsArrayBuffer(file);
+    reader.onload = function() {
+        //console.log(reader.result);
+        let myArrayBuffer=reader.result;
+        newFileReadInMemory(file.name, myArrayBuffer);
+    };
+}
+
+/*
+ *  This function is called when the new file is already in memory. Ready to be manipulated
+*/
+function newFileReadInMemory (filename, myArrayBuffer){
+
+    document.getElementById('textresultparagraph').innerText="File name: "+filename;
+
+    let fileBytes=new Uint8Array(myArrayBuffer); // convert it to bytes
+    let mytext=" File Bytes=";
+    for (let i=0; i<fileBytes.length; i++)
+        mytext+=" "+fileBytes[i];
+
+    document.getElementById('textresultparagraph').innerText+=mytext;
+
+}
+
 function PlayButtonClick (){
     // must be a power of 2.
     let signal = [1, -1, 1, -1];
@@ -28,4 +70,8 @@ function PlayButtonClick (){
 
     console.log("reconstructed signal: " + reconstructedSignal.real);
 
+}
+
+function LoadWAVButtonClick(){
+    document.getElementById('file-selector').click();
 }
