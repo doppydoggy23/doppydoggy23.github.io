@@ -47,7 +47,7 @@ function readFile(input) {
 */
 function newFileReadInMemory (filename, myArrayBuffer){
 
-    document.getElementById('textresultparagraph').innerText="File name: "+filename;
+/*    document.getElementById('textresultparagraph').innerText="File name: "+filename;
 
     let fileBytes=new Uint8Array(myArrayBuffer); // convert it to bytes
     let mytext=" File Bytes=";
@@ -55,7 +55,12 @@ function newFileReadInMemory (filename, myArrayBuffer){
         mytext+=" "+fileBytes[i];
 
     document.getElementById('textresultparagraph').innerText+=mytext;
+*/
+    let wav = new wavefile.WaveFile();//WaveFile();
+    wav.fromBuffer(new Uint8Array(myArrayBuffer));
 
+    document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
+        + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
 }
 
 function PlayButtonClick (){
