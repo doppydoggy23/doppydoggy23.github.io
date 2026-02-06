@@ -56,11 +56,15 @@ function newFileReadInMemory (filename, myArrayBuffer){
 
     document.getElementById('textresultparagraph').innerText+=mytext;
 */
-    let wav = new wavefile.WaveFile();//WaveFile();
-    wav.fromBuffer(new Uint8Array(myArrayBuffer));
+    try {
+        let wav = new wavefile.WaveFile();//WaveFile();
+        wav.fromBuffer(new Uint8Array(myArrayBuffer));
 
-    document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
-        + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
+        document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
+            + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
+    } catch (e) {
+        document.getElementById('textresultparagraph').innerText="file format not supported";
+    }
 }
 
 function PlayButtonClick (){
