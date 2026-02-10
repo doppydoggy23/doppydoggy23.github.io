@@ -53,62 +53,65 @@ function readFile(input) {
  *  This function is called when the new file is already in memory. Ready to be manipulated
 */
 function newFileReadInMemory (filename, myArrayBuffer){
-
-/*    document.getElementById('textresultparagraph').innerText="File name: "+filename;
-
-    let fileBytes=new Uint8Array(myArrayBuffer); // convert it to bytes
-    let mytext=" File Bytes=";
-    for (let i=0; i<fileBytes.length; i++)
-        mytext+=" "+fileBytes[i];
-
-    document.getElementById('textresultparagraph').innerText+=mytext;
-*/
-
+    
+    let wav;
 
     try {
-        let wav = new wavefile.WaveFile();//WaveFile();
+        wav = new wavefile.WaveFile();//WaveFile();
+    
         wav.fromBuffer(new Uint8Array(myArrayBuffer));
-
-        document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
-            + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
-
-/*        let samples = new Float64Array(wav.data.samples.length); // wav.getSamples(true, Float64Array);
-        for (let i=0; i<wav.data.samples.length; i++)
-            samples[i]=wav.data.samples[i]/255;
-        //wav.toBitDepth("24");
-*/
-
-        //wav.toBitDepth("64");
 
         WAVInfo={};
         WAVInfo.sampleRate=wav.fmt.sampleRate;
         WAVInfo.numChannels=wav.fmt.numChannels;
         WAVInfo.bitsPerSample=wav.fmt.bitsPerSample;
-        //WAVInfo.samples=samples;
-        //console.log ("samples.length="+WAVInfo.samples.length);
-//        console.log ("samples[1000]="+samples[1000]);
-        console.log ("wav.data.samples[1000]="+wav.data.samples[1000]);
+        //console.log ("wav.data.samples[1000]="+wav.data.samples[1000]);
 
+        let mySamples = wav.getSamples(true);
+        //console.log ("mySamples.length="+mySamples.length);
+        //console.log ("mySamples[1000]="+mySamples[1000]);
+        //console.log ("mySamples[1001]="+mySamples[1001]);
 
-/*        if (wav.fmt.numChannels <= 1) {
-            for (let i =0; i<samples.length; i++)
-                WAVInfo.samples[i]=samples[i];
+        let myRange=128;
+        if (wav.fmt.bitsPerSample==16)
+            myRange=32768;
+        if (wav.fmt.bitsPerSample>16)
+            throw "more than 16 bits are not supported";
+
+        WAVInfo.samples=new Float64Array(mySamples.length/wav.fmt.numChannels);
+        if (wav.fmt.numChannels <= 1) {
+            for (let i =0; i<mySamples.length; i++) {
+                WAVInfo.samples[i]=mySamples[i];
+                WAVInfo.samples[i]-=128;
+                WAVInfo.samples[i]/=myRange;
+            }
         } else {
             let ii=0;
-            for (let i =0; i<samples.length; i+=2)
-                WAVInfo.samples[ii]=(samples[i]+samples[i+1])/2;
-                ii++;
+            for (let i =0; i<mySamples.length; i+=2) {
+                if (WAVInfo.bitsPerSample==8) {
+                    WAVInfo.samples[ii]=mySamples[i];
+                    WAVInfo.samples[ii]+=mySamples[i+1];
+                    WAVInfo.samples[ii]/=2;
+                    WAVInfo.samples[ii]-=128;
+                    WAVInfo.samples[ii]/=myRange;
+                    ii++;    
+                }
+                if (WAVInfo.bitsPerSample==16) {
+                    WAVInfo.samples[ii]=mySamples[i];
+                    WAVInfo.samples[ii]=mySamples[i+1];
+                    WAVInfo.samples[ii]/=2;
+                    WAVInfo.samples[ii]/=myRange;
+                    ii++;    
+                }
+            }
         }        
-*/
-        let mySamples = wav.getSamples(true);
-        console.log ("mySamples.length="+mySamples.length);
-        console.log ("mySamples[1000]="+mySamples[1000]);
-        //console.log ("mySamples="+mySamples);
 
     } catch (e) {
         document.getElementById('textresultparagraph').innerText="file format not supported";
     }
 
+    document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
+            + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
 }
 
 function PlayButtonClick (){
