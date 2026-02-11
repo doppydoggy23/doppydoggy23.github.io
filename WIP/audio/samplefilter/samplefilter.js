@@ -72,6 +72,8 @@ function newFileReadInMemory (filename, myArrayBuffer){
         //console.log ("mySamples[1000]="+mySamples[1000]);
         //console.log ("mySamples[1001]="+mySamples[1001]);
 
+        //TODO: TRY 16 bit mono
+
         let myRange=128;
         if (wav.fmt.bitsPerSample==16)
             myRange=32768;
@@ -82,7 +84,8 @@ function newFileReadInMemory (filename, myArrayBuffer){
         if (wav.fmt.numChannels <= 1) {
             for (let i =0; i<mySamples.length; i++) {
                 WAVInfo.samples[i]=mySamples[i];
-                WAVInfo.samples[i]-=128;
+                if (wav.fmt.bitsPerSample==8)
+                    WAVInfo.samples[i]-=128;
                 WAVInfo.samples[i]/=myRange;
             }
         } else {
