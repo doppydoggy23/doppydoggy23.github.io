@@ -1,9 +1,12 @@
 "use strict";
 
+const FFTLength=4096;
+
 let WAVInfo ={ 
 //    sampleRate
 //    numChannels
 //    samples (in mono)
+//    processedSamples
 };
 
 
@@ -120,6 +123,14 @@ function PlayButtonClick (){
     playWAV();
 }
 
+function PlayProcessedButtonClick() {
+    if (WAVInfo==null)
+        return;
+
+    processWAVSamples();
+    playProcessedWAV();
+}
+
 function LoadWAVButtonClick(){
     document.getElementById('file-selector').click();
 }
@@ -150,6 +161,89 @@ function playWAV() {
         const nowBuffering = myArrayBuffer.getChannelData(channel);
         for (let i = 0; i < myArrayBuffer.length; i++) {
             nowBuffering[i]=WAVInfo.samples[i];
+        }
+    }
+
+    // Get an AudioBufferSourceNode.
+    // This is the AudioNode to use when we want to play an AudioBuffer
+    const source = audioCtx.createBufferSource();
+
+    // set the buffer in the AudioBufferSourceNode
+    source.buffer = myArrayBuffer;
+
+    // connect the AudioBufferSourceNode to the
+    // destination so we can hear the sound
+    source.connect(audioCtx.destination);
+
+    // start the source playing
+    source.start();
+}
+
+
+//processes the original WAV samples to get the new processed samples
+function processWAVSamples() {
+
+    let numFFTBufs=Math.ceil(WAVInfo.samples.length/FFTLength)
+    WAVInfo.processedSamples=new Float64Array(numFFTBufs*FFTLength);
+
+    let signalBuffer=new Float64Array(FFTLength);
+    
+    //clear the samples (useless)
+    for (let i=0; i<WAVInfo.processedSamples.length; i++)
+        WAVInfo.processedSamples[i]=0;
+
+    //for every buffer
+    for (let iBuf=0; iBuf<numFFTBufs; iBuf++) {
+
+        let bufNumIndex=(iBuf*FFTLength);
+
+        //process every FFT buffer
+        for (let i=0; i<FFTLength; i++) {
+
+            let origIndex=bufNumIndex+i;
+            let value;
+
+            if (origIndex < WAVInfo.samples.length)
+                value=WAVInfo.samples[origIndex];
+            else
+                value=0;
+            
+            signalBuffer[i]=value;
+        }
+
+        //copy the buffer to the modified samples array
+        for (let i=0; i<FFTLength; i++) {
+            WAVInfo.processedSamples[bufNumIndex+i]=signalBuffer[i];
+        }
+    }
+}
+
+// plays the processed wav
+function playProcessedWAV() {
+
+    if (WAVInfo==null)
+        return;
+
+    let totalSampleTime=WAVInfo.processedSamples.length/WAVInfo.sampleRate;
+    if (totalSampleTime<=0)
+        return;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // 
+    const myArrayBuffer = audioCtx.createBuffer(
+    2,
+    WAVInfo.sampleRate*totalSampleTime,
+    WAVInfo.sampleRate
+    );
+
+    // Fill the buffer with sound;
+    // just values between -1.0 and 1.0
+    for (let channel = 0; channel < myArrayBuffer.numberOfChannels; channel++) {
+        // This gives us the actual array that contains the data
+        const nowBuffering = myArrayBuffer.getChannelData(channel);
+        for (let i = 0; i < myArrayBuffer.length; i++) {
+            nowBuffering[i]=WAVInfo.processedSamples[i];
         }
     }
 
