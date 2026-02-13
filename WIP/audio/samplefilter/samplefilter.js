@@ -208,8 +208,9 @@ function processWAVSamples() {
             else
                 value=0;
             
-            signalBuffer[i]=value;
+            signalBuffer[i]=value*Hann(i, FFTLength);
         }
+
 
         let phasors = fft(signalBuffer);
         //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
@@ -276,4 +277,9 @@ function playProcessedWAV() {
 
     // start the source playing
     source.start();
+}
+
+//Windowing function (n=sample index, N=numSamples)
+function Hann(n, N) {
+    return (0.5-( 0.5*Math.cos((2*Math.PI*n)/N) ));
 }
