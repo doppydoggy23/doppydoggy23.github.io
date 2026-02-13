@@ -211,10 +211,26 @@ function processWAVSamples() {
             signalBuffer[i]=value;
         }
 
+        let phasors = fft(signalBuffer);
+        //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
+
+        // DEBUG
+        for (let i=50; i<phasors.real.length; i++) {
+            phasors.real[i]=0;
+            phasors.imag[i]=0;
+        }
+        // DEBUG
+
+        let reconstructedSignal = ifft(phasors);
+        //console.log("reconstructed signal: " + reconstructedSignal.real);
+    
         //copy the buffer to the modified samples array
         for (let i=0; i<FFTLength; i++) {
-            WAVInfo.processedSamples[bufNumIndex+i]=signalBuffer[i];
+            WAVInfo.processedSamples[bufNumIndex+i]=reconstructedSignal.real[i];
         }
+        /*for (let i=0; i<FFTLength; i++) {
+            WAVInfo.processedSamples[bufNumIndex+i]=signalBuffer[i];
+        }*/
     }
 }
 
