@@ -208,7 +208,7 @@ function processWAVSamples() {
             else
                 value=0;
             
-            signalBuffer[i]=value;//*Hann(i, FFTLength); // get "windowed" (https://en.wikipedia.org/wiki/Hann_function) value
+            signalBuffer[i]=value*Hann(i, FFTLength); // get "windowed" (https://en.wikipedia.org/wiki/Hann_function) value
         }
 
 
@@ -216,10 +216,10 @@ function processWAVSamples() {
         //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
 
         // DEBUG
-        for (let i=50; i<phasors.real.length; i++) {
+        /*for (let i=50; i<phasors.real.length; i++) {
             phasors.real[i]=0;
             phasors.imag[i]=0;
-        }
+        }*/
         // DEBUG
 
         let reconstructedSignal = ifft(phasors);
