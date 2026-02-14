@@ -179,57 +179,7 @@ function playWAV() {
     source.start();
 }
 
-// this functions processes the samples to create the filtered WAV
-// It uses a Hann window of 75% overlap (50% produced cracks)
-// there that the Pos added every frame was (FFTLength/4),
-// and the usable 1/4 overlap-save chunck starts at ((FFTLength/2)-(FFTLength/8))
-// of the window (past 2/3 of the start) of the chunk
 function processWAVSamples() {
-
-    // create the array of the processed samples
-    WAVInfo.processedSamples=new Float64Array(WAVInfo.samples.length);
-    //clear the samples (useless)
-    for (let i=0; i<WAVInfo.processedSamples.length; i++)
-        WAVInfo.processedSamples[i]=0;
-
-    let bufferFFT=new Float64Array(FFTLength); // signal to be processed
-    let pos=-(FFTLength/4); // 75% window overlap
-
-    while (pos < WAVInfo.samples.length) {
-        for (let i=0; i<FFTLength; i++) {
-            let value;
-
-            if ((pos<0)||(pos>=WAVInfo.samples.length))
-                value=0;
-            else
-                value=WAVInfo.samples[pos+i];
-
-            bufferFFT[i]=value*Hann(i, FFTLength);            
-        }
-
-        let phasors = fft(bufferFFT);
-        //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
-
-        // DEBUG
-        //for (let i=50; i<phasors.real.length; i++) {
-        //    phasors.real[i]=0;
-        //    phasors.imag[i]=0;
-        //}
-        // DEBUG
-        let reconstructedSignal = ifft(phasors);
-
-        let dest=pos+(FFTLength/2)-(FFTLength/8); // past 2/3 of the start of the chunk
-
-        for (let i=0; i<(FFTLength/4); i++)
-            if ( ((dest+i)>=0) && ((dest+i)<WAVInfo.processedSamples.length) )
-                WAVInfo.processedSamples[dest+i]=reconstructedSignal.real[(FFTLength/2)-(FFTLength/8)+i];
-        
-        pos+=(FFTLength/4); // 75% window overlap
-    }    
-}
-
-
-/*function processWAVSamples() {
 
     WAVInfo.processedSamples=new Float64Array(WAVInfo.samples.length);
     //clear the samples (useless)
@@ -255,10 +205,10 @@ function processWAVSamples() {
         //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
 
         // DEBUG
-        //for (let i=50; i<phasors.real.length; i++) {
-        //    phasors.real[i]=0;
-        //    phasors.imag[i]=0;
-        //}
+/*        for (let i=50; i<phasors.real.length; i++) {
+            phasors.real[i]=0;
+            phasors.imag[i]=0;
+        }*/
         // DEBUG
         let reconstructedSignal = ifft(phasors);
 
@@ -269,8 +219,10 @@ function processWAVSamples() {
                 WAVInfo.processedSamples[dest+i]=reconstructedSignal.real[(FFTLength/4)+i];
         
         pos+=(FFTLength/2);
-    }    
-}*/
+    }
+
+    
+}
 
 
 //processes the original WAV samples to get the new processed samples
