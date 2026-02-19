@@ -36,7 +36,8 @@ function readFile(input) {
     reader.onload = function() {
         //console.log(reader.result);
         let myArrayBuffer=reader.result;
-        newFileReadInMemory(file.name, myArrayBuffer);
+        newFileReadInMemory(file.name, myArrayBuffer); // Transform the WAV file into -1..0..1 memory samples
+        createFreqGraph(FFTLength, 800); // create the graphics of frequencies
     };
 }
 
@@ -106,6 +107,51 @@ function newFileReadInMemory (filename, myArrayBuffer){
 
     document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
             + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
+}
+
+function createFreqGraph(FFTRes, graphWidth) {
+    let AccFFTfrequencies=new Float64Array(FFTRes);
+    AccFFTfrequencies.fill(0);
+
+    let bufferFFT=new Float64Array(FFTRes); // signal to be processed
+    let pos=0; 
+
+    // process the whole WAV, buffer by buffer
+    while (pos < WAVInfo.samples.length) {
+        for (let i=0; i<FFTRes; i++) {
+            let value;
+
+            if ((pos<0)||(pos>=WAVInfo.samples.length))
+                value=0;
+            else
+                value=WAVInfo.samples[pos+i];
+
+            bufferFFT[i]=value*Hann(i, FFTLength);            
+        }
+
+        let phasors = fft(bufferFFT);
+        //let reconstructedSignal = ifft(phasors);
+
+        // save the higest energy for that frequency
+        for (let i=0; i<FFTRes; i++) {
+            let energy=Math.abs(phasors.real[i]+phasors.imag[i]);
+            if  (energy > AccFFTfrequencies[i])
+                AccFFTfrequencies[i]=energy;
+        }
+
+        pos+=FFTRes;
+    }
+
+    // calculate average
+    let average=0;
+    for (let i=0; i<FFTRes; i++) {
+        average+=AccFFTfrequencies[i];
+    }
+    average/=FFTRes;
+    console.log("createFreqGraph: Average energy="+average);
+
+    // ToDo: stretch the accumulated frequencies to the canvas width
+
 }
 
 function PlayButtonClick (){
