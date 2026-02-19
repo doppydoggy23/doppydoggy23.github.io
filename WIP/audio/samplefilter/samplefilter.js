@@ -143,14 +143,47 @@ function createFreqGraph(FFTRes, graphWidth) {
     }
 
     // calculate average
-    let average=0;
+/*    let average=0;
     for (let i=0; i<FFTRes; i++) {
         average+=AccFFTfrequencies[i];
     }
     average/=FFTRes;
     console.log("createFreqGraph: Average energy="+average);
+*/
 
-    // ToDo: stretch the accumulated frequencies to the canvas width
+    //normalize the array data before the stretch
+    let higestVal=-1;
+    for (let i=0; i<FFTRes; i++) {
+        if (AccFFTfrequencies[i]>higestVal)
+            higestVal=AccFFTfrequencies[i];
+    }
+    for (let i=0; i<FFTRes; i++) {
+        AccFFTfrequencies[i]/=higestVal;
+    }
+    //console.log("createFreqGraph: highest value="+higestVal);
+    //ToDo: limit the higuest value to something smaller, say, 10*lowest value, express in dB?
+
+
+    //stretch the accumulated frequencies to the canvas width
+    let graphData=new Float64Array(graphWidth);
+
+    if (graphWidth > FFTRes)
+        throw "createFreqGraph: wrong graphWidth";
+
+    let fgstep=graphWidth/FFTRes;
+    let formervalue=-1;
+    let acc=0;
+    for (let i=0; i<FFTRes; i++) {
+        acc+=fgstep;
+        let floorVal=Math.floor(acc);
+        if (floorVal != formervalue) {
+            if ((floorVal>=0)&&(floorVal<graphData.length))
+                graphData[floorVal]=AccFFTfrequencies[i];
+            formervalue=floorVal;
+        }
+    }
+    //console.log("createFreqGraph: graphData="+graphData);
+
 
 }
 
