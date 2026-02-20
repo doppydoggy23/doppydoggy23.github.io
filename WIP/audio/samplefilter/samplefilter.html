@@ -105,12 +105,18 @@
 
 <body onload="initializeUI()">
 
-  <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
-  <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
-  <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>
+  <div width="100%">
+    <canvas id="myCanvas" width="800" height="100" > </canvas> 
+  </div>
 
-  <p id="textresultparagraph">
-  </p>
+  <div width="100%">
+    <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
+    <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
+    <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>
+
+    <p id="textresultparagraph">
+    </p>
+  </div>
 
   <!-- It's hidden because we will trigger it with another button-->
 <input type="file" id="file-selector" style="display:none" onchange="readFile(this)"> 

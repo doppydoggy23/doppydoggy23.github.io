@@ -12,6 +12,15 @@ let WAVInfo ={
 
 function initializeUI() {
     WAVInfo=null;
+
+    //clear canvas
+    let canvas = document.getElementById('myCanvas');
+    let ctx = canvas.getContext("2d");
+    let canvasWidth = canvas.width;
+    let canvasHeight = canvas.height;
+
+    ctx.fillStyle = "rgb(230, 230, 230)"; //"white"; // 
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 }
 
 /*
@@ -37,7 +46,7 @@ function readFile(input) {
         //console.log(reader.result);
         let myArrayBuffer=reader.result;
         newFileReadInMemory(file.name, myArrayBuffer); // Transform the WAV file into -1..0..1 memory samples
-        createFreqGraph(FFTLength, 800); // create the graphics of frequencies
+        createFreqGraph(FFTLength, document.getElementById('myCanvas').width); // create the graphics of frequencies
     };
 }
 
@@ -134,7 +143,7 @@ function createFreqGraph(FFTRes, graphWidth) {
 
         // save the higest energy for that frequency
         for (let i=0; i<FFTRes; i++) {
-            let energy=Math.abs(phasors.real[i]+phasors.imag[i]);
+            let energy=Math.abs(phasors.real[i])+Math.abs(phasors.imag[i]);
             if  (energy > AccFFTfrequencies[i])
                 AccFFTfrequencies[i]=energy;
         }
@@ -142,18 +151,9 @@ function createFreqGraph(FFTRes, graphWidth) {
         pos+=FFTRes;
     }
 
-    // calculate average
-/*    let average=0;
-    for (let i=0; i<FFTRes; i++) {
-        average+=AccFFTfrequencies[i];
-    }
-    average/=FFTRes;
-    console.log("createFreqGraph: Average energy="+average);
-*/
-
     //normalize the array data before the stretch
     let higestVal=-1;
-    for (let i=0; i<FFTRes; i++) {
+    for (let i=0; i<=(FFTRes/2); i++) { // we only need up to (FFTRes/2) frequencies
         if (AccFFTfrequencies[i]>higestVal)
             higestVal=AccFFTfrequencies[i];
     }
@@ -163,17 +163,16 @@ function createFreqGraph(FFTRes, graphWidth) {
     //console.log("createFreqGraph: highest value="+higestVal);
     //ToDo: limit the higuest value to something smaller, say, 10*lowest value, express in dB?
 
-
     //stretch the accumulated frequencies to the canvas width
     let graphData=new Float64Array(graphWidth);
 
-    if (graphWidth > FFTRes)
+    if (graphWidth > (FFTRes/2))
         throw "createFreqGraph: wrong graphWidth";
 
-    let fgstep=graphWidth/FFTRes;
+    let fgstep=graphWidth/(FFTRes/2);
     let formervalue=-1;
     let acc=0;
-    for (let i=0; i<FFTRes; i++) {
+    for (let i=0; i<=(FFTRes/2); i++) {
         acc+=fgstep;
         let floorVal=Math.floor(acc);
         if (floorVal != formervalue) {
@@ -184,7 +183,22 @@ function createFreqGraph(FFTRes, graphWidth) {
     }
     //console.log("createFreqGraph: graphData="+graphData);
 
+    //
+    // draw the frequencies spectrum
+    //
+    let canvas = document.getElementById('myCanvas');
+    let ctx = canvas.getContext("2d");
+    let canvasWidth = canvas.width;
+    let canvasHeight = canvas.height;
 
+    ctx.fillStyle = "rgb(230, 230, 230)"; //"white"; // 
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.fillStyle = "rgb(0, 0, 0)";
+    // draw the bars
+    for (let i=0; i<graphData.length; i++) {
+        ctx.fillRect(i, canvasHeight-(graphData[i]*canvasHeight), 1, canvasHeight);        
+    }
 }
 
 function PlayButtonClick (){
@@ -290,7 +304,7 @@ function processWAVSamples() {
         //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
 
         // DEBUG
-        //for (let i=50; i<phasors.real.length; i++) {
+        //for (let i=(phasors.real.length/2); i<phasors.real.length; i++) {
         //    phasors.real[i]=0;
         //    phasors.imag[i]=0;
         //}
