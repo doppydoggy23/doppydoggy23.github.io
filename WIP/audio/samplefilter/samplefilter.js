@@ -304,10 +304,33 @@ function processWAVSamples() {
         //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
 
         // DEBUG
-        //for (let i=(phasors.real.length/2); i<phasors.real.length; i++) {
+        //for (let i=(phasors.real.length/2)+1; i<phasors.real.length; i++) {
         //    phasors.real[i]=0;
         //    phasors.imag[i]=0;
         //}
+/*  works ok      for (let i=10000; i<(phasors.real.length/2); i++) {
+            phasors.real[i]=0;
+            phasors.imag[i]=0;
+            phasors.real[i+(phasors.real.length/2)]=0;
+            phasors.imag[i+(phasors.real.length/2)]=0;
+        }*/
+/*works like the former        for (let i=10000; i<phasors.real.length; i++) {
+            phasors.real[i]=0;
+            phasors.imag[i]=0;
+        }*/
+        // first we clear the upper part of the FFT
+        for (let i=(phasors.real.length/2)+1; i<phasors.real.length; i++) {
+            phasors.real[i]=0;
+            phasors.imag[i]=0;
+        }
+        // after that, we need to double the remaining coeficients in the
+        // left half to compensate for the loss of energy
+        for (let i=0; i<=(phasors.real.length/2); i++) {
+            phasors.real[i]*=2;
+            phasors.imag[i]*=2;
+        }
+
+
         // DEBUG
         let reconstructedSignal = ifft(phasors);
 
