@@ -110,6 +110,15 @@
   </div>
 
   <div width="100%">
+    <sl-range id="Freq1Range" min="0" max="5000" step="1" help-text="Frequency 1" tooltip="bottom" style="width:800px;" oninput="Freq1RangeChange()" value="440"></sl-range>
+    <sl-input id="Freq1Input" help-text="Frequency 1" style="width:100px;" value="440" oninput="Freq1InputChange()"> </sl-input>
+  </div>
+  <div width="100%">
+    <sl-range id="Freq2Range" min="0" max="5000" step="1" help-text="Frequency 2" tooltip="bottom" style="width:800px;" oninput="Freq2RangeChange()" value="880"></sl-range>
+    <sl-input id="Freq2Input" help-text="Frequency 2" style="width:100px;" value="880" oninput="Freq2InputChange()"> </sl-input>
+  </div>
+
+  <div width="100%">
     <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
     <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
     <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>

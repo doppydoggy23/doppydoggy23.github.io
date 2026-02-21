@@ -1,5 +1,8 @@
 "use strict";
 
+// ToDo: check the validity of cutoff frequencies in their textboxes before processing the audio
+// ToDo: add a stop button
+
 const FFTLength=4096;
 
 let WAVInfo ={ 
@@ -47,7 +50,27 @@ function readFile(input) {
         let myArrayBuffer=reader.result;
         newFileReadInMemory(file.name, myArrayBuffer); // Transform the WAV file into -1..0..1 memory samples
         createFreqGraph(FFTLength, document.getElementById('myCanvas').width); // create the graphics of frequencies
+        // set the UI controls according to the WAV values
+        if (WAVInfo!=null) {
+            document.getElementById('Freq1Range').max=WAVInfo.sampleRate/2;
+            document.getElementById('Freq2Range').max=WAVInfo.sampleRate/2;
+            document.getElementById('Freq1Input').value=440; document.getElementById('Freq1Range').value=440;
+            document.getElementById('Freq2Input').value=880; document.getElementById('Freq2Range').value=880;
+        }
     };
+}
+
+function Freq1RangeChange(){
+    document.getElementById('Freq1Input').value=document.getElementById('Freq1Range').value;
+}
+function Freq2RangeChange(){    
+    document.getElementById('Freq2Input').value=document.getElementById('Freq2Range').value;
+}
+function Freq1InputChange() {
+    document.getElementById('Freq1Range').value=document.getElementById('Freq1Input').value;
+}
+function Freq2InputChange() {
+    document.getElementById('Freq2Range').value=document.getElementById('Freq2Input').value;
 }
 
 /*
@@ -112,6 +135,7 @@ function newFileReadInMemory (filename, myArrayBuffer){
 
     } catch (e) {
         document.getElementById('textresultparagraph').innerText="file format not supported";
+        WAVInfo=null;
     }
 
     document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
@@ -119,6 +143,10 @@ function newFileReadInMemory (filename, myArrayBuffer){
 }
 
 function createFreqGraph(FFTRes, graphWidth) {
+
+    if (WAVInfo==null)
+        return;
+
     let AccFFTfrequencies=new Float64Array(FFTRes);
     AccFFTfrequencies.fill(0);
 
@@ -202,17 +230,6 @@ function createFreqGraph(FFTRes, graphWidth) {
 }
 
 function PlayButtonClick (){
-/*    // must be a power of 2.
-    let signal = [1, -1, 1, -1];
-
-    let phasors = fft(signal);
-    
-    console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
-
-    let reconstructedSignal = ifft(phasors);
-
-    console.log("reconstructed signal: " + reconstructedSignal.real);
-*/
     playWAV();
 }
 
@@ -279,6 +296,15 @@ function playWAV() {
 // of the window (past 2/3 of the start) of the chunk
 function processWAVSamples() {
 
+    let bandPassFreq1=document.getElementById('Freq1Input').value; //parseInt
+    let bandPassFreq2=document.getElementById('Freq2Input').value;
+    if (bandPassFreq1>bandPassFreq2) {
+        let temp=bandPassFreq1;
+        bandPassFreq1=bandPassFreq2;
+        bandPassFreq2=temp;
+    }
+    //console.log("bandPassFreq1="+bandPassFreq1+ " bandPassFreq2="+bandPassFreq2);
+
     // create the array of the processed samples
     WAVInfo.processedSamples=new Float64Array(WAVInfo.samples.length);
     //clear the samples (useless)
@@ -303,25 +329,20 @@ function processWAVSamples() {
         let phasors = fft(bufferFFT);
         //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
 
-        // DEBUG
-        //for (let i=(phasors.real.length/2)+1; i<phasors.real.length; i++) {
-        //    phasors.real[i]=0;
-        //    phasors.imag[i]=0;
-        //}
-/*  works ok      for (let i=10000; i<(phasors.real.length/2); i++) {
-            phasors.real[i]=0;
-            phasors.imag[i]=0;
-            phasors.real[i+(phasors.real.length/2)]=0;
-            phasors.imag[i+(phasors.real.length/2)]=0;
-        }*/
-/*works like the former        for (let i=10000; i<phasors.real.length; i++) {
-            phasors.real[i]=0;
-            phasors.imag[i]=0;
-        }*/
+        //
         // first we clear the upper part of the FFT
         for (let i=(phasors.real.length/2)+1; i<phasors.real.length; i++) {
             phasors.real[i]=0;
             phasors.imag[i]=0;
+        }
+        // we cut all the frequencies except between bandPassFreq1 and bandPassFreq2
+        // The frequency of the kth bin is given by, k × (sampling_rate / N)
+        for (let i=0; i<=(phasors.real.length/2); i++) {
+            let thisBinFreq=i*WAVInfo.sampleRate/FFTLength;
+            if ((thisBinFreq<bandPassFreq1) || (thisBinFreq>bandPassFreq2)) {
+                phasors.real[i]=0;
+                phasors.imag[i]=0;
+            }
         }
         // after that, we need to double the remaining coeficients in the
         // left half to compensate for the loss of energy
@@ -329,6 +350,7 @@ function processWAVSamples() {
             phasors.real[i]*=2;
             phasors.imag[i]*=2;
         }
+        //
 
 
         // DEBUG
