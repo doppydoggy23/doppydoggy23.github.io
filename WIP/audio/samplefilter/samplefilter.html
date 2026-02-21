@@ -1,93 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Sample Filter</title>
+<title>Sample Filter and Extractor</title>
 <style>
 
-#upperMenuBar {
-  border-style: solid;
-  border-width: 1px;
+#MainContainer {
+  width: 1000px;
+  height: 450px;
+  border: 1px;
   border-color: black;
-  /*background-color: red;*/
-  width: 800px;
-  height: 100px;
-  margin: auto;
-  /*text-align: left;*/
-  display: flex; 
-  flex-direction: row; /* display all in a row*/
-  justify-content: center;
-  align-items: center;
+  border-style: solid;
 }
 
-#PlayButton {
-  padding: 10px;
+#Divider1 {
+  width: 1000px;
+  height: 50px;
+  text-align: center;
 }
-#StopButton {
-  padding: 10px;
-}
-#SpeedRange {
+
+#Divider2 {
   width: 200px;
-  padding: 10px;
-  /*font-family: Arial; */
-  font-family: sans-serif, Verdana, Geneva, Tahoma;
+  height: 50px;
+  float: left;
 }
-#PatternLengthRange {
+#Divider3 {
+  width: 400px;
+  height: 50px;
+  float: left;
+}
+#Divider4 {
+  width: 400px;
+  height: 50px;
+  float: left;
+  text-align: right;
+}
+
+#Divider5 {
   width: 200px;
-  padding: 10px;
-  /*font-family: Arial; */
-  font-family: sans-serif, Verdana, Geneva, Tahoma;
+  height: 50px;
+  float: left;
 }
 
-#middleComponents {
+.Divider6 {
+  width: 1000px;
+  height: 70px;
+}
+
+.Divider7 {
+  width: 200px;
+  height: 70px;
+  float: left;
+}
+
+.Divider8 {
   width: 800px;
-  height: 500px;
-  margin: auto;
-  background-color: red;
-  display: flex; 
-  flex-direction: row; /* display all in a row*/
-  justify-content: center;
-  align-items: center;
+  height: 70px;
+  float: left;
 }
 
-#middleSelectorDiv {
-  width: 250px;
-  height: 500px;
-  background-color: white;
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-}
-
-#myCanvas {
-  background-color: white;
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-}
-
-.SelectorClass {
-  font-family: sans-serif, Verdana, Geneva, Tahoma;
-  padding: 10px;
-}
-
-#tabsDiv {
-  width: 800px;
-  height: 300px;
-  background-color: white;
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-  margin: auto; /*center horizontally*/
-}
-
-.SoundsGroupDiv {
-  /*justify-content: center;
-  align-items: center;*/
-  padding: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  column-gap: 10px;
-  row-gap: 10px;
+.Divider9 {
+  width: 1000px;
+  text-align: center;
 }
 
 </style>
@@ -105,27 +78,39 @@
 
 <body onload="initializeUI()">
 
-  <div width="100%">
-    <canvas id="myCanvas" width="800" height="100" > </canvas> 
+  <div id="MainContainer">
+    <div id="Divider1" width="1000px" height="50px"> <span> Select the frequencies between you want to extract</span></div>
+    <div id="Divider2"></div> <div id="Divider3"> <p id="TextMinFreq"> 0</p> </div> <div id="Divider4"> <p id="TextMaxFreq">22000</p></div>
+    <div id="Divider5"></div> <canvas id="myCanvas" width="800px" height="100px" style="border:none;float:left;"> </canvas> 
+
+    <div class="Divider6">
+      <div class="Divider7"> <sl-input id="Freq1Input" help-text="Frequency 1" style="width:100px;float: left;margin-left: 40px;" value="440" oninput="Freq1InputChange()"> </sl-input> </div>
+      <div class="Divider8"><sl-range id="Freq1Range" min="0" max="5000" step="1" help-text="Frequency 1" tooltip="bottom" style="width:800px;float: right;" oninput="Freq1RangeChange()" value="440"></sl-range> </div>
+    </div>
+
+    <div class="Divider6">
+      <div class="Divider7"> <sl-input id="Freq2Input" help-text="Frequency 2" style="width:100px;float: left;margin-left: 40px;" value="880" oninput="Freq2InputChange()"> </sl-input> </div>
+      <div class="Divider8"><sl-range id="Freq2Range" min="0" max="5000" step="1" help-text="Frequency 2" tooltip="bottom" style="width:800px;float: right;" oninput="Freq2RangeChange()" value="880"></sl-range> </div>
+    </div>
+
+    <div class="Divider9">
+      <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
+      <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
+      <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>
+    </div>
+  
+      <p id="textresultparagraph">
+        Load a WAV file to begin.
+      </p>
+  
   </div>
 
-  <div width="100%">
-    <sl-range id="Freq1Range" min="0" max="5000" step="1" help-text="Frequency 1" tooltip="bottom" style="width:800px;" oninput="Freq1RangeChange()" value="440"></sl-range>
-    <sl-input id="Freq1Input" help-text="Frequency 1" style="width:100px;" value="440" oninput="Freq1InputChange()"> </sl-input>
-  </div>
-  <div width="100%">
-    <sl-range id="Freq2Range" min="0" max="5000" step="1" help-text="Frequency 2" tooltip="bottom" style="width:800px;" oninput="Freq2RangeChange()" value="880"></sl-range>
-    <sl-input id="Freq2Input" help-text="Frequency 2" style="width:100px;" value="880" oninput="Freq2InputChange()"> </sl-input>
-  </div>
+  <h2>What is this?</h2>
+  <p>This is a toy. A web tool intended to create new timbres from your old samples by applying a band-pass filter to them.</p>
 
-  <div width="100%">
-    <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
-    <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
-    <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>
-
-    <p id="textresultparagraph">
-    </p>
-  </div>
+  <h2>how do I use it?</h2>
+  <p>Load a sample and select the frequencies between you want to extract. Play it. Save it.</p>
+  <p>You can also select the frequencies by clicking, dragging and realeasing the mouse on the frequencies graphic.</p>
 
   <!-- It's hidden because we will trigger it with another button-->
 <input type="file" id="file-selector" style="display:none" onchange="readFile(this)"> 

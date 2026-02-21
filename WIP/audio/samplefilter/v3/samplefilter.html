@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sample Filter</title>
+<style>
+
+#upperMenuBar {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  /*background-color: red;*/
+  width: 800px;
+  height: 100px;
+  margin: auto;
+  /*text-align: left;*/
+  display: flex; 
+  flex-direction: row; /* display all in a row*/
+  justify-content: center;
+  align-items: center;
+}
+
+#PlayButton {
+  padding: 10px;
+}
+#StopButton {
+  padding: 10px;
+}
+#SpeedRange {
+  width: 200px;
+  padding: 10px;
+  /*font-family: Arial; */
+  font-family: sans-serif, Verdana, Geneva, Tahoma;
+}
+#PatternLengthRange {
+  width: 200px;
+  padding: 10px;
+  /*font-family: Arial; */
+  font-family: sans-serif, Verdana, Geneva, Tahoma;
+}
+
+#middleComponents {
+  width: 800px;
+  height: 500px;
+  margin: auto;
+  background-color: red;
+  display: flex; 
+  flex-direction: row; /* display all in a row*/
+  justify-content: center;
+  align-items: center;
+}
+
+#middleSelectorDiv {
+  width: 250px;
+  height: 500px;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+#myCanvas {
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+.SelectorClass {
+  font-family: sans-serif, Verdana, Geneva, Tahoma;
+  padding: 10px;
+}
+
+#tabsDiv {
+  width: 800px;
+  height: 300px;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  margin: auto; /*center horizontally*/
+}
+
+.SoundsGroupDiv {
+  /*justify-content: center;
+  align-items: center;*/
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 10px;
+}
+
+</style>
+
+
+<script src="samplefilter.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
+<script src="fft.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/light.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+
+</head>
+
+
+<body onload="initializeUI()">
+
+  <div width="100%">
+    <canvas id="myCanvas" width="800" height="100" > </canvas> 
+  </div>
+
+  <div width="100%">
+    <sl-range id="Freq1Range" min="0" max="5000" step="1" help-text="Frequency 1" tooltip="bottom" style="width:800px;" oninput="Freq1RangeChange()" value="440"></sl-range>
+    <sl-input id="Freq1Input" help-text="Frequency 1" style="width:100px;" value="440" oninput="Freq1InputChange()"> </sl-input>
+  </div>
+  <div width="100%">
+    <sl-range id="Freq2Range" min="0" max="5000" step="1" help-text="Frequency 2" tooltip="bottom" style="width:800px;" oninput="Freq2RangeChange()" value="880"></sl-range>
+    <sl-input id="Freq2Input" help-text="Frequency 2" style="width:100px;" value="880" oninput="Freq2InputChange()"> </sl-input>
+  </div>
+
+  <div width="100%">
+    <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
+    <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
+    <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>
+
+    <p id="textresultparagraph">
+    </p>
+  </div>
+
+  <!-- It's hidden because we will trigger it with another button-->
+<input type="file" id="file-selector" style="display:none" onchange="readFile(this)"> 
+
+</body>
+</html>

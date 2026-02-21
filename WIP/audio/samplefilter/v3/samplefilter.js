@@ -56,7 +56,6 @@ function readFile(input) {
             document.getElementById('Freq2Range').max=WAVInfo.sampleRate/2;
             document.getElementById('Freq1Input').value=440; document.getElementById('Freq1Range').value=440;
             document.getElementById('Freq2Input').value=880; document.getElementById('Freq2Range').value=880;
-            document.getElementById('TextMaxFreq').innerHTML=""+WAVInfo.sampleRate/2;
         }
     };
 }
@@ -134,15 +133,13 @@ function newFileReadInMemory (filename, myArrayBuffer){
             }
         }        
 
-        document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
-            + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
-
-
     } catch (e) {
         document.getElementById('textresultparagraph').innerText="file format not supported";
         WAVInfo=null;
     }
 
+    document.getElementById('textresultparagraph').innerText=" sampleRate="+wav.fmt.sampleRate
+            + " numChannels="+wav.fmt.numChannels + " bitsPerSample="+wav.fmt.bitsPerSample;
 }
 
 function createFreqGraph(FFTRes, graphWidth) {
