@@ -9,7 +9,8 @@ let WAVInfo ={
 //    sampleRate
 //    numChannels
 //    samples (in mono)
-//    processedSamples
+//    processedSamples (mono)
+//    source (buffer source, to be able to stop it)
 };
 
 
@@ -321,6 +322,14 @@ function playWAV() {
 
     // start the source playing
     source.start();
+
+    WAVInfo.source=source;
+}
+
+function StopButtonClick() {    
+    if (WAVInfo==null)
+        return;
+    WAVInfo.source.stop();
 }
 
 // this functions processes the samples to create the filtered WAV
@@ -400,104 +409,6 @@ function processWAVSamples() {
     }    
 }
 
-
-/*function processWAVSamples() {
-
-    WAVInfo.processedSamples=new Float64Array(WAVInfo.samples.length);
-    //clear the samples (useless)
-    for (let i=0; i<WAVInfo.processedSamples.length; i++)
-        WAVInfo.processedSamples[i]=0;
-
-    let bufferFFT=new Float64Array(FFTLength);
-    let pos=-(FFTLength/2);
-
-    while (pos < WAVInfo.samples.length) {
-        for (let i=0; i<FFTLength; i++) {
-            let value;
-
-            if ((pos<0)||(pos>=WAVInfo.samples.length))
-                value=0;
-            else
-                value=WAVInfo.samples[pos+i];
-
-            bufferFFT[i]=value*Hann(i, FFTLength);            
-        }
-
-        let phasors = fft(bufferFFT);
-        //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
-
-        // DEBUG
-        //for (let i=50; i<phasors.real.length; i++) {
-        //    phasors.real[i]=0;
-        //    phasors.imag[i]=0;
-        //}
-        // DEBUG
-        let reconstructedSignal = ifft(phasors);
-
-        let dest=pos+(FFTLength/4);
-
-        for (let i=0; i<(FFTLength/2); i++)
-            if ( ((dest+i)>=0) && ((dest+i)<WAVInfo.processedSamples.length) )
-                WAVInfo.processedSamples[dest+i]=reconstructedSignal.real[(FFTLength/4)+i];
-        
-        pos+=(FFTLength/2);
-    }    
-}*/
-
-
-//processes the original WAV samples to get the new processed samples
-/*function processWAVSamples() {
-
-    let numFFTBufs=Math.ceil(WAVInfo.samples.length/FFTLength)
-    WAVInfo.processedSamples=new Float64Array(numFFTBufs*FFTLength);
-
-    let signalBuffer=new Float64Array(FFTLength);
-    
-    //clear the samples (useless)
-    for (let i=0; i<WAVInfo.processedSamples.length; i++)
-        WAVInfo.processedSamples[i]=0;
-
-    //for every buffer
-    for (let iBuf=0; iBuf<numFFTBufs; iBuf++) {
-
-        let bufNumIndex=(iBuf*FFTLength);
-
-        //process every FFT buffer
-        for (let i=0; i<FFTLength; i++) {
-
-            let origIndex=bufNumIndex+i;
-            let value;
-
-            if (origIndex < WAVInfo.samples.length)
-                value=WAVInfo.samples[origIndex];
-            else
-                value=0;
-            
-            signalBuffer[i]=value;//*Hann(i, FFTLength); // get "windowed" (https://en.wikipedia.org/wiki/Hann_function) value
-        }
-
-
-        let phasors = fft(signalBuffer);
-        //console.log("phasors: real " + phasors.real + " imag " + phasors.imag);
-
-        // DEBUG
-        for (let i=50; i<phasors.real.length; i++) {
-            phasors.real[i]=0;
-            phasors.imag[i]=0;
-        }
-        // DEBUG
-
-        let reconstructedSignal = ifft(phasors);
-        //console.log("reconstructed signal: " + reconstructedSignal.real);
-    
-        //copy the buffer to the modified samples array
-        for (let i=0; i<FFTLength; i++) {
-            WAVInfo.processedSamples[bufNumIndex+i]=reconstructedSignal.real[i];
-        }
-    }
-}
-*/
-
 // plays the processed wav
 function playProcessedWAV() {
 
@@ -540,6 +451,8 @@ function playProcessedWAV() {
 
     // start the source playing
     source.start();
+
+    WAVInfo.source=source;
 }
 
 //Windowing function (n=sample index, N=numSamples)

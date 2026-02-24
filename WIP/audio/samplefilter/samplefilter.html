@@ -63,6 +63,12 @@
   text-align: center;
 }
 
+#pivot {
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
 </style>
 
 
@@ -78,39 +84,44 @@
 
 <body onload="initializeUI()">
 
-  <div id="MainContainer">
-    <div id="Divider1" width="1000px" height="50px"> <span> Select the frequencies between you want to extract</span></div>
-    <div id="Divider2"></div> <div id="Divider3"> <p id="TextMinFreq"> 0</p> </div> <div id="Divider4"> <p id="TextMaxFreq">22000</p></div>
-    <div id="Divider5"></div> <canvas id="myCanvas" width="800px" height="100px" style="border:none;float:left;"> </canvas> 
+  <div id="pivot">
+    <div id="MainContainer">
+      <div id="Divider1" width="1000px" height="50px"> <span> Select the frequencies between you want to extract</span></div>
+      <div id="Divider2"></div> <div id="Divider3"> <p id="TextMinFreq"> 0</p> </div> <div id="Divider4"> <p id="TextMaxFreq">22000</p></div>
+      <div id="Divider5"></div> <canvas id="myCanvas" width="800px" height="100px" style="border:none;float:left;"> </canvas> 
 
-    <div class="Divider6">
-      <div class="Divider7"> <sl-input id="Freq1Input" help-text="Frequency 1" style="width:100px;float: left;margin-left: 40px;" value="440" oninput="Freq1InputChange()"> </sl-input> </div>
-      <div class="Divider8"><sl-range id="Freq1Range" min="0" max="5000" step="1" help-text="Frequency 1" tooltip="bottom" style="width:800px;float: right;" oninput="Freq1RangeChange()" value="440"></sl-range> </div>
-    </div>
+      <div class="Divider6">
+        <div class="Divider7"> <sl-input id="Freq1Input" help-text="Frequency 1" style="width:100px;float: left;margin-left: 40px;" value="440" oninput="Freq1InputChange()"> </sl-input> </div>
+        <div class="Divider8"><sl-range id="Freq1Range" min="0" max="5000" step="1" help-text="Frequency 1" tooltip="bottom" style="width:800px;float: right;" oninput="Freq1RangeChange()" value="440"></sl-range> </div>
+      </div>
 
-    <div class="Divider6">
-      <div class="Divider7"> <sl-input id="Freq2Input" help-text="Frequency 2" style="width:100px;float: left;margin-left: 40px;" value="880" oninput="Freq2InputChange()"> </sl-input> </div>
-      <div class="Divider8"><sl-range id="Freq2Range" min="0" max="5000" step="1" help-text="Frequency 2" tooltip="bottom" style="width:800px;float: right;" oninput="Freq2RangeChange()" value="880"></sl-range> </div>
-    </div>
+      <div class="Divider6">
+        <div class="Divider7"> <sl-input id="Freq2Input" help-text="Frequency 2" style="width:100px;float: left;margin-left: 40px;" value="880" oninput="Freq2InputChange()"> </sl-input> </div>
+        <div class="Divider8"><sl-range id="Freq2Range" min="0" max="5000" step="1" help-text="Frequency 2" tooltip="bottom" style="width:800px;float: right;" oninput="Freq2RangeChange()" value="880"></sl-range> </div>
+      </div>
 
-    <div class="Divider9">
-      <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
-      <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
-      <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>
+      <div class="Divider9">
+        <sl-button id="LoadWAVButton" onclick="LoadWAVButtonClick()">Load WAV</sl-button>
+        <sl-button id="PlayButton" onclick="PlayButtonClick()">Play Original</sl-button>
+        <sl-button id="PlayProcessedButton" onclick="PlayProcessedButtonClick()">Play Processed</sl-button>
+        <sl-button id="StopButton" onclick="StopButtonClick()">Stop</sl-button>
+      </div>
     </div>
-  
-      <p id="textresultparagraph">
-        Load a WAV file to begin.
-      </p>
-  
   </div>
+  
+  <div style="text-align: center;">
+    <p id="textresultparagraph">
+          Load a WAV file to begin.
+    </p>
+  </div>
+  
 
   <h2>What is this?</h2>
   <p>This is a toy. A web tool intended to create new timbres from your old samples by applying a band-pass filter to them.</p>
 
   <h2>how do I use it?</h2>
   <p>Load a sample and select the frequencies between you want to extract. Play it. Save it.</p>
-  <p>You can also select the frequencies by clicking, dragging and realeasing the mouse on the frequencies graphic.</p>
+  <p>You can also select the frequencies by clicking, dragging and releasing the mouse on the frequencies graphic.</p>
 
   <!-- It's hidden because we will trigger it with another button-->
 <input type="file" id="file-selector" style="display:none" onchange="readFile(this)"> 
