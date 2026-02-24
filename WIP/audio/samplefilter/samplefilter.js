@@ -24,6 +24,9 @@ function initializeUI() {
 
     ctx.fillStyle = "rgb(230, 230, 230)"; //"white"; // 
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    canvas.addEventListener("mouseup", canvasMouseUp);
+    canvas.addEventListener("mousedown", canvasMouseDown);
 }
 
 /*
@@ -72,6 +75,34 @@ function Freq1InputChange() {
 }
 function Freq2InputChange() {
     document.getElementById('Freq2Range').value=document.getElementById('Freq2Input').value;
+}
+
+function canvasMouseDown(event) {
+    if (WAVInfo==null)
+        return;
+
+    //console.log("canvasClick: offsetX="+event.offsetX+ " offsetY="+event.offsetY+ " button="+event.button);
+    let canvas = document.getElementById('myCanvas');
+    let ctx = canvas.getContext("2d");
+    let canvasWidth = canvas.width;
+    let canvasHeight = canvas.height;
+
+    document.getElementById('Freq1Range').value=(event.offsetX/canvasWidth)*(WAVInfo.sampleRate/2);
+    document.getElementById('Freq1Input').value=(event.offsetX/canvasWidth)*(WAVInfo.sampleRate/2);
+}
+
+function canvasMouseUp(event) {
+    if (WAVInfo==null)
+        return;
+
+    //console.log("canvasClick: offsetX="+event.offsetX+ " offsetY="+event.offsetY+ " button="+event.button);
+    let canvas = document.getElementById('myCanvas');
+    let ctx = canvas.getContext("2d");
+    let canvasWidth = canvas.width;
+    let canvasHeight = canvas.height;
+
+    document.getElementById('Freq2Range').value=(event.offsetX/canvasWidth)*(WAVInfo.sampleRate/2);
+    document.getElementById('Freq2Input').value=(event.offsetX/canvasWidth)*(WAVInfo.sampleRate/2);
 }
 
 /*
