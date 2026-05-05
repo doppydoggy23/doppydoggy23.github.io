@@ -1,8 +1,13 @@
 
 mapfab(raw, "test4.mapfab", "chr", "palette", "metatiles", "level")
 
+ct U MAX_BG_X_TILES=7
+ct U MAX_BG_Y_TILES=7
+ct U MAX_BG_TILES=49
 
-
+struct BGTilePos
+    U xpos
+    U ypos
 
 vars /game_vars
 
@@ -13,6 +18,9 @@ vars /game_vars
     CC/metatiles mt_sw
     CC/metatiles mt_se
     CC/metatiles mt_attr
+
+    BGTilePos[MAX_BG_TILES] bg_tiles
+
 
  
 /*
@@ -120,14 +128,49 @@ mode main()
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
     //
+    
+    // set the background tiles in correct position
+    U xstep=255/MAX_BG_X_TILES
+    U ystep=255/MAX_BG_Y_TILES
+    for U yy=0; yy<MAX_BG_X_TILES; yy+=1
+        for U xx=0; xx<MAX_BG_X_TILES; xx+=1
+            U tpos=yy
+            tpos*=MAX_BG_X_TILES
+            tpos+=xx
+            bg_tiles[tpos].xpos=xx
+            bg_tiles[tpos].xpos*=xstep
+            bg_tiles[tpos].ypos=yy
+            bg_tiles[tpos].ypos*=ystep
+
     while true
         update_pads()
-        //
+        update_sprites() 
         nmi // Wait for the next NMI
     //
 
 //////////
 
+fn update_sprites()
+    U i=0
+
+    for U ii=0; ii<MAX_BG_TILES; ii+=1
+        set_oam_x(i, bg_tiles[ii].xpos)     // x-position
+        set_oam_y(i, bg_tiles[ii].ypos) // y-position
+        set_oam_p(i, 0)    // tile
+        set_oam_a(i, 0)      // options
+        i += 4
+        // update the positions for the next frame
+        bg_tiles[ii].xpos+=1
+        bg_tiles[ii].ypos+=1
+
+
+/*    set_oam_x(i, 0)     // x-position
+    set_oam_y(i, 0) // y-position
+    set_oam_p(i, 0)    // tile
+    set_oam_a(i, 0)      // options
+    i += 4*/
+    // Clear the remainder of OAM
+    hide_oam(i)
 
 /*
 returns the map metatile at screen pixel position (px, py)
