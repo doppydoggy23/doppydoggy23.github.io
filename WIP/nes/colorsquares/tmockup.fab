@@ -157,7 +157,7 @@ fn update_sprites()
         set_oam_x(i, bg_tiles[ii].xpos)     // x-position
         set_oam_y(i, bg_tiles[ii].ypos) // y-position
         set_oam_p(i, 0)    // tile
-        set_oam_a(i, 0)      // options
+        set_oam_a(i, 32)      // options
         i += 4
         // update the positions for the next frame
         bg_tiles[ii].xpos+=1
