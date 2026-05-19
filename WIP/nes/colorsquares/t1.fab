@@ -9,8 +9,12 @@ struct BGTilePos
     U xpos
     U ypos
 */
+
+ct U MAX_PPUOPS_PENDING = 100 // max number of queued PPU OPerations
+
 vars /game_vars
 
+    // these vars contain the metatile map of the current level
     U[16*15] level_mt_map // level 1 map of metatiles in RAM
     //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
     CC/metatiles mt_nw
@@ -18,11 +22,15 @@ vars /game_vars
     CC/metatiles mt_sw
     CC/metatiles mt_se
     CC/metatiles mt_attr
+    //
 
-    Bool is_ppuop_pending=false
-    U ppuop_col
-    U ppuop_row
-    U ppuop_new_metatile
+    // these vars control the PPU QUEUE
+    U num_ppuops_in_queue=0
+    U ppuops_queue_index=0
+    U[MAX_PPUOPS_PENDING] ppuop_col
+    U[MAX_PPUOPS_PENDING] ppuop_row
+    U[MAX_PPUOPS_PENDING] ppuop_new_metatile
+    //
 
  
 /*
@@ -106,10 +114,13 @@ fn load_screen(CCC/levels my_lvl_pointer)
 ////////
 
 nmi main_nmi()
-    // we need to update GFXs while NMI, so we do this now
-    if is_ppuop_pending
-        set_metatile_at_colrow(ppuop_col, ppuop_row, ppuop_new_metatile)
-        is_ppuop_pending=false
+    // we need to update GFXs while NMI, so we do this now, ONLY ONE metatile per frame
+    if (num_ppuops_in_queue > 0)
+        set_metatile_at_colrow(ppuop_col[ppuops_queue_index], ppuop_row[ppuops_queue_index], ppuop_new_metatile[ppuops_queue_index])
+        ppuops_queue_index+=1
+        if (ppuops_queue_index >= num_ppuops_in_queue)
+            num_ppuops_in_queue=0
+            ppuops_queue_index=0
     // Update OAM and poll the pads:
     ppu_upload_oam_poll_pads(0)
     // Turn on rendering:
@@ -129,19 +140,6 @@ mode main()
     {PPUCTRL}(PPUCTRL_NMI_ON)
     //
     
-/*    // set the background tiles in correct position
-    U xstep=255/MAX_BG_X_TILES
-    U ystep=255/MAX_BG_Y_TILES
-    for U yy=0; yy<MAX_BG_X_TILES; yy+=1
-        for U xx=0; xx<MAX_BG_X_TILES; xx+=1
-            U tpos=yy
-            tpos*=MAX_BG_X_TILES
-            tpos+=xx
-            bg_tiles[tpos].xpos=xx
-            bg_tiles[tpos].xpos*=xstep
-            bg_tiles[tpos].ypos=yy
-            bg_tiles[tpos].ypos*=ystep
-*/
     while true
         update_pads()
         move_player()
@@ -153,13 +151,25 @@ mode main()
 
 fn move_player()
     if (pads[0].held & BUTTON_LEFT)
-        attempt_new_mt_change(0, 0, 16)
+        attempt_new_mt_change(0, 0, 16, false)
     if (pads[0].held & BUTTON_RIGHT)
-        attempt_new_mt_change(1, 1, 17)
+        attempt_new_mt_change(1, 1, 17, false)
+
+    if (pads[0].held & BUTTON_UP)
+        attempt_new_mt_change(5, 5, 17, true)
+        attempt_new_mt_change(6, 5, 17, true)
+        attempt_new_mt_change(7, 5, 17, true)
+        attempt_new_mt_change(8, 5, 17, true)
+    if (pads[0].held & BUTTON_DOWN)
+        attempt_new_mt_change(5, 7, 17, true)
+        attempt_new_mt_change(6, 7, 17, true)
+        attempt_new_mt_change(7, 7, 17, true)
+        attempt_new_mt_change(8, 7, 17, true)
+
     if (pads[0].held & BUTTON_A)
-        attempt_new_mt_change(2, 2, 18)
+        attempt_new_mt_change(2, 2, 18, false)
     if (pads[0].held & BUTTON_B)
-        attempt_new_mt_change(3, 3, 19)
+        attempt_new_mt_change(3, 3, 19, false)
 
 
 fn update_sprites()
@@ -246,13 +256,15 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
     {PPUDATA}(new_attr)
 
 /*
- Attempts a new write to the PPU mem and level_mt_map variable.
- It checks if there is a former PPU op in progress,
- and if there is, aborts.
+ Attempts a new write to the PPU mem and level_mt_map variable,
+ that will be done starting from the next NMI.
+ It checks if there is a former PPU op in progress.
 */
-fn attempt_new_mt_change (U mycol, U myrow, U new_metatile)
-    if (!is_ppuop_pending)
-        ppuop_col=mycol
-        ppuop_row=myrow
-        ppuop_new_metatile=new_metatile
-        is_ppuop_pending=true
+fn attempt_new_mt_change (U mycol, U myrow, U new_metatile, Bool pile_up_op)
+    if ((num_ppuops_in_queue > 0) && (!pile_up_op)) // exit if there are pending ops that we should not pile up
+        return
+    //
+    ppuop_col[num_ppuops_in_queue]=mycol
+    ppuop_row[num_ppuops_in_queue]=myrow
+    ppuop_new_metatile[num_ppuops_in_queue]=new_metatile
+    num_ppuops_in_queue+=1
