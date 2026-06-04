@@ -2,9 +2,9 @@
 mapfab(raw, "t1.mapfab", "chr", "palette", "metatiles", "level")
 
 // Square Sides Color enums
-ct U RED=0
-ct U GREEN=1
-ct U VIOLET=2
+ct U VIOLET=0
+ct U RED=1
+ct U GREEN=2
 ct U YELLOW=3
 
 // we have from 2 to 9 squares in a level, all with 4 sides
@@ -40,6 +40,8 @@ vars /game_vars
 
     //
     Square[9] level_squares
+    U[9] squares_x_coords = U[9](3, 7, 11,   3, 7, 11,   3, 7, 11)
+    U[9] squares_y_coords = U[9](2, 2, 2,   6, 6, 6,   10, 10, 10)
     //
  
 /*
@@ -204,6 +206,9 @@ mode main()
     level_squares[8].south=GREEN
     level_squares[8].west=YELLOW
     //
+    for U i=1; i<10; i+=1
+        update_square(i)
+    //
 
     while true
         update_pads()
@@ -333,3 +338,28 @@ fn attempt_new_mt_change (U mycol, U myrow, U new_metatile, Bool pile_up_op)
     ppuop_row[num_ppuops_in_queue]=myrow
     ppuop_new_metatile[num_ppuops_in_queue]=new_metatile
     num_ppuops_in_queue+=1
+
+// updates the colors of the squares 1..9
+fn update_square (U square_num)
+    if (! level_squares[square_num-1].active)
+        return
+    U scr_xpos=squares_x_coords[square_num-1]
+    U scr_ypos=squares_y_coords[square_num-1]
+    // find the matching metatiles
+    U north_mt1=24+(level_squares[square_num-1].north << 1)
+    U south_mt1=24+(level_squares[square_num-1].south << 1)
+    U east_mt1=32+(level_squares[square_num-1].east << 1)
+    U west_mt1=32+(level_squares[square_num-1].west << 1)
+    // write the metatiles to the PPU and level map
+    attempt_new_mt_change(scr_xpos, scr_ypos-1, north_mt1, true)
+    attempt_new_mt_change(scr_xpos+1, scr_ypos-1, north_mt1+1, true)
+    //
+    attempt_new_mt_change(scr_xpos, scr_ypos+2, south_mt1, true)
+    attempt_new_mt_change(scr_xpos+1, scr_ypos+2, south_mt1+1, true)
+    //
+    attempt_new_mt_change(scr_xpos-1, scr_ypos, west_mt1, true)
+    attempt_new_mt_change(scr_xpos-1, scr_ypos+1, west_mt1+1, true)
+    //
+    attempt_new_mt_change(scr_xpos+2, scr_ypos, east_mt1, true)
+    attempt_new_mt_change(scr_xpos+2, scr_ypos+1, east_mt1+1, true)
+    
