@@ -7,6 +7,10 @@ ct U RED=1
 ct U GREEN=2
 ct U YELLOW=3
 
+// rotation directions
+ct U ROT_CW=0
+ct U ROT_CCW=1
+
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
     Bool active // it might be that not all squares are active in a level
@@ -239,31 +243,14 @@ fn move_player()
     if (pads[0].pressed & BUTTON_DOWN)
         attempt_to_move_selector_down()
 
-    if (pads[0].held & BUTTON_A)
-        attempt_new_mt_change(2, 2, 18, false)
-    if (pads[0].held & BUTTON_B)
-        attempt_new_mt_change(3, 3, 19, false)
+    if (pads[0].pressed & BUTTON_A)
+        attempt_to_rotate_curr_square(ROT_CW)
+    if (pads[0].pressed & BUTTON_B)
+        attempt_to_rotate_curr_square(ROT_CCW)
 
 
 fn update_sprites()
     U i=0
-
-/*    for U ii=0; ii<MAX_BG_TILES; ii+=1
-        set_oam_x(i, bg_tiles[ii].xpos)     // x-position
-        set_oam_y(i, bg_tiles[ii].ypos) // y-position
-        set_oam_p(i, 0)    // tile
-        set_oam_a(i, 32)      // options
-        i += 4
-        // update the positions for the next frame
-        bg_tiles[ii].xpos+=1
-        bg_tiles[ii].ypos+=1
-*/
-
-/*    set_oam_x(i, 0)     // x-position
-    set_oam_y(i, 0) // y-position
-    set_oam_p(i, 0)    // tile
-    set_oam_a(i, 0)      // options
-    i += 4*/
 
     // push square selector sprites
     selector_sprite_x=sel_spr_x[square_selector-1]
@@ -284,7 +271,6 @@ fn update_sprites()
         ix=selector_sprite_x
         iy+=8
     //
-
 
     // Clear the remainder of OAM
     hide_oam(i)
@@ -390,26 +376,52 @@ fn update_square (U square_num)
 
 // attempting to move the selector to each position
 fn attempt_to_move_selector_left()
+    if (num_ppuops_in_queue > 0) // do not move if there are pending PPU ops
+        return
     U sel_col=squares_by_col[square_selector-1]
     if (sel_col > 0)
         if (level_squares[square_selector-2].active)
             square_selector-=1
 //
 fn attempt_to_move_selector_right()
+    if (num_ppuops_in_queue > 0) // do not move if there are pending PPU ops
+        return
     U sel_col=squares_by_col[square_selector-1]
     if (sel_col < 2)
         if (level_squares[square_selector].active)
             square_selector+=1
 //
 fn attempt_to_move_selector_up()
+    if (num_ppuops_in_queue > 0) // do not move if there are pending PPU ops
+        return
     U sel_row=squares_by_row[square_selector-1]
     if (sel_row > 0)
         if (level_squares[square_selector-4].active)
             square_selector-=3
 //
 fn attempt_to_move_selector_down()
+    if (num_ppuops_in_queue > 0) // do not move if there are pending PPU ops
+        return
     U sel_row=squares_by_row[square_selector-1]
     if (sel_row < 2)
         if (level_squares[square_selector+2].active)
             square_selector+=3
 
+fn attempt_to_rotate_curr_square (U direction)
+    if (num_ppuops_in_queue > 0) // do not rotate if there are pending PPU ops
+        return
+    U pivot
+    if (direction==ROT_CCW) //counter clock-wise
+        pivot=level_squares[square_selector-1].north
+        level_squares[square_selector-1].north=level_squares[square_selector-1].east
+        level_squares[square_selector-1].east=level_squares[square_selector-1].south
+        level_squares[square_selector-1].south=level_squares[square_selector-1].west
+        level_squares[square_selector-1].west=pivot
+    else //Clockwise
+        pivot=level_squares[square_selector-1].north
+        level_squares[square_selector-1].north=level_squares[square_selector-1].west
+        level_squares[square_selector-1].west=level_squares[square_selector-1].south
+        level_squares[square_selector-1].south=level_squares[square_selector-1].east
+        level_squares[square_selector-1].east=pivot
+    //
+    update_square(square_selector)
