@@ -57,6 +57,11 @@ vars /game_vars
     U[9] sel_spr_x = U[9](48, 112, 176,   48, 112, 176,   48, 112, 176)
     U[9] sel_spr_y = U[9](32, 32, 32,   96, 96, 96,   160, 160, 160)
 
+    // these control the succes! and start! signs
+    Bool show_success = false
+    Bool show_start = false
+    U sign_x = 96
+    U sign_y = 112
  
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
@@ -252,25 +257,64 @@ fn move_player()
 fn update_sprites()
     U i=0
 
-    // push square selector sprites
-    selector_sprite_x=sel_spr_x[square_selector-1]
-    selector_sprite_y=sel_spr_y[square_selector-1]
-    U ix=selector_sprite_x
-    U iy=selector_sprite_y
-    U sprnum=92
-    //
-    for U ity=0; ity<4; ity+=1
-        for U it=0; it<4; it+=1
-            set_oam_x(i, ix) // x-position
-            set_oam_y(i, iy) // y-position
-            set_oam_p(i, sprnum+it) // tile
-            set_oam_a(i, 0)  // options
-            i += 4
-            ix += 8
-        sprnum+=16
-        ix=selector_sprite_x
-        iy+=8
-    //
+    if ((show_success) || (show_start))
+        if show_success
+            // show "success!" sign
+            U ix=sign_x
+            U iy=sign_y
+            U sprnum=24
+            //
+            for U ity=0; ity<4; ity+=1
+                for U it=0; it<8; it+=1
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, sprnum+it) // tile
+                    set_oam_a(i, 1)  // options
+                    i += 4
+                    ix += 8
+                sprnum+=16
+                ix=sign_x
+                iy+=8
+            //
+        else
+            // show "start!" sign
+            U ix=sign_x
+            U iy=sign_y
+            U sprnum=148
+            //
+            for U ity=0; ity<4; ity+=1
+                for U it=0; it<8; it+=1
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, sprnum+it) // tile
+                    set_oam_a(i, 1)  // options
+                    i += 4
+                    ix += 8
+                sprnum+=16
+                ix=sign_x
+                iy+=8
+            //
+    else
+        // push square selector sprites
+        selector_sprite_x=sel_spr_x[square_selector-1]
+        selector_sprite_y=sel_spr_y[square_selector-1]
+        U ix=selector_sprite_x
+        U iy=selector_sprite_y
+        U sprnum=92
+        //
+        for U ity=0; ity<4; ity+=1
+            for U it=0; it<4; it+=1
+                set_oam_x(i, ix) // x-position
+                set_oam_y(i, iy) // y-position
+                set_oam_p(i, sprnum+it) // tile
+                set_oam_a(i, 0)  // options
+                i += 4
+                ix += 8
+            sprnum+=16
+            ix=selector_sprite_x
+            iy+=8
+        //
+
 
     // Clear the remainder of OAM
     hide_oam(i)
