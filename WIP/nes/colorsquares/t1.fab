@@ -233,6 +233,7 @@ mode main()
         update_pads()
         move_player()
         update_sprites() 
+        check_if_success()
         nmi // Wait for the next NMI
     //
 
@@ -469,3 +470,20 @@ fn attempt_to_rotate_curr_square (U direction)
         level_squares[square_selector-1].east=pivot
     //
     update_square(square_selector)
+
+// checks if the player won
+fn check_if_success()
+    Bool game_success=true
+    //
+    for U i=0; i<9; i+=1
+        if ((i==0) && level_squares[0].active)
+            if ( (level_squares[1].active) && (level_squares[0].east != level_squares[1].west) )
+                game_success=false
+            if ( (level_squares[3].active) && (level_squares[0].south != level_squares[3].north) )
+                game_success=false
+    //
+    if game_success
+        show_success=true
+    else
+        show_success=false
+
