@@ -481,6 +481,34 @@ fn check_if_success()
                 game_success=false
             if ( (level_squares[3].active) && (level_squares[0].south != level_squares[3].north) )
                 game_success=false
+        if ((i==1) && level_squares[1].active)
+            if ( (level_squares[0].active) && (level_squares[0].east != level_squares[1].west) )
+                game_success=false
+            if ( (level_squares[4].active) && (level_squares[1].south != level_squares[4].north) )
+                game_success=false
+            if ( (level_squares[2].active) && (level_squares[1].east != level_squares[2].west) )
+                game_success=false
+        if ((i==2) && level_squares[2].active)
+            if ( (level_squares[1].active) && (level_squares[1].east != level_squares[2].west) )
+                game_success=false
+            if ( (level_squares[5].active) && (level_squares[2].south != level_squares[5].north) )
+                game_success=false
+        if ((i==3) && level_squares[3].active)
+            if ( (level_squares[4].active) && (level_squares[3].east != level_squares[4].west) )
+                game_success=false
+            if ( (level_squares[0].active) && (level_squares[0].south != level_squares[3].north) )
+                game_success=false
+            if ( (level_squares[6].active) && (level_squares[3].south != level_squares[6].north) )
+                game_success=false
+        if ((i==4) && level_squares[4].active)
+            if ( (level_squares[3].active) && (level_squares[3].east != level_squares[4].west) )
+                game_success=false
+            if ( (level_squares[5].active) && (level_squares[4].east != level_squares[5].west) )
+                game_success=false
+            if ( (level_squares[1].active) && (level_squares[1].south != level_squares[4].north) )
+                game_success=false
+            if ( (level_squares[7].active) && (level_squares[4].south != level_squares[7].north) )
+                game_success=false
     //
     if game_success
         show_success=true
