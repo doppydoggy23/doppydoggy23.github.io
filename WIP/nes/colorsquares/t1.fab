@@ -471,7 +471,7 @@ fn attempt_to_rotate_curr_square (U direction)
     //
     update_square(square_selector)
 
-// checks if the player won
+// checks if the player solved the puzzle
 fn check_if_success()
     Bool game_success=true
     //
@@ -508,6 +508,30 @@ fn check_if_success()
             if ( (level_squares[1].active) && (level_squares[1].south != level_squares[4].north) )
                 game_success=false
             if ( (level_squares[7].active) && (level_squares[4].south != level_squares[7].north) )
+                game_success=false
+        if ((i==5) && level_squares[5].active)
+            if ( (level_squares[4].active) && (level_squares[4].east != level_squares[5].west) )
+                game_success=false
+            if ( (level_squares[2].active) && (level_squares[2].south != level_squares[5].north) )
+                game_success=false
+            if ( (level_squares[8].active) && (level_squares[5].south != level_squares[8].north) )
+                game_success=false
+        if ((i==6) && level_squares[6].active)
+            if ( (level_squares[7].active) && (level_squares[6].east != level_squares[7].west) )
+                game_success=false
+            if ( (level_squares[3].active) && (level_squares[3].south != level_squares[6].north) )
+                game_success=false
+        if ((i==7) && level_squares[7].active)
+            if ( (level_squares[6].active) && (level_squares[6].east != level_squares[7].west) )
+                game_success=false
+            if ( (level_squares[4].active) && (level_squares[4].south != level_squares[7].north) )
+                game_success=false
+            if ( (level_squares[8].active) && (level_squares[7].east != level_squares[8].west) )
+                game_success=false
+        if ((i==8) && level_squares[8].active)
+            if ( (level_squares[7].active) && (level_squares[7].east != level_squares[8].west) )
+                game_success=false
+            if ( (level_squares[5].active) && (level_squares[5].south != level_squares[8].north) )
                 game_success=false
     //
     if game_success
