@@ -65,7 +65,7 @@ vars /game_vars
 
     // rng
     U rnd_tmp=0
-    U[16] rotation_table = U[16](1, 4, 5, 5, 3, 7, 2, 9, 3, 8, 2, 5, 7, 1, 2, 2) // random positions to randomize levels. CAN'T BE 0 due to a bug
+    U[16] rotation_table = U[16](1, 4, 5, 5, 3, 7, 2, 9, 3, 8, 2, 5, 7, 1, 2, 2) // random positions to randomize levels
 
  
 /*
@@ -236,10 +236,15 @@ mode main()
     //seed(random_seed) // random number generator engine
     // randomize level
     for U sqr=1; sqr<10; sqr+=1
-        U randomval=rotation_table[myrnd() & 15]
-        for U numrots=0; numrots<randomval; numrots+=1 // ToDo: INVESTIGATE THIS. When randomval=0 the game freezes instead of not rotating. Possible compiler bug?
-            rot_sqr_inter(sqr) // rotate by a random-value times
-        rnd_tmp+=50 // change the random seed
+        U randomval=rotation_table[rnd_tmp & 15]
+        for U numrots=0; numrots<randomval; numrots+=1 // ToDo: investigate this. When randomval=0 the game freezes
+            rot_sqr_inter(mysqr) // rotate by a random-value times
+            /*U pivot=level_squares[sqr-1].north
+            level_squares[sqr-1].north=level_squares[sqr-1].east
+            level_squares[sqr-1].east=level_squares[sqr-1].south
+            level_squares[sqr-1].south=level_squares[sqr-1].west
+            level_squares[sqr-1].west=pivot*/
+        rnd_tmp+=1
 
             
 
@@ -571,7 +576,6 @@ fn check_if_success()
 // returns a byte pseudo random number. I couldn't get pubby's rng to work :-/
 fn myrnd() U
     rnd_tmp+= 123
-    rnd_tmp>>=4
-    rnd_tmp*=11
-    rnd_tmp^= 100
+    rnd_tmp*= 56 // mult by 56 makes it always return zero
+    rnd_tmp^= 255
     return rnd_tmp
