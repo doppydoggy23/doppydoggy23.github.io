@@ -65,7 +65,7 @@ vars /game_vars
 
     // rng
     U rnd_tmp=0
-    U[16] rotation_table = U[16](1, 4, 5, 1, 3, 7, 2, 9, 3, 8, 2, 5, 7, 1, 7, 2) // random positions to randomize levels. CAN'T BE 0 due to a randomize_lvl_() bug
+    U[16] rotation_table = U[16](1, 4, 5, 5, 3, 7, 2, 9, 3, 8, 2, 5, 7, 1, 2, 2) // random positions to randomize levels. CAN'T BE 0 due to a bug
 
  
 /*
@@ -233,9 +233,21 @@ mode main()
     level_squares[8].west=YELLOW
     //
 
-    randomize_lvl() // randomize level
-    redraw_all_sqrs()
+    //seed(random_seed) // random number generator engine
+    // randomize level
+    for U sqr=1; sqr<10; sqr+=1
+        U randomval=rotation_table[myrnd() & 15]
+        for U numrots=0; numrots<randomval; numrots+=1 // ToDo: INVESTIGATE THIS. When randomval=0 the game freezes instead of not rotating. Possible compiler bug?
+            rot_sqr_inter(sqr) // rotate by a random-value times
+        rnd_tmp+=50 // change the random seed
+
+            
+
     //
+    for U i=1; i<10; i+=1
+        update_square(i) // draw the squares metatiles
+    //
+
 
     while true
         update_pads()
@@ -261,11 +273,6 @@ fn move_player()
         attempt_to_rotate_curr_square(ROT_CW)
     if (pads[0].pressed & BUTTON_B)
         attempt_to_rotate_curr_square(ROT_CCW)
-
-    if (pads[0].pressed & BUTTON_START)
-        randomize_lvl()
-        redraw_all_sqrs()
-    
 
 
 fn update_sprites()
@@ -568,17 +575,3 @@ fn myrnd() U
     rnd_tmp*=11
     rnd_tmp^= 100
     return rnd_tmp
-
-// randomizes the level to make it new every time you play
-fn randomize_lvl()
-    for U sqr=1; sqr<10; sqr+=1
-        U randomval=rotation_table[myrnd() & 15]
-        for U numrots=0; numrots<randomval; numrots+=1 // ToDo: INVESTIGATE THIS. When randomval=0 the game freezes instead of not rotating. Possible compiler bug?
-            rot_sqr_inter(sqr) // rotate by a random-value times
-        rnd_tmp+=50 // change the random seed
-
-// redraws all squares
-fn redraw_all_sqrs()
-    for U i=1; i<10; i+=1
-        update_square(i) // draw the squares metatiles
-    //
