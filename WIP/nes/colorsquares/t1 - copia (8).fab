@@ -43,7 +43,6 @@ vars /game_vars
 
     // these vars contain the squares in the level and their positions on screen
     Square[9] level_squares
-    Square[9] solved_squares // these contain the solved squares, so when you press select, it solves automatically
     U[9] squares_x_coords = U[9](3, 7, 11,   3, 7, 11,   3, 7, 11)
     U[9] squares_y_coords = U[9](2, 2, 2,   6, 6, 6,   10, 10, 10)
     //
@@ -235,7 +234,7 @@ mode main()
     level_squares[8].south=GREEN
     level_squares[8].west=YELLOW
     //
-    copy_to_solved_squares()
+
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
@@ -268,9 +267,6 @@ fn move_player()
     if (pads[0].pressed & BUTTON_START)
         randomize_lvl()
         redraw_all_sqrs()
-
-    if (pads[0].pressed & BUTTON_SELECT)
-        cheat_curr_square()
     
 
 
@@ -597,20 +593,3 @@ fn redraw_all_sqrs()
     for U i=1; i<10; i+=1
         update_square(i) // draw the squares metatiles
     //
-
-// copies the solved squares to solved_squares var
-fn copy_to_solved_squares()
-    for U i=0; i<9; i+=1
-        solved_squares[i].north=level_squares[i].north
-        solved_squares[i].south=level_squares[i].south
-        solved_squares[i].east=level_squares[i].east
-        solved_squares[i].west=level_squares[i].west
-        solved_squares[i].active=level_squares[i].active
-
-// cheats (solves) a square in range 1..9
-fn cheat_curr_square()
-    level_squares[square_selector-1].north=solved_squares[square_selector-1].north
-    level_squares[square_selector-1].south=solved_squares[square_selector-1].south
-    level_squares[square_selector-1].east=solved_squares[square_selector-1].east
-    level_squares[square_selector-1].west=solved_squares[square_selector-1].west
-    update_square(square_selector)
