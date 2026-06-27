@@ -1,10 +1,6 @@
 
 mapfab(raw, "t1.mapfab", "chr", "palette", "metatiles", "level")
 
-data /romdata
-    [] start_screen_bytes
-        file(raw, "startscr.nam")
-
 // Square Sides Color enums
 ct U VIOLET=0
 ct U RED=1
@@ -47,7 +43,6 @@ vars /game_vars
 
     // these vars contain the squares in the level and their positions on screen
     Square[9] level_squares
-    Square[9] solved_squares // these contain the solved squares, so when you press select, it solves automatically
     U[9] squares_x_coords = U[9](3, 7, 11,   3, 7, 11,   3, 7, 11)
     U[9] squares_y_coords = U[9](2, 2, 2,   6, 6, 6,   10, 10, 10)
     //
@@ -62,381 +57,17 @@ vars /game_vars
     U[9] sel_spr_x = U[9](48, 112, 176,   48, 112, 176,   48, 112, 176)
     U[9] sel_spr_y = U[9](32, 32, 32,   96, 96, 96,   160, 160, 160)
 
+    // these control the succes! and start! signs
+    Bool show_success = false
+    Bool show_start = false
+    U sign_x = 96
+    U sign_y = 112
+
     // rng
-    U rnd_tmp // it's better to leave it uninitialized because when we enter a mode, it sets to default again (not what we want)
-    //U[16] rotation_table = U[16](1, 4, 5, 1, 3, 7, 2, 9, 3, 8, 2, 5, 7, 1, 7, 2) // random positions to randomize levels. CAN'T BE 0 due to a randomize_lvl_() bug
+    U rnd_tmp=0
+    U[16] rotation_table = U[16](1, 4, 5, 1, 3, 7, 2, 9, 3, 8, 2, 5, 7, 1, 7, 2) // random positions to randomize levels. CAN'T BE 0 due to a randomize_lvl_() bug
 
-    U current_level
-
-////////
-
-// entrance point NMI
-nmi main_nmi() 
-    // Update OAM and poll the pads:
-    ppu_upload_oam_poll_pads(0)
-    // Turn on rendering:
-    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
-    // Reset the scroll
-    ppu_reset_scroll(0, 0)
-    //
-    rnd_tmp+=1 // change the xor rng seed
-    if (rnd_tmp==0) // if the xor rng seed is 0, the result always is 0
-        rnd_tmp=1
-    //
-
-// entrance point function
-mode main()
-: nmi main_nmi
-    // init vars
-    current_level=0
-    //
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten.
-    //
-    // load start screen made in NEXXT whose data is in ROM start screen uses the upper 256 set of chr
-    ppu_reset_addr($2000)
-    for UU i=0; i<1024; i+=1
-        {PPUDATA}(@start_screen_bytes{i})
-    //
-    // Tell the NES to trigger NMI once per frame, and change the BG pattern table addr, since the start src uses the upper ones:
-    {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
-    //
-    while true
-        update_pads()
-        //
-        if pads[0].pressed & BUTTON_START
-            current_level=5
-            play_level(5)
-        nmi // Wait for the next NMI
-    //
-
-nmi play_level_nmi()
-    // we need to update GFXs while NMI, so we do this now, ONLY ONE metatile per frame
-    if (num_ppuops_in_queue > 0)
-        set_metatile_at_colrow(ppuop_col[ppuops_queue_index], ppuop_row[ppuops_queue_index], ppuop_new_metatile[ppuops_queue_index])
-        ppuops_queue_index+=1
-        if (ppuops_queue_index >= num_ppuops_in_queue)
-            num_ppuops_in_queue=0
-            ppuops_queue_index=0
-    // Update OAM and poll the pads:
-    ppu_upload_oam_poll_pads(0)
-    // Turn on rendering:
-    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
-    // Reset the scroll
-    ppu_reset_scroll(0, 0)
-    //
-    
-mode level5()
-: nmi play_level_nmi
-    // init vars
-    current_level=5
-    //
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    
-    // prepare the level squares values
-    level_squares[0].active=true
-    level_squares[0].north=GREEN
-    level_squares[0].east=VIOLET
-    level_squares[0].south=YELLOW
-    level_squares[0].west=RED
-    //
-    level_squares[1].active=true
-    level_squares[1].north=GREEN
-    level_squares[1].east=YELLOW
-    level_squares[1].south=RED
-    level_squares[1].west=VIOLET
-    //
-    level_squares[2].active=true
-    level_squares[2].north=VIOLET
-    level_squares[2].east=RED
-    level_squares[2].south=GREEN
-    level_squares[2].west=YELLOW
-    //
-    level_squares[3].active=true
-    level_squares[3].north=YELLOW
-    level_squares[3].east=GREEN
-    level_squares[3].south=RED
-    level_squares[3].west=VIOLET
-    //
-    level_squares[4].active=true
-    level_squares[4].north=RED
-    level_squares[4].east=YELLOW
-    level_squares[4].south=VIOLET
-    level_squares[4].west=GREEN
-    //
-    level_squares[5].active=true
-    level_squares[5].north=GREEN
-    level_squares[5].east=VIOLET
-    level_squares[5].south=RED
-    level_squares[5].west=YELLOW
-    //
-    level_squares[6].active=true
-    level_squares[6].north=RED
-    level_squares[6].east=GREEN
-    level_squares[6].south=VIOLET
-    level_squares[6].west=YELLOW
-    //
-    level_squares[7].active=true
-    level_squares[7].north=VIOLET
-    level_squares[7].east=YELLOW
-    level_squares[7].south=RED
-    level_squares[7].west=GREEN
-    //
-    level_squares[8].active=true
-    level_squares[8].north=RED
-    level_squares[8].east=VIOLET
-    level_squares[8].south=GREEN
-    level_squares[8].west=YELLOW
-    //
-    copy_to_solved_squares()
-    randomize_lvl() // randomize level
-    redraw_all_sqrs()
-    //
-
-    while true
-        update_pads()
-        move_player()
-        update_sprites() 
-        check_if_success()
-        nmi // Wait for the next NMI
-    //
-
-mode level6()
-: nmi play_level_nmi
-    // init vars
-    current_level=6
-    //
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    
-    // prepare the level squares values
-    level_squares[0].active=true
-    level_squares[0].north=GREEN
-    level_squares[0].east=RED
-    level_squares[0].south=YELLOW
-    level_squares[0].west=VIOLET
-    //
-    level_squares[1].active=true
-    level_squares[1].north=YELLOW
-    level_squares[1].east=VIOLET
-    level_squares[1].south=YELLOW
-    level_squares[1].west=RED
-    //
-    level_squares[2].active=true
-    level_squares[2].north=RED
-    level_squares[2].east=GREEN
-    level_squares[2].south=YELLOW
-    level_squares[2].west=VIOLET
-    //
-    level_squares[3].active=true
-    level_squares[3].north=YELLOW
-    level_squares[3].east=GREEN
-    level_squares[3].south=VIOLET
-    level_squares[3].west=GREEN
-    //
-    level_squares[4].active=true
-    level_squares[4].north=YELLOW
-    level_squares[4].east=VIOLET
-    level_squares[4].south=RED
-    level_squares[4].west=GREEN
-    //
-    level_squares[5].active=true
-    level_squares[5].north=YELLOW
-    level_squares[5].east=RED
-    level_squares[5].south=GREEN
-    level_squares[5].west=VIOLET
-    //
-    level_squares[6].active=true
-    level_squares[6].north=VIOLET
-    level_squares[6].east=GREEN
-    level_squares[6].south=YELLOW
-    level_squares[6].west=RED
-    //
-    level_squares[7].active=true
-    level_squares[7].north=RED
-    level_squares[7].east=YELLOW
-    level_squares[7].south=VIOLET
-    level_squares[7].west=GREEN
-    //
-    level_squares[8].active=true
-    level_squares[8].north=GREEN
-    level_squares[8].east=RED
-    level_squares[8].south=VIOLET
-    level_squares[8].west=YELLOW
-    //
-    copy_to_solved_squares()
-    randomize_lvl() // randomize level
-    redraw_all_sqrs()
-    //
-
-    while true
-        update_pads()
-        move_player()
-        update_sprites() 
-        check_if_success()
-        nmi // Wait for the next NMI
-    //
-
-mode level7()
-: nmi play_level_nmi
-    // init vars
-    current_level=7
-    //
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    
-    // prepare the level squares values
-    level_squares[0].active=true
-    level_squares[0].north=GREEN
-    level_squares[0].east=RED
-    level_squares[0].south=RED
-    level_squares[0].west=GREEN
-    //
-    level_squares[1].active=true
-    level_squares[1].north=YELLOW
-    level_squares[1].east=GREEN
-    level_squares[1].south=GREEN
-    level_squares[1].west=RED
-    //
-    level_squares[2].active=true
-    level_squares[2].north=YELLOW
-    level_squares[2].east=VIOLET
-    level_squares[2].south=GREEN
-    level_squares[2].west=GREEN
-    //
-    level_squares[3].active=true
-    level_squares[3].north=RED
-    level_squares[3].east=GREEN
-    level_squares[3].south=VIOLET
-    level_squares[3].west=VIOLET
-    //
-    level_squares[4].active=true
-    level_squares[4].north=GREEN
-    level_squares[4].east=VIOLET
-    level_squares[4].south=VIOLET
-    level_squares[4].west=GREEN
-    //
-    level_squares[5].active=true
-    level_squares[5].north=GREEN
-    level_squares[5].east=RED
-    level_squares[5].south=GREEN
-    level_squares[5].west=VIOLET
-    //
-    level_squares[6].active=true
-    level_squares[6].north=VIOLET
-    level_squares[6].east=VIOLET
-    level_squares[6].south=RED
-    level_squares[6].west=YELLOW
-    //
-    level_squares[7].active=true
-    level_squares[7].north=VIOLET
-    level_squares[7].east=YELLOW
-    level_squares[7].south=GREEN
-    level_squares[7].west=VIOLET
-    //
-    level_squares[8].active=true
-    level_squares[8].north=GREEN
-    level_squares[8].east=VIOLET
-    level_squares[8].south=RED
-    level_squares[8].west=YELLOW
-    //
-    copy_to_solved_squares()
-    randomize_lvl() // randomize level
-    redraw_all_sqrs()
-    //
-
-    while true
-        update_pads()
-        move_player()
-        update_sprites() 
-        check_if_success()
-        nmi // Wait for the next NMI
-    //
-
-// jumps to lvl level
-fn play_level (U lvl)
-    if (lvl == 5)
-        goto mode level5()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 6)
-        goto mode level6()  // Initialize game by entering the play level mode
-        : preserves
-    if (lvl == 7)
-        goto mode level7()  // Initialize game by entering the play level mode
-        : preserves
-    //default
-    goto mode main()  // by default, go to main screen
-    : preserves
-
-//////////
-
-fn move_player()
-    if (pads[0].pressed & BUTTON_LEFT)
-        attempt_to_move_selector_left()
-    if (pads[0].pressed & BUTTON_RIGHT)
-        attempt_to_move_selector_right()
-    if (pads[0].pressed & BUTTON_UP)
-        attempt_to_move_selector_up()
-    if (pads[0].pressed & BUTTON_DOWN)
-        attempt_to_move_selector_down()
-
-    if (pads[0].pressed & BUTTON_A)
-        attempt_to_rotate_curr_square(ROT_CW)
-    if (pads[0].pressed & BUTTON_B)
-        attempt_to_rotate_curr_square(ROT_CCW)
-
-    if (pads[0].pressed & BUTTON_START)
-        randomize_lvl()
-        redraw_all_sqrs()
-
-    if (pads[0].pressed & BUTTON_SELECT)
-        cheat_curr_square()
-    
-
-
-fn update_sprites()
-    U i=0
-    //
-    // push square selector sprites
-    selector_sprite_x=sel_spr_x[square_selector-1]
-    selector_sprite_y=sel_spr_y[square_selector-1]
-    U ix=selector_sprite_x
-    U iy=selector_sprite_y
-    U sprnum=92
-    //
-    for U ity=0; ity<4; ity+=1
-        for U it=0; it<4; it+=1
-            set_oam_x(i, ix) // x-position
-            set_oam_y(i, iy) // y-position
-            set_oam_p(i, sprnum+it) // tile
-            set_oam_a(i, 0)  // options
-            i += 4
-            ix += 8
-        sprnum+=16
-        ix=selector_sprite_x
-        iy+=8
-    //
-    // Clear the remainder of OAM
-    hide_oam(i)
-
+ 
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
 Its only argument is a pointer to the levels struct 
@@ -514,6 +145,193 @@ fn load_screen(CCC/levels my_lvl_pointer)
     // copy the level metatiles map to RAM
     for UU iv=0; iv<(16*15); iv+=1
         level_mt_map{iv}=my_lvl_pointer{iv}
+
+////////
+
+nmi main_nmi()
+    // we need to update GFXs while NMI, so we do this now, ONLY ONE metatile per frame
+    if (num_ppuops_in_queue > 0)
+        set_metatile_at_colrow(ppuop_col[ppuops_queue_index], ppuop_row[ppuops_queue_index], ppuop_new_metatile[ppuops_queue_index])
+        ppuops_queue_index+=1
+        if (ppuops_queue_index >= num_ppuops_in_queue)
+            num_ppuops_in_queue=0
+            ppuops_queue_index=0
+    // Update OAM and poll the pads:
+    ppu_upload_oam_poll_pads(0)
+    // Turn on rendering:
+    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+    // Reset the scroll
+    ppu_reset_scroll(0, 0)
+    //
+    rnd_tmp+=1
+    //
+    
+mode main()
+: nmi main_nmi
+    //
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    hide_oam(0)// Clear OAM to start fresh
+    load_screen(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+    //
+    
+    // prepare the level squares values
+    level_squares[0].active=true
+    level_squares[0].north=GREEN
+    level_squares[0].east=VIOLET
+    level_squares[0].south=YELLOW
+    level_squares[0].west=RED
+    //
+    level_squares[1].active=true
+    level_squares[1].north=GREEN
+    level_squares[1].east=YELLOW
+    level_squares[1].south=RED
+    level_squares[1].west=VIOLET
+    //
+    level_squares[2].active=true
+    level_squares[2].north=VIOLET
+    level_squares[2].east=RED
+    level_squares[2].south=GREEN
+    level_squares[2].west=YELLOW
+    //
+    level_squares[3].active=true
+    level_squares[3].north=YELLOW
+    level_squares[3].east=GREEN
+    level_squares[3].south=RED
+    level_squares[3].west=VIOLET
+    //
+    level_squares[4].active=true
+    level_squares[4].north=RED
+    level_squares[4].east=YELLOW
+    level_squares[4].south=VIOLET
+    level_squares[4].west=GREEN
+    //
+    level_squares[5].active=true
+    level_squares[5].north=GREEN
+    level_squares[5].east=VIOLET
+    level_squares[5].south=RED
+    level_squares[5].west=YELLOW
+    //
+    level_squares[6].active=true
+    level_squares[6].north=RED
+    level_squares[6].east=GREEN
+    level_squares[6].south=VIOLET
+    level_squares[6].west=YELLOW
+    //
+    level_squares[7].active=true
+    level_squares[7].north=VIOLET
+    level_squares[7].east=YELLOW
+    level_squares[7].south=RED
+    level_squares[7].west=GREEN
+    //
+    level_squares[8].active=true
+    level_squares[8].north=RED
+    level_squares[8].east=VIOLET
+    level_squares[8].south=GREEN
+    level_squares[8].west=YELLOW
+    //
+
+    randomize_lvl() // randomize level
+    redraw_all_sqrs()
+    //
+
+    while true
+        update_pads()
+        move_player()
+        update_sprites() 
+        check_if_success()
+        nmi // Wait for the next NMI
+    //
+
+//////////
+
+fn move_player()
+    if (pads[0].pressed & BUTTON_LEFT)
+        attempt_to_move_selector_left()
+    if (pads[0].pressed & BUTTON_RIGHT)
+        attempt_to_move_selector_right()
+    if (pads[0].pressed & BUTTON_UP)
+        attempt_to_move_selector_up()
+    if (pads[0].pressed & BUTTON_DOWN)
+        attempt_to_move_selector_down()
+
+    if (pads[0].pressed & BUTTON_A)
+        attempt_to_rotate_curr_square(ROT_CW)
+    if (pads[0].pressed & BUTTON_B)
+        attempt_to_rotate_curr_square(ROT_CCW)
+
+    if (pads[0].pressed & BUTTON_START)
+        randomize_lvl()
+        redraw_all_sqrs()
+    
+
+
+fn update_sprites()
+    U i=0
+
+    if ((show_success) || (show_start))
+        if show_success
+            // show "success!" sign
+            U ix=sign_x
+            U iy=sign_y
+            U sprnum=24
+            //
+            for U ity=0; ity<4; ity+=1
+                for U it=0; it<8; it+=1
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, sprnum+it) // tile
+                    set_oam_a(i, 1)  // options
+                    i += 4
+                    ix += 8
+                sprnum+=16
+                ix=sign_x
+                iy+=8
+            //
+        else
+            // show "start!" sign
+            U ix=sign_x
+            U iy=sign_y
+            U sprnum=148
+            //
+            for U ity=0; ity<4; ity+=1
+                for U it=0; it<8; it+=1
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, sprnum+it) // tile
+                    set_oam_a(i, 1)  // options
+                    i += 4
+                    ix += 8
+                sprnum+=16
+                ix=sign_x
+                iy+=8
+            //
+    else
+        // push square selector sprites
+        selector_sprite_x=sel_spr_x[square_selector-1]
+        selector_sprite_y=sel_spr_y[square_selector-1]
+        U ix=selector_sprite_x
+        U iy=selector_sprite_y
+        U sprnum=92
+        //
+        for U ity=0; ity<4; ity+=1
+            for U it=0; it<4; it+=1
+                set_oam_x(i, ix) // x-position
+                set_oam_y(i, iy) // y-position
+                set_oam_p(i, sprnum+it) // tile
+                set_oam_a(i, 0)  // options
+                i += 4
+                ix += 8
+            sprnum+=16
+            ix=selector_sprite_x
+            iy+=8
+        //
+
+
+    // Clear the remainder of OAM
+    hide_oam(i)
 
 /*
 returns the map metatile at screen pixel position (px, py)
@@ -668,11 +486,11 @@ fn attempt_to_rotate_curr_square (U direction)
 
 // rotates the square without updating screen. Used to randomize level. sqr 1..9
 fn rot_sqr_inter(U sqr)
-    U pivot=level_squares[sqr-1].north
-    level_squares[sqr-1].north=level_squares[sqr-1].east
-    level_squares[sqr-1].east=level_squares[sqr-1].south
-    level_squares[sqr-1].south=level_squares[sqr-1].west
-    level_squares[sqr-1].west=pivot
+        U pivot=level_squares[sqr-1].north
+        level_squares[sqr-1].north=level_squares[sqr-1].east
+        level_squares[sqr-1].east=level_squares[sqr-1].south
+        level_squares[sqr-1].south=level_squares[sqr-1].west
+        level_squares[sqr-1].west=pivot
 
 
 // checks if the player solved the puzzle
@@ -739,53 +557,36 @@ fn check_if_success()
                 game_success=false
     //
     if game_success
-        current_level+=1
-        play_level(current_level)
+        show_success=true
+    else
+        show_success=false
 
 // returns a byte pseudo random number. I couldn't get pubby's rng to work :-/
 fn myrnd() U
-    rnd_tmp|= 123 
+    rnd_tmp+= 123
     rnd_tmp>>=4
     rnd_tmp*=11
     rnd_tmp^= 100
     return rnd_tmp
 
-// fast. returns a pseudo random number byte. Based on xorshift: https://en.wikipedia.org/wiki/Xorshift
+// returns a pseudo random number byte. Based on xorshift: https://en.wikipedia.org/wiki/Xorshift
 fn xorshiftrnd8() U
+    rnd_tmp+=123
     rnd_tmp^= (rnd_tmp << 5)
     rnd_tmp^= (rnd_tmp >> 3)
     rnd_tmp^= (rnd_tmp << 1)
     return rnd_tmp
-
+    
 // randomizes the level to make it new every time you play
 fn randomize_lvl()
     for U sqr=1; sqr<10; sqr+=1
-        //U randomval=rotation_table[myrnd() & 15]
-        U randomval=(xorshiftrnd8() >> 4) // pseudo-rng don't work very well on this. I tried using a table of random number of rotations, but I finally left it like this
-        randomval+=1
+        U randomval=rotation_table[myrnd() & 15]
         for U numrots=0; numrots<randomval; numrots+=1 // ToDo: INVESTIGATE THIS. When randomval=0 the game freezes instead of not rotating. Possible compiler bug?
             rot_sqr_inter(sqr) // rotate by a random-value times
-        //rnd_tmp+=50 // change the random seed
+        rnd_tmp+=50 // change the random seed
 
 // redraws all squares
 fn redraw_all_sqrs()
     for U i=1; i<10; i+=1
         update_square(i) // draw the squares metatiles
     //
-
-// copies the solved squares to solved_squares var
-fn copy_to_solved_squares()
-    for U i=0; i<9; i+=1
-        solved_squares[i].north=level_squares[i].north
-        solved_squares[i].south=level_squares[i].south
-        solved_squares[i].east=level_squares[i].east
-        solved_squares[i].west=level_squares[i].west
-        solved_squares[i].active=level_squares[i].active
-
-// cheats (solves) a square in range 1..9
-fn cheat_curr_square()
-    level_squares[square_selector-1].north=solved_squares[square_selector-1].north
-    level_squares[square_selector-1].south=solved_squares[square_selector-1].south
-    level_squares[square_selector-1].east=solved_squares[square_selector-1].east
-    level_squares[square_selector-1].west=solved_squares[square_selector-1].west
-    update_square(square_selector)

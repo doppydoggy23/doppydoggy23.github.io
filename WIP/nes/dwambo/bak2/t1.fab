@@ -93,15 +93,16 @@ mode main()
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten.
+    load_screen(@lev_start) // the name lev_levelX is defined in the levels.macrofab
     //
-    // load start screen made in NEXXT whose data is in ROM start screen uses the upper 256 set of chr
+    // load start screen made in NEXXT whose data is in ROM
+    state(1) // start screen uses the second bank of chr
     ppu_reset_addr($2000)
     for UU i=0; i<1024; i+=1
         {PPUDATA}(@start_screen_bytes{i})
     //
-    // Tell the NES to trigger NMI once per frame, and change the BG pattern table addr, since the start src uses the upper ones:
-    {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
+    // Tell the NES to trigger NMI once per frame:
+    {PPUCTRL}(PPUCTRL_NMI_ON)
     //
     while true
         update_pads()
