@@ -131,49 +131,7 @@ nmi play_level_nmi()
     // Reset the scroll
     ppu_reset_scroll(0, 0)
     //
-
-// The following mode shows 2 see-through screens and jumps to the next level
-mode see_through_scr()
-: nmi play_level_nmi
-    //
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    // show first see through screen
-    U num_mt_written=0
-    U x=0
-    U y=0
-    while (num_mt_written<240)
-        hide_oam(0)
-        UU pos=((y<<4)+x)
-        attempt_new_mt_change(x, y, inter_scr_mt_map{pos}, false) // I need to use this function because the PPU is painting right now
-        num_mt_written+=1
-        if (x==15)
-            x=0
-            y+=1
-        else
-            x+=1
-        nmi // Wait for the next NMI
-    //
-    // show second see through screen
-    num_mt_written=0
-    x=0
-    y=0
-    while (num_mt_written<240)
-        hide_oam(0)
-        UU pos=((y<<4)+x)
-        attempt_new_mt_change(x, y, pr_lvl_scr_mt_map{pos}, false) // I need to use this function because the PPU is painting right now
-        num_mt_written+=1
-        if (x==15)
-            x=0
-            y+=1
-        else
-            x+=1
-        nmi // Wait for the next NMI
-    //
-    current_level+=1
-    play_level(current_level) // finally, we start the new level
-
-
+    
 mode level5()
 : nmi play_level_nmi
     // init vars
@@ -183,12 +141,12 @@ mode level5()
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
     load_screen(@lev_level5) // this is necessary because we want the palette
-/*    for U y=0; y<15; y+=1
+    for U y=0; y<15; y+=1
         for U x=0; x<16; x+=1
             UU nx=x
             UU ny=y
             UU pos=((y<<4)+x)
-            set_metatile_at_colrow(nx, ny, pr_lvl_scr_mt_map{pos})*/
+            set_metatile_at_colrow(nx, ny, pr_lvl_scr_mt_map{pos})
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
     //
@@ -791,15 +749,16 @@ fn check_if_success()
                 game_success=false
     //
     if game_success
-        /*fence
-        // We need to use fence to avoid that the compiler jumps before current_level is incremented.
-        // I removed this and put the current_level+=1 in see_through_scr()
         current_level+=1
-        fence*/
-        //play_level(current_level)
-        goto mode see_through_scr() 
-        : preserves
-    //
+        play_level(current_level)
+
+// returns a byte pseudo random number. I couldn't get pubby's rng to work :-/
+fn myrnd() U
+    rnd_tmp|= 123 
+    rnd_tmp>>=4
+    rnd_tmp*=11
+    rnd_tmp^= 100
+    return rnd_tmp
 
 // fast. returns a pseudo random number byte. Based on xorshift: https://en.wikipedia.org/wiki/Xorshift
 fn xorshiftrnd8() U
