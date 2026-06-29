@@ -28,16 +28,13 @@ ct U MAX_PPUOPS_PENDING = 100 // max number of queued PPU OPerations
 vars /game_vars
 
     // these vars contain the metatile map of the current level
-    U[16*15] level_mt_map // current screen map of metatiles in RAM
+    U[16*15] level_mt_map // level map of metatiles in RAM
     //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
     CC/metatiles mt_nw
     CC/metatiles mt_ne
     CC/metatiles mt_sw
     CC/metatiles mt_se
     CC/metatiles mt_attr
-    //
-    U[16*15] inter_scr_mt_map // screen map of preloaded metatiles of dwambo screen in RAM
-    U[16*15] pr_lvl_scr_mt_map // screen map of the preloaded next level metatiles in RAM
     //
 
     // these vars control the PPU QUEUE
@@ -97,7 +94,6 @@ mode main()
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
     load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten.
-    preload_screens(@lev_dwambo, @lev_level5) // preloads the DWAMBO screen and the next level into its matching variables in RAM
     //
     // load start screen made in NEXXT whose data is in ROM start screen uses the upper 256 set of chr
     ppu_reset_addr($2000)
@@ -140,13 +136,7 @@ mode level5()
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // this is necessary because we want the palette
-    for U y=0; y<15; y+=1
-        for U x=0; x<16; x+=1
-            UU nx=x
-            UU ny=y
-            UU pos=((y<<4)+x)
-            set_metatile_at_colrow(nx, ny, pr_lvl_scr_mt_map{pos})
+    load_screen(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
     //
@@ -799,31 +789,3 @@ fn cheat_curr_square()
     level_squares[square_selector-1].east=solved_squares[square_selector-1].east
     level_squares[square_selector-1].west=solved_squares[square_selector-1].west
     update_square(square_selector)
-
-// preloads the dwambo screen metatiles and the next level screen metatiles into its correct mt variables
-fn preload_screens(CCC/levels my_lvl_pointer, CCC/levels my_lvl_pointer2)
-    U chr_bank = read U(my_lvl_pointer)
-    CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
-    CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
-    UU size = UU(read U(my_lvl_pointer)) // width in metatiles of screen
-    //after all these reads, now my_lvl_pointer points to the metatiles matrix       
-    UU mt_size = UU(read U(mymetatiles)) // number of metatiles
-    if mt_size == 0
-        mt_size = 256            
-    // copy the level metatiles map to RAM
-    for UU iv=0; iv<(16*15); iv+=1
-        inter_scr_mt_map{iv}=my_lvl_pointer{iv}
-    //
-    //
-    chr_bank = read U(my_lvl_pointer2)
-    pal=read CCC/palettes(my_lvl_pointer2)
-    mymetatiles=read CC/metatiles(my_lvl_pointer2)
-    size = UU(read U(my_lvl_pointer2)) // width in metatiles of screen
-    //after all these reads, now my_lvl_pointer points to the metatiles matrix       
-    mt_size = UU(read U(mymetatiles)) // number of metatiles
-    if mt_size == 0
-        mt_size = 256            
-    // copy the level metatiles map to RAM
-    for UU iv=0; iv<(16*15); iv+=1
-        pr_lvl_scr_mt_map{iv}=my_lvl_pointer2{iv}
-
