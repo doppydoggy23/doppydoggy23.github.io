@@ -67,7 +67,7 @@ vars /game_vars
 
     // rng
     U rnd_tmp // it's better to leave it uninitialized because when we enter a mode, it sets to default again (not what we want)
-    U[16] rotation_table = U[16](1, 4, 2, 1, 3, 2, 1, 4, 3, 2, 1, 2, 1, 3, 4, 2) // random positions to randomize levels. CAN'T BE 0 due to a randomize_lvl_() bug
+    //U[16] rotation_table = U[16](1, 4, 5, 1, 3, 7, 2, 9, 3, 8, 2, 5, 7, 1, 7, 2) // random positions to randomize levels. CAN'T BE 0 due to a randomize_lvl_() bug
 
     U current_level
 
@@ -750,7 +750,7 @@ fn move_player()
     if (pads[0].pressed & BUTTON_B)
         attempt_to_rotate_curr_square(ROT_CCW)
 
-    if (pads[0].pressed & BUTTON_START) // ToDo: remove this
+    if (pads[0].pressed & BUTTON_START)
         randomize_lvl()
         redraw_all_sqrs()
 
@@ -1105,16 +1105,13 @@ fn xorshiftrnd8() U
 
 // randomizes the level to make it new every time you play
 fn randomize_lvl()
-    U randomval=(xorshiftrnd8() >> 4)
     for U sqr=1; sqr<10; sqr+=1
-        /*U randomval=(xorshiftrnd8() >> 4) // pseudo-rng don't work very well on this. I tried using a table of random number of rotations, but I finally left it like this
-        randomval+=1*/
-        U rotval=rotation_table[(randomval & 15)] // get it from a rotation table
-        for U numrots=0; numrots<rotval; numrots+=1 // ToDo: INVESTIGATE THIS. When randomval=0 the game freezes instead of not rotating. Possible compiler bug?
-            rot_sqr_inter(sqr) // rotate by a random-value times
+        //U randomval=rotation_table[myrnd() & 15]
+        U randomval=(xorshiftrnd8() >> 4) // pseudo-rng don't work very well on this. I tried using a table of random number of rotations, but I finally left it like this
         randomval+=1
+        for U numrots=0; numrots<randomval; numrots+=1 // ToDo: INVESTIGATE THIS. When randomval=0 the game freezes instead of not rotating. Possible compiler bug?
+            rot_sqr_inter(sqr) // rotate by a random-value times
         //rnd_tmp+=50 // change the random seed
-        //ToDo: check if a level needs ramdomization again, and randomize it
 
 // redraws all squares
 fn redraw_all_sqrs()
