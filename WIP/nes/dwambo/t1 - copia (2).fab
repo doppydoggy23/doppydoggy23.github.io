@@ -4,8 +4,6 @@ mapfab(raw, "t1.mapfab", "chr", "palette", "metatiles", "level")
 data /romdata
     [] start_screen_bytes
         file(raw, "startscr.nam")
-    [] help_screen_bytes
-        file(raw, "helpscr.nam")
 
 // Square Sides Color enums
 ct U VIOLET=0
@@ -98,7 +96,7 @@ mode main()
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten. //ToDo: make it load palette only?
+    load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten.
     preload_screens(@lev_dwambo, @lev_level5) // preloads the DWAMBO screen and the next level into its matching variables in RAM
     //
     // load start screen made in NEXXT whose data is in ROM start screen uses the upper 256 set of chr
@@ -109,84 +107,12 @@ mode main()
     // Tell the NES to trigger NMI once per frame, and change the BG pattern table addr, since the start src uses the upper ones:
     {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
     //
-    U spriterot=0
-    U current_selection=0 // intro screen, which option is selected, 0 or 1
-    //
     while true
         update_pads()
         //
-        // update shown sprites
-        U i=0
-        U sprnum
-        U spritex=88
-        U spritey=176
-        //
-        if (current_selection>0)
-            spritey+=16
-        sprnum=72+((spriterot>>2) & 7)
-        spriterot+=1
-        //
-        set_oam_x(i, spritex) // x-position
-        set_oam_y(i, spritey) // y-position
-        set_oam_p(i, sprnum) // tile
-        set_oam_a(i, 0)  // options
-        i+=4
-        set_oam_x(i, spritex+88) // x-position
-        set_oam_y(i, spritey) // y-position
-        set_oam_p(i, sprnum) // tile
-        set_oam_a(i, 0)  // options
-        i+=4
-        hide_oam(i)// Clear the remainder of OAM
-        //
         if pads[0].pressed & BUTTON_START
-            if (current_selection==0)
-                current_level=1
-                play_level(1)
-            else
-                goto mode howto_scr()  //go to main screen
-                : preserves
-        if (pads[0].pressed & BUTTON_UP)
-            current_selection=0
-        if (pads[0].pressed & BUTTON_DOWN)
-            current_selection=1
-
-        nmi // Wait for the next NMI
-    //
-
-// entrance point NMI
-nmi howto_nmi() 
-    // Update OAM and poll the pads:
-    ppu_upload_oam_poll_pads(0)
-    // Turn on rendering:
-    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
-    // Reset the scroll
-    ppu_reset_scroll(0, 0)
-    //
-
-// entrance point function
-mode howto_scr()
-: nmi howto_nmi
-    // init vars
-    current_level=0
-    //
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    //
-    // load the help screen made in NEXXT
-    load_palette_from(@lev_level5)
-    ppu_reset_addr($2000)
-    for UU i=0; i<1024; i+=1
-        {PPUDATA}(@help_screen_bytes{i})
-    //
-    // Tell the NES to trigger NMI once per frame
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    while true
-        update_pads()
-        if pads[0].pressed & BUTTON_START
-            goto mode main()  //go to main screen
-            : preserves
+            current_level=1
+            play_level(1)
         nmi // Wait for the next NMI
     //
 
@@ -935,14 +861,6 @@ fn load_screen(CCC/levels my_lvl_pointer)
     // copy the level metatiles map to RAM
     for UU iv=0; iv<(16*15); iv+=1
         level_mt_map{iv}=my_lvl_pointer{iv}
-
-fn load_palette_from(CCC/levels my_lvl_pointer)
-    U chr_bank = read U(my_lvl_pointer)
-    CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
-    // set palette
-    load_palette(pal)
-    ppu_upload_palette()
-
 
 /*
 returns the map metatile at screen pixel position (px, py)
