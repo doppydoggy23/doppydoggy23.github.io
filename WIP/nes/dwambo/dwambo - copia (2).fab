@@ -73,10 +73,6 @@ vars /game_vars
 
     U current_level
 
-    Bool during_animation=true
-    U[9] square_center_x = U[9](48+16, 112+16, 176+16,   48+16, 112+16, 176+16,   48+16, 112+16, 176+16)
-    U[9] square_center_y = U[9](32+16, 32+16, 32+16,   96+16, 96+16, 96+16,   160+16, 160+16, 160+16)
-
 ////////
 
 // entrance point NMI
@@ -841,50 +837,24 @@ fn update_sprites()
     U i=0
     //
     // push square selector sprites
-    if (!during_animation)
-        selector_sprite_x=sel_spr_x[square_selector-1]
-        selector_sprite_y=sel_spr_y[square_selector-1]
-        U ix=selector_sprite_x
-        U iy=selector_sprite_y
-        U sprnum=92
-        //
-        for U ity=0; ity<4; ity+=1
-            for U it=0; it<4; it+=1
-                set_oam_x(i, ix) // x-position
-                set_oam_y(i, iy) // y-position
-                set_oam_p(i, sprnum+it) // tile
-                set_oam_a(i, 0)  // options
-                i += 4
-                ix += 8
-            sprnum+=16
-            ix=selector_sprite_x
-            iy+=8
+    selector_sprite_x=sel_spr_x[square_selector-1]
+    selector_sprite_y=sel_spr_y[square_selector-1]
+    U ix=selector_sprite_x
+    U iy=selector_sprite_y
+    U sprnum=92
     //
-
+    for U ity=0; ity<4; ity+=1
+        for U it=0; it<4; it+=1
+            set_oam_x(i, ix) // x-position
+            set_oam_y(i, iy) // y-position
+            set_oam_p(i, sprnum+it) // tile
+            set_oam_a(i, 0)  // options
+            i += 4
+            ix += 8
+        sprnum+=16
+        ix=selector_sprite_x
+        iy+=8
     //
-    if during_animation
-        U sqr_center_x=square_center_x[0]
-        U sqr_center_y=square_center_y[0]
-        U spr_x=sqr_center_x-9
-        U spr_y=sqr_center_y-34
-        //
-        U ix=spr_x
-        U iy=spr_y
-        U sprnum=$94
-        //
-        for U ity=0; ity<4; ity+=1
-            for U it=0; it<4; it+=1
-                set_oam_x(i, ix) // x-position
-                set_oam_y(i, iy) // y-position
-                set_oam_p(i, sprnum+it) // tile
-                set_oam_a(i, 0)  // options
-                i += 4
-                ix += 8
-            sprnum+=16
-            ix=spr_x
-            iy+=8
-    //
-
     // Clear the remainder of OAM
     hide_oam(i)
 
