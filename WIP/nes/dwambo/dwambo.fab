@@ -17,6 +17,9 @@ ct U YELLOW=3
 ct U ROT_CW=0
 ct U ROT_CCW=1
 
+ct U ANIM_DELAY=5 // num frame the rotation animation slows down
+ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
+
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
     Bool active // it might be that not all squares are active in a level
@@ -76,6 +79,13 @@ vars /game_vars
     Bool during_animation=true
     U[9] square_center_x = U[9](48+16, 112+16, 176+16,   48+16, 112+16, 176+16,   48+16, 112+16, 176+16)
     U[9] square_center_y = U[9](32+16, 32+16, 32+16,   96+16, 96+16, 96+16,   160+16, 160+16, 160+16)
+    U anim_frame=0
+    U anim_delay_counter=0
+    U[4] side_spr_table_h1 = U[4]($34, $35, $32, $33)
+    U[4] side_spr_table_h2 = U[4]($44, $45, $42, $43)
+    U[4] side_spr_table_v1 = U[4]($14, $24, $16, $26)
+    U[4] side_spr_table_v2 = U[4]($15, $25, $17, $27)
+
 
 ////////
 
@@ -865,24 +875,79 @@ fn update_sprites()
     if during_animation
         U sqr_center_x=square_center_x[0]
         U sqr_center_y=square_center_y[0]
-        U spr_x=sqr_center_x-9
-        U spr_y=sqr_center_y-34
+        U spr_x//=sqr_center_x-9
+        U spr_y//=sqr_center_y-34
+        U sprnum//=$94
         //
-        U ix=spr_x
-        U iy=spr_y
-        U sprnum=$94
+        if (anim_frame==1)
+            spr_x=sqr_center_x-9
+            spr_y=sqr_center_y-34
+            sprnum=$94
+        if (anim_frame==2)
+            spr_x=sqr_center_x
+            spr_y=sqr_center_y-32
+            sprnum=$98
+        if (anim_frame==3)
+            spr_x=sqr_center_x+9
+            spr_y=sqr_center_y-32+7
+            sprnum=$9C
         //
-        for U ity=0; ity<4; ity+=1
-            for U it=0; it<4; it+=1
-                set_oam_x(i, ix) // x-position
-                set_oam_y(i, iy) // y-position
-                set_oam_p(i, sprnum+it) // tile
-                set_oam_a(i, 0)  // options
-                i += 4
-                ix += 8
-            sprnum+=16
-            ix=spr_x
-            iy+=8
+        if ((anim_frame==0) || (anim_frame==4))
+            if (anim_frame==0)
+                U ix=sel_spr_x[0]
+                U iy=sel_spr_y[0]-16
+                for U it=0; it<4; it+=1
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, side_spr_table_h1[it]) // tile
+                    set_oam_a(i, 0)  // options
+                    i += 4
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy+8) // y-position
+                    set_oam_p(i, side_spr_table_h2[it]) // tile
+                    set_oam_a(i, 0)  // options
+                    i += 4
+                    ix += 8
+                //
+            else
+                U ix=sel_spr_x[0]+32
+                U iy=sel_spr_y[0]
+                for U ity=0; ity<4; ity+=1
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, side_spr_table_v1[ity]) // tile
+                    set_oam_a(i, 0)  // options
+                    i += 4
+                    set_oam_x(i, ix+8) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, side_spr_table_v2[ity]) // tile
+                    set_oam_a(i, 0)  // options
+                    i += 4
+                    iy+=8
+        else
+            U ix=spr_x
+            U iy=spr_y
+            for U ity=0; ity<4; ity+=1
+                for U it=0; it<4; it+=1
+                    set_oam_x(i, ix) // x-position
+                    set_oam_y(i, iy) // y-position
+                    set_oam_p(i, sprnum+it) // tile
+                    set_oam_a(i, 0)  // options
+                    i += 4
+                    ix += 8
+                sprnum+=16
+                ix=spr_x
+                iy+=8
+    //
+
+    //
+    anim_delay_counter+=1
+    if (anim_delay_counter>=ANIM_DELAY)
+        anim_delay_counter=0
+        anim_frame+=1
+    if (anim_frame>=NUM_ROT_ANIM_FR)
+        anim_frame=0
+        anim_delay_counter=0
     //
 
     // Clear the remainder of OAM
