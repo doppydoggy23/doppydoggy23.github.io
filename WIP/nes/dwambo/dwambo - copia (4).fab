@@ -25,7 +25,7 @@ ct U YELLOW=3
 ct U ROT_CW=0
 ct U ROT_CCW=1
 
-ct U ANIM_DELAY=5 // num frame the rotation animation slows down
+ct U ANIM_DELAY=55 // num frame the rotation animation slows down
 ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
 
 // we have from 2 to 9 squares in a level, all with 4 sides
@@ -860,7 +860,6 @@ fn move_player()
 
 fn update_sprites()
     U i=0
-    U numsprites=0
     //
     // push square selector sprites
     if (!during_animation)
@@ -876,7 +875,6 @@ fn update_sprites()
                 set_oam_y(i, iy) // y-position
                 set_oam_p(i, sprnum+it) // tile
                 set_oam_a(i, 0)  // options
-                numsprites+=1
                 i += 4
                 ix += 8
             sprnum+=16
@@ -912,7 +910,6 @@ fn update_sprites()
                 set_oam_p(i, side_spr_table_h2[it]) // tile
                 set_oam_a(i, 0)  // options
                 i += 4
-                numsprites+=4
                 //
                 ix += 8
                 //
@@ -940,21 +937,17 @@ fn update_sprites()
                 set_oam_p(i, side_spr_table_v2[ity]) // tile
                 set_oam_a(i, 0)  // options
                 i += 4
-                numsprites+=4
                 //
                 iy+=8
         else
             U spr_x
             U spr_y
             U sprnum
-            U trim=4
-            U trim2=4
             // North to East spr
             if (anim_frame==1)
                 spr_x=sel_spr_x[0]+16-9
                 spr_y=sel_spr_y[0]+16-34
                 sprnum=$94
-                trim=3
             if (anim_frame==2)
                 spr_x=sel_spr_x[0]+16
                 spr_y=sel_spr_y[0]+16-32
@@ -963,31 +956,25 @@ fn update_sprites()
                 spr_x=sel_spr_x[0]+16+9
                 spr_y=sel_spr_y[0]+16-32+7
                 sprnum=$9C
-                trim2=3
             //
             U ix=spr_x
             U iy=spr_y
-            for U ity=0; ity<trim; ity+=1
-                for U it=0; it<trim2; it+=1
+            for U ity=0; ity<4; ity+=1
+                for U it=0; it<4; it+=1
                     set_oam_x(i, ix) // x-position
                     set_oam_y(i, iy) // y-position
                     set_oam_p(i, sprnum+it) // tile
                     set_oam_a(i, 0)  // options
                     i += 4
                     ix += 8
-                    numsprites+=1
                 sprnum+=16
                 ix=spr_x
                 iy+=8
             //East to South spr
-            trim=0
-            trim2=4
             if (anim_frame==3)
                 spr_x=sel_spr_x[0]+16-9
                 spr_y=sel_spr_y[0]+16
-                sprnum=$B4//$C4 //
-                trim=8
-                trim2=3
+                sprnum=$C4
             if (anim_frame==2)
                 spr_x=sel_spr_x[0]+16
                 spr_y=sel_spr_y[0]+16
@@ -998,25 +985,22 @@ fn update_sprites()
                 sprnum=$CC
             ix=spr_x
             iy=spr_y
-            for U ity=0; ity<trim2; ity+=1
+            for U ity=0; ity<4; ity+=1
                 for U it=0; it<4; it+=1
                     set_oam_x(i, ix) // x-position
-                    set_oam_y(i, iy+trim) // y-position
+                    set_oam_y(i, iy) // y-position
                     set_oam_p(i, sprnum+it) // tile
                     set_oam_a(i, %10000000)  // options flip v
-                    numsprites+=1
                     i += 4
                     ix += 8
                 sprnum-=16
                 ix=spr_x
                 iy+=8
             //West to North spr
-            trim=4
             if (anim_frame==3)
                 spr_x=sel_spr_x[0]+16-9 +9 // si
                 spr_y=sel_spr_y[0]+16-34
                 sprnum=$94
-                trim=3
             if (anim_frame==2)
                 spr_x=sel_spr_x[0]+16 -8 // si
                 spr_y=sel_spr_y[0]+16-32
@@ -1028,49 +1012,17 @@ fn update_sprites()
             //
             ix=spr_x
             iy=spr_y
-            for U ity=0; ity<trim; ity+=1
+            for U ity=0; ity<4; ity+=1
                 for U it=0; it<4; it+=1
                     set_oam_x(i, ix) // x-position
                     set_oam_y(i, iy) // y-position
                     set_oam_p(i, sprnum+it) // tile
                     set_oam_a(i, %01000000)  // flip h
-                    numsprites+=1
                     i += 4
                     ix -= 8
                 sprnum+=16
                 ix=spr_x
                 iy+=8
-            //South to West
-            trim2=4
-            if (anim_frame==1)
-                spr_x=sel_spr_x[0]+16-4
-                spr_y=sel_spr_y[0]+16+34-10
-                sprnum=$94
-            if (anim_frame==2)
-                spr_x=sel_spr_x[0]+16-16+8
-                spr_y=sel_spr_y[0]+16+32-8
-                sprnum=$98
-            if (anim_frame==3)
-                spr_x=sel_spr_x[0]+16+9-24
-                spr_y=sel_spr_y[0]+16+32-7-16+4
-                sprnum=$9C
-                trim2=3
-            //
-            ix=spr_x
-            iy=spr_y
-            for U ity=0; ity<4; ity+=1
-                for U it=0; it<trim2; it+=1
-                    set_oam_x(i, ix) // x-position
-                    set_oam_y(i, iy) // y-position
-                    set_oam_p(i, sprnum+it) // tile
-                    set_oam_a(i, %11000000)  // flip h&v
-                    numsprites+=1
-                    i += 4
-                    ix -= 8
-                sprnum+=16
-                ix=spr_x
-                iy-=8                
-
     //
 
     // frame counters of animation
@@ -1084,8 +1036,7 @@ fn update_sprites()
     //
 
     // Clear the remainder of OAM
-    if (numsprites<64)
-        hide_oam(i)
+    hide_oam(i)
 
 /*
 Loads a 16x15 metatiles screen made with MapFab. 
