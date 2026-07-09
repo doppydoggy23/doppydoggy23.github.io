@@ -89,7 +89,6 @@ vars /game_vars
     U[9] square_center_y = U[9](32+16, 32+16, 32+16,   96+16, 96+16, 96+16,   160+16, 160+16, 160+16)*/
     U anim_frame=0
     U anim_delay_counter=0
-    Bool during_anim_final_rot=false
     U[4] side_spr_table_h1 = U[4]($34, $35, $32, $33)
     U[4] side_spr_table_h2 = U[4]($44, $45, $42, $43)
     U[4] side_spr_table_v1 = U[4]($14, $24, $16, $26)
@@ -421,7 +420,6 @@ mode level2()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -487,7 +485,6 @@ mode level3()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -561,7 +558,6 @@ mode level4()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -643,7 +639,6 @@ mode level5()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -725,7 +720,6 @@ mode level6()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -807,7 +801,6 @@ mode level7()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -857,7 +850,10 @@ fn move_player()
 
     if (pads[0].pressed & BUTTON_A)
         //attempt_to_rotate_curr_square(ROT_CW)
-        start_rot_anim()
+        during_animation=true // starts the rotation animation process
+        anim_frame=0
+        anim_delay_counter=0
+        clear_curr_square_bg() // clears the square bg to clean the view below the sprites
 
 /*    if (pads[0].pressed & BUTTON_B)
         attempt_to_rotate_curr_square(ROT_CCW)*/
@@ -905,9 +901,13 @@ fn update_sprites()
         U sce=level_squares[square_selector-1].east
         U scw=level_squares[square_selector-1].west
         //
-        if ((anim_frame==0) || (anim_frame==4) || (anim_frame==5)) // if animation frame numbers >5, garbage is output during this func
-            // There is no need to rotate colors at frame 4, because, at frame 4, since update_animation() 
-            // executes before update_sprites() in the main loop, the square colors will be already rotated by then
+        if ((anim_frame==0) || (anim_frame==4))
+            //
+            if (anim_frame==4) // square colors after rotation // ToDo: fix for when user rotates CCW                
+                scn=level_squares[square_selector-1].west
+                scs=level_squares[square_selector-1].east
+                sce=level_squares[square_selector-1].north
+                scw=level_squares[square_selector-1].south
             //
             U ix=sel_spr_x[square_selector-1]
             U iy=sel_spr_y[square_selector-1]-16
@@ -1489,38 +1489,23 @@ fn preload_screens(CCC/levels my_lvl_pointer, CCC/levels my_lvl_pointer2)
         pr_lvl_scr_mt_map{iv}=my_lvl_pointer2{iv}
 
 // updates the rotation animation frames
-fn update_animation() 
+fn update_animation() // ToDo: put this in every level Mode
     if (!during_animation)
         return
     //
     if (anim_frame==0) // if anim_frame=0, we have to wait until the BG under the sprites has been cleared
         if (num_ppuops_in_queue > 0)
             return
-    // 
-/*    if ((anim_frame==4)&&(!during_anim_final_rot))
-        attempt_to_rotate_curr_square(ROT_CW)
-        during_anim_final_rot=true
-        return
-*/
-    if during_anim_final_rot // wait until the new BG is drawed to clear the sprites
-        if (num_ppuops_in_queue > 0)
-            return
-        else
-            during_anim_final_rot=false
-    //
+    // frame counters of animation    
     anim_delay_counter+=1
     if (anim_delay_counter>=ANIM_DELAY)
         anim_delay_counter=0
         anim_frame+=1
-        if (anim_frame==4)
-            attempt_to_rotate_curr_square(ROT_CW)
-            during_anim_final_rot=true
     if (anim_frame>=NUM_ROT_ANIM_FR)
         anim_frame=0
         anim_delay_counter=0
         during_animation=false
-        during_anim_final_rot=false
-        
+        attempt_to_rotate_curr_square(ROT_CW)
     //
 
 fn clear_curr_square_bg()
@@ -1535,10 +1520,3 @@ fn clear_curr_square_bg()
     attempt_new_mt_change(scr_xpos-1, scr_ypos+1, 8, true)
     attempt_new_mt_change(scr_xpos+2, scr_ypos, 8, true)
     attempt_new_mt_change(scr_xpos+2, scr_ypos+1, 8, true)
-
-fn start_rot_anim()
-        during_animation=true // starts the rotation animation process
-        anim_frame=0
-        anim_delay_counter=0
-        during_anim_final_rot=false
-        clear_curr_square_bg() // clears the square bg to clean the view below the sprites

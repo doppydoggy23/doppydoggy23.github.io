@@ -84,12 +84,11 @@ vars /game_vars
 
     U current_level
 
-    Bool during_animation=false
+    Bool during_animation=true
 /*    U[9] square_center_x = U[9](48+16, 112+16, 176+16,   48+16, 112+16, 176+16,   48+16, 112+16, 176+16)
     U[9] square_center_y = U[9](32+16, 32+16, 32+16,   96+16, 96+16, 96+16,   160+16, 160+16, 160+16)*/
     U anim_frame=0
     U anim_delay_counter=0
-    Bool during_anim_final_rot=false
     U[4] side_spr_table_h1 = U[4]($34, $35, $32, $33)
     U[4] side_spr_table_h2 = U[4]($44, $45, $42, $43)
     U[4] side_spr_table_v1 = U[4]($14, $24, $16, $26)
@@ -359,7 +358,6 @@ mode level1()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -421,7 +419,6 @@ mode level2()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -487,7 +484,6 @@ mode level3()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -561,7 +557,6 @@ mode level4()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -643,7 +638,6 @@ mode level5()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -725,7 +719,6 @@ mode level6()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -807,7 +800,6 @@ mode level7()
     while true
         update_pads()
         move_player()
-        update_animation() // before update sprites
         update_sprites() 
         check_if_success()
         nmi // Wait for the next NMI
@@ -843,9 +835,6 @@ fn play_level (U lvl)
 //////////
 
 fn move_player()
-    if during_animation
-        return
-
     if (pads[0].pressed & BUTTON_LEFT)
         attempt_to_move_selector_left()
     if (pads[0].pressed & BUTTON_RIGHT)
@@ -856,11 +845,9 @@ fn move_player()
         attempt_to_move_selector_down()
 
     if (pads[0].pressed & BUTTON_A)
-        //attempt_to_rotate_curr_square(ROT_CW)
-        start_rot_anim()
-
-/*    if (pads[0].pressed & BUTTON_B)
-        attempt_to_rotate_curr_square(ROT_CCW)*/
+        attempt_to_rotate_curr_square(ROT_CW)
+    if (pads[0].pressed & BUTTON_B)
+        attempt_to_rotate_curr_square(ROT_CCW)
 
     if (pads[0].pressed & BUTTON_START) // ToDo: remove this
         randomize_lvl()
@@ -899,67 +886,59 @@ fn update_sprites()
 
     //
     if during_animation
-        //square colors before
-        U scn=level_squares[square_selector-1].north
-        U scs=level_squares[square_selector-1].south
-        U sce=level_squares[square_selector-1].east
-        U scw=level_squares[square_selector-1].west
         //
-        if ((anim_frame==0) || (anim_frame==4) || (anim_frame==5)) // if animation frame numbers >5, garbage is output during this func
-            // There is no need to rotate colors at frame 4, because, at frame 4, since update_animation() 
-            // executes before update_sprites() in the main loop, the square colors will be already rotated by then
-            //
-            U ix=sel_spr_x[square_selector-1]
-            U iy=sel_spr_y[square_selector-1]-16
+        if ((anim_frame==0) || (anim_frame==4))
+            U ix=sel_spr_x[0]
+            U iy=sel_spr_y[0]-16
             for U it=0; it<4; it+=1
                 set_oam_x(i, ix) // North row1
                 set_oam_y(i, iy) // 
                 set_oam_p(i, side_spr_table_h1[it]) // tile
-                set_oam_a(i, scn)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 set_oam_x(i, ix) // North row 2
                 set_oam_y(i, iy+8) // 
                 set_oam_p(i, side_spr_table_h2[it]) // tile
-                set_oam_a(i, scn)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 //
                 set_oam_x(i, ix) // South row1
                 set_oam_y(i, iy+48) // 
                 set_oam_p(i, side_spr_table_h1[it]) // tile
-                set_oam_a(i, scs)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 set_oam_x(i, ix) // South row 2
                 set_oam_y(i, iy+48+8) // 
                 set_oam_p(i, side_spr_table_h2[it]) // tile
-                set_oam_a(i, scs)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 numsprites+=4
                 //
                 ix += 8
                 //
-            ix=sel_spr_x[square_selector-1]+32
-            iy=sel_spr_y[square_selector-1]
+            ix=sel_spr_x[0]+32
+            iy=sel_spr_y[0]
             for U ity=0; ity<4; ity+=1
                 set_oam_x(i, ix) // East column 1
                 set_oam_y(i, iy) // 
                 set_oam_p(i, side_spr_table_v1[ity]) // tile
-                set_oam_a(i, sce)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 set_oam_x(i, ix+8) // East column 2
                 set_oam_y(i, iy) // 
                 set_oam_p(i, side_spr_table_v2[ity]) // tile
-                set_oam_a(i, sce)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 //
                 set_oam_x(i, ix-48) // West column 1
                 set_oam_y(i, iy) // 
                 set_oam_p(i, side_spr_table_v1[ity]) // tile
-                set_oam_a(i, scw)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 set_oam_x(i, ix-48+8) // West column 2
                 set_oam_y(i, iy) // 
                 set_oam_p(i, side_spr_table_v2[ity]) // tile
-                set_oam_a(i, scw)  // options
+                set_oam_a(i, 0)  // options
                 i += 4
                 numsprites+=4
                 //
@@ -972,17 +951,17 @@ fn update_sprites()
             U trim2=4
             // North to East spr
             if (anim_frame==1)
-                spr_x=sel_spr_x[square_selector-1]+16-9
-                spr_y=sel_spr_y[square_selector-1]+16-34
+                spr_x=sel_spr_x[0]+16-9
+                spr_y=sel_spr_y[0]+16-34
                 sprnum=$94
                 trim=3
             if (anim_frame==2)
-                spr_x=sel_spr_x[square_selector-1]+16
-                spr_y=sel_spr_y[square_selector-1]+16-32
+                spr_x=sel_spr_x[0]+16
+                spr_y=sel_spr_y[0]+16-32
                 sprnum=$98
             if (anim_frame==3)
-                spr_x=sel_spr_x[square_selector-1]+16+9
-                spr_y=sel_spr_y[square_selector-1]+16-32+7
+                spr_x=sel_spr_x[0]+16+9
+                spr_y=sel_spr_y[0]+16-32+7
                 sprnum=$9C
                 trim2=3
             //
@@ -993,7 +972,7 @@ fn update_sprites()
                     set_oam_x(i, ix) // x-position
                     set_oam_y(i, iy) // y-position
                     set_oam_p(i, sprnum+it) // tile
-                    set_oam_a(i, scn)  // options
+                    set_oam_a(i, 0)  // options
                     i += 4
                     ix += 8
                     numsprites+=1
@@ -1004,18 +983,18 @@ fn update_sprites()
             trim=0
             trim2=4
             if (anim_frame==3)
-                spr_x=sel_spr_x[square_selector-1]+16-9
-                spr_y=sel_spr_y[square_selector-1]+16
+                spr_x=sel_spr_x[0]+16-9
+                spr_y=sel_spr_y[0]+16
                 sprnum=$B4//$C4 //
                 trim=8
                 trim2=3
             if (anim_frame==2)
-                spr_x=sel_spr_x[square_selector-1]+16
-                spr_y=sel_spr_y[square_selector-1]+16
+                spr_x=sel_spr_x[0]+16
+                spr_y=sel_spr_y[0]+16
                 sprnum=$C8
             if (anim_frame==1)
-                spr_x=sel_spr_x[square_selector-1]+16+9
-                spr_y=sel_spr_y[square_selector-1]+16-7
+                spr_x=sel_spr_x[0]+16+9
+                spr_y=sel_spr_y[0]+16-7
                 sprnum=$CC
             ix=spr_x
             iy=spr_y
@@ -1024,7 +1003,7 @@ fn update_sprites()
                     set_oam_x(i, ix) // x-position
                     set_oam_y(i, iy+trim) // y-position
                     set_oam_p(i, sprnum+it) // tile
-                    set_oam_a(i, %10000000|sce)  // options flip v
+                    set_oam_a(i, %10000000)  // options flip v
                     numsprites+=1
                     i += 4
                     ix += 8
@@ -1034,17 +1013,17 @@ fn update_sprites()
             //West to North spr
             trim=4
             if (anim_frame==3)
-                spr_x=sel_spr_x[square_selector-1]+16-9 +9 // si
-                spr_y=sel_spr_y[square_selector-1]+16-34
+                spr_x=sel_spr_x[0]+16-9 +9 // si
+                spr_y=sel_spr_y[0]+16-34
                 sprnum=$94
                 trim=3
             if (anim_frame==2)
-                spr_x=sel_spr_x[square_selector-1]+16 -8 // si
-                spr_y=sel_spr_y[square_selector-1]+16-32
+                spr_x=sel_spr_x[0]+16 -8 // si
+                spr_y=sel_spr_y[0]+16-32
                 sprnum=$98
             if (anim_frame==1)
-                spr_x=sel_spr_x[square_selector-1]+16+9 -26 // si
-                spr_y=sel_spr_y[square_selector-1]+16-32+7
+                spr_x=sel_spr_x[0]+16+9 -26 // si
+                spr_y=sel_spr_y[0]+16-32+7
                 sprnum=$9C
             //
             ix=spr_x
@@ -1054,7 +1033,7 @@ fn update_sprites()
                     set_oam_x(i, ix) // x-position
                     set_oam_y(i, iy) // y-position
                     set_oam_p(i, sprnum+it) // tile
-                    set_oam_a(i, %01000000|scw)  // flip h
+                    set_oam_a(i, %01000000)  // flip h
                     numsprites+=1
                     i += 4
                     ix -= 8
@@ -1064,16 +1043,16 @@ fn update_sprites()
             //South to West
             trim2=4
             if (anim_frame==1)
-                spr_x=sel_spr_x[square_selector-1]+16-4
-                spr_y=sel_spr_y[square_selector-1]+16+34-10
+                spr_x=sel_spr_x[0]+16-4
+                spr_y=sel_spr_y[0]+16+34-10
                 sprnum=$94
             if (anim_frame==2)
-                spr_x=sel_spr_x[square_selector-1]+16-16+8
-                spr_y=sel_spr_y[square_selector-1]+16+32-8
+                spr_x=sel_spr_x[0]+16-16+8
+                spr_y=sel_spr_y[0]+16+32-8
                 sprnum=$98
             if (anim_frame==3)
-                spr_x=sel_spr_x[square_selector-1]+16+9-24
-                spr_y=sel_spr_y[square_selector-1]+16+32-7-16+4
+                spr_x=sel_spr_x[0]+16+9-24
+                spr_y=sel_spr_y[0]+16+32-7-16+4
                 sprnum=$9C
                 trim2=3
             //
@@ -1084,7 +1063,7 @@ fn update_sprites()
                     set_oam_x(i, ix) // x-position
                     set_oam_y(i, iy) // y-position
                     set_oam_p(i, sprnum+it) // tile
-                    set_oam_a(i, %11000000|scs)  // flip h&v
+                    set_oam_a(i, %11000000)  // flip h&v
                     numsprites+=1
                     i += 4
                     ix -= 8
@@ -1092,6 +1071,16 @@ fn update_sprites()
                 ix=spr_x
                 iy-=8                
 
+    //
+
+    // frame counters of animation
+    anim_delay_counter+=1
+    if (anim_delay_counter>=ANIM_DELAY)
+        anim_delay_counter=0
+        anim_frame+=1
+    if (anim_frame>=NUM_ROT_ANIM_FR)
+        anim_frame=0
+        anim_delay_counter=0
     //
 
     // Clear the remainder of OAM
@@ -1488,57 +1477,3 @@ fn preload_screens(CCC/levels my_lvl_pointer, CCC/levels my_lvl_pointer2)
     for UU iv=0; iv<(16*15); iv+=1
         pr_lvl_scr_mt_map{iv}=my_lvl_pointer2{iv}
 
-// updates the rotation animation frames
-fn update_animation() 
-    if (!during_animation)
-        return
-    //
-    if (anim_frame==0) // if anim_frame=0, we have to wait until the BG under the sprites has been cleared
-        if (num_ppuops_in_queue > 0)
-            return
-    // 
-/*    if ((anim_frame==4)&&(!during_anim_final_rot))
-        attempt_to_rotate_curr_square(ROT_CW)
-        during_anim_final_rot=true
-        return
-*/
-    if during_anim_final_rot // wait until the new BG is drawed to clear the sprites
-        if (num_ppuops_in_queue > 0)
-            return
-        else
-            during_anim_final_rot=false
-    //
-    anim_delay_counter+=1
-    if (anim_delay_counter>=ANIM_DELAY)
-        anim_delay_counter=0
-        anim_frame+=1
-        if (anim_frame==4)
-            attempt_to_rotate_curr_square(ROT_CW)
-            during_anim_final_rot=true
-    if (anim_frame>=NUM_ROT_ANIM_FR)
-        anim_frame=0
-        anim_delay_counter=0
-        during_animation=false
-        during_anim_final_rot=false
-        
-    //
-
-fn clear_curr_square_bg()
-    U scr_xpos=squares_x_coords[square_selector-1]
-    U scr_ypos=squares_y_coords[square_selector-1]
-    // write the metatiles to the PPU and level map
-    attempt_new_mt_change(scr_xpos, scr_ypos-1, 8, true)
-    attempt_new_mt_change(scr_xpos+1, scr_ypos-1, 8, true)
-    attempt_new_mt_change(scr_xpos, scr_ypos+2, 8, true)
-    attempt_new_mt_change(scr_xpos+1, scr_ypos+2, 8, true)
-    attempt_new_mt_change(scr_xpos-1, scr_ypos, 8, true)
-    attempt_new_mt_change(scr_xpos-1, scr_ypos+1, 8, true)
-    attempt_new_mt_change(scr_xpos+2, scr_ypos, 8, true)
-    attempt_new_mt_change(scr_xpos+2, scr_ypos+1, 8, true)
-
-fn start_rot_anim()
-        during_animation=true // starts the rotation animation process
-        anim_frame=0
-        anim_delay_counter=0
-        during_anim_final_rot=false
-        clear_curr_square_bg() // clears the square bg to clean the view below the sprites
