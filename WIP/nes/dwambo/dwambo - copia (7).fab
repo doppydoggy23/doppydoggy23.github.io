@@ -94,7 +94,6 @@ vars /game_vars
     U[4] side_spr_table_h2 = U[4]($44, $45, $42, $43)
     U[4] side_spr_table_v1 = U[4]($14, $24, $16, $26)
     U[4] side_spr_table_v2 = U[4]($15, $25, $17, $27)
-    U rotation_dir
 /*    S[5] sprt_disp_x = S[5](0, -9, 0, 9, 0)
     S[5] sprt_disp_y = S[5](0, -34, -32, -25, 0)
     U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)*/
@@ -857,11 +856,11 @@ fn move_player()
         attempt_to_move_selector_down()
 
     if (pads[0].pressed & BUTTON_A)
-        rotation_dir=ROT_CW
+        //attempt_to_rotate_curr_square(ROT_CW)
         start_rot_anim()
-    if (pads[0].pressed & BUTTON_B)
-        rotation_dir=ROT_CCW
-        start_rot_anim()
+
+/*    if (pads[0].pressed & BUTTON_B)
+        attempt_to_rotate_curr_square(ROT_CCW)*/
 
     if (pads[0].pressed & BUTTON_START) // ToDo: remove this
         randomize_lvl()
@@ -875,7 +874,6 @@ fn move_player()
 fn update_sprites()
     U i=0
     U numsprites=0
-    U old_anim_frame=anim_frame
     //
     // push square selector sprites
     if (!during_animation)
@@ -906,13 +904,6 @@ fn update_sprites()
         U scs=level_squares[square_selector-1].south
         U sce=level_squares[square_selector-1].east
         U scw=level_squares[square_selector-1].west
-        //
-        if (rotation_dir==ROT_CCW)
-            if (anim_frame==1)
-                anim_frame=3
-            else
-                if (anim_frame==3)
-                    anim_frame=1
         //
         if ((anim_frame==0) || (anim_frame==4) || (anim_frame==5)) // if animation frame numbers >5, garbage is output during this func
             // There is no need to rotate colors at frame 4, because, at frame 4, since update_animation() 
@@ -974,13 +965,6 @@ fn update_sprites()
                 //
                 iy+=8
         else
-            //anim_frame 1, 2, 3
-            if (rotation_dir==ROT_CCW)
-                scn=level_squares[square_selector-1].east
-                scs=level_squares[square_selector-1].west
-                sce=level_squares[square_selector-1].south
-                scw=level_squares[square_selector-1].north
-            //
             U spr_x
             U spr_y
             U sprnum
@@ -1109,7 +1093,6 @@ fn update_sprites()
                 iy-=8                
 
     //
-    anim_frame=old_anim_frame
 
     // Clear the remainder of OAM
     if (numsprites<64)
@@ -1514,6 +1497,11 @@ fn update_animation()
         if (num_ppuops_in_queue > 0)
             return
     // 
+/*    if ((anim_frame==4)&&(!during_anim_final_rot))
+        attempt_to_rotate_curr_square(ROT_CW)
+        during_anim_final_rot=true
+        return
+*/
     if during_anim_final_rot // wait until the new BG is drawed to clear the sprites
         if (num_ppuops_in_queue > 0)
             return
@@ -1525,7 +1513,7 @@ fn update_animation()
         anim_delay_counter=0
         anim_frame+=1
         if (anim_frame==4)
-            attempt_to_rotate_curr_square(rotation_dir)
+            attempt_to_rotate_curr_square(ROT_CW)
             during_anim_final_rot=true
     if (anim_frame>=NUM_ROT_ANIM_FR)
         anim_frame=0
