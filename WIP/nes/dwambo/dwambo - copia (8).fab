@@ -2,8 +2,6 @@
 mapfab(raw, "dwambo.mapfab", "chr", "palette", "metatiles", "level")
 
 audio(puf1_music, "songs.txt")
-audio(puf1_sfx) // needed to play songs.txt, even if not used
-
 
 data /romdata
     [] start_screen_bytes
@@ -119,14 +117,10 @@ nmi main_nmi()
     if (rnd_tmp==0) // if the xor rng seed is 0, the result always is 0
         rnd_tmp=1
     //
-    puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
-
 
 // entrance point function
 mode main()
 : nmi main_nmi
-    puf.init(system) // it only works if done once
-    //
     // init vars
     current_level=0
     //
@@ -197,7 +191,6 @@ nmi howto_nmi()
     // Reset the scroll
     ppu_reset_scroll(0, 0)
     //
-    puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
 
 // entrance point function
 mode howto_scr()
@@ -241,7 +234,6 @@ nmi play_level_nmi()
     // Reset the scroll
     ppu_reset_scroll(0, 0)
     //
-    puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
 
 // The following mode shows 2 see-through screens and jumps to the next level
 mode see_through_scr()
@@ -366,7 +358,6 @@ mode level1()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
-    puf.play_track(0)
 
     while true
         update_pads()
@@ -429,7 +420,6 @@ mode level2()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
-    puf.play_track(0)
 
     while true
         update_pads()
@@ -496,7 +486,6 @@ mode level3()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
-    puf.play_track(0)
 
     while true
         update_pads()
@@ -571,7 +560,6 @@ mode level4()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
-    puf.play_track(0)
 
     while true
         update_pads()
@@ -654,7 +642,6 @@ mode level5()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
-    puf.play_track(0)
 
     while true
         update_pads()
@@ -737,7 +724,6 @@ mode level6()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
-    puf.play_track(0)
 
     while true
         update_pads()
@@ -820,7 +806,6 @@ mode level7()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
     //
-    puf.play_track(0)
 
     while true
         update_pads()
@@ -1448,7 +1433,6 @@ fn check_if_success()
         current_level+=1
         fence*/
         //play_level(current_level)
-        puf.stop(0)
         goto mode see_through_scr() 
         : preserves
     //
