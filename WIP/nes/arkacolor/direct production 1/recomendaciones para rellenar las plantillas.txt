@@ -1,0 +1,10 @@
+Para la caja:
+- que tenga parte frontal y trasera
+	La frontal con el título y el dibujo y la trasera con 
+	dibujo, screenshots del juego y una descripción del juego
+Para la etiqueta del cartucho:
+	Que el dibujo se extienda por fuera de donde se recorta la
+	etiqueta, para que si el corte no es perfecto, no haya
+	bordes negros (lo que se ve fuera del borde de la etiqueta)
+
+	
