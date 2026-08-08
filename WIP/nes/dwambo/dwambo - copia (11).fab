@@ -10,8 +10,6 @@ data /romdata
         file(raw, "startscr.nam")
     [] help_screen_bytes
         file(raw, "helpscr.nam")
-    [] end_screen_bytes
-        file(raw, "endscr.nam")
     //U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)
     /*[5] sprt_chr
         U(0) 
@@ -230,46 +228,6 @@ mode howto_scr()
         nmi // Wait for the next NMI
     //
 
-// entrance point NMI
-nmi end_nmi() 
-    // Update OAM and poll the pads:
-    ppu_upload_oam_poll_pads(0)
-    // Turn on rendering:
-    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
-    // Reset the scroll
-    ppu_reset_scroll(0, 0)
-    //
-    puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
-
-// entrance point function
-mode end_scr()
-: nmi howto_nmi
-    // init vars
-    current_level=0
-    //
-    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    //
-    // load the help screen made in NEXXT
-    load_palette_from(@lev_level5)
-    ppu_reset_addr($2000)
-    for UU i=0; i<1024; i+=1
-        {PPUDATA}(@end_screen_bytes{i})
-    //
-    // Tell the NES to trigger NMI once per frame
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
-    while true
-        update_pads()
-        if pads[0].pressed & BUTTON_START
-            goto mode main()  //go to main screen
-            : preserves
-        nmi // Wait for the next NMI
-    //
-
-
-
 nmi play_level_nmi()
     // we need to update GFXs while NMI, so we do this now, ONLY ONE metatile per frame
     if (num_ppuops_in_queue > 0)
@@ -342,9 +300,6 @@ mode see_through_scr()
         //
         nmi // Wait for the next NMI
     //
-    if (current_level>=7)
-        goto mode end_scr() 
-        : preserves
     // show second see through screen
     num_mt_written=0
     x=0
@@ -1507,9 +1462,8 @@ fn check_if_success()
         // I removed this and put the current_level+=1 in see_through_scr()
         current_level+=1
         fence*/
-        //play_level(current_level)        
+        //play_level(current_level)
         puf.stop(0)
-        //
         goto mode see_through_scr() 
         : preserves
     //
