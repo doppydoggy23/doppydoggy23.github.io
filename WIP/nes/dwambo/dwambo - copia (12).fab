@@ -34,8 +34,6 @@ ct U ROT_CCW=1
 ct U ANIM_DELAY=5 // num frame the rotation animation slows down
 ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
 
-ct U NUM_FRAMES_PER_SEC=60
-
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
     Bool active // it might be that not all squares are active in a level
@@ -109,10 +107,6 @@ vars /game_vars
     S[5] sprt_disp_y = S[5](0, -34, -32, -25, 0)
     U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)*/
 
-    // time accounting variables, the time is stored one cipher in every nibble, to make it easier to display
-    U secs=0
-    U mins=0
-    U hours=0
 
 ////////
 
@@ -420,12 +414,6 @@ mode level1()
     redraw_all_sqrs()
     //
     puf.play_track(0)
-    //
-    U frame_counter=0
-    secs=0
-    mins=0
-    hours=0
-    //
 
     while true
         update_pads()
@@ -433,12 +421,6 @@ mode level1()
         update_animation() // before update sprites
         update_sprites() 
         check_if_success()
-        //
-        frame_counter+=1
-        if (frame_counter>NUM_FRAMES_PER_SEC)
-            frame_counter=0
-            update_time() // updates the seconds, minutes, and hours passed since level start
-        //
         nmi // Wait for the next NMI
     //
 
@@ -989,21 +971,6 @@ fn update_sprites()
         set_oam_y(i, selector_sprite_y+12) // y-position
         set_oam_p(i, $DD) // tile
         set_oam_a(i, 1)  // pal+options
-        i += 4
-    //
-    //
-        // push secs sprites // ToDo: remove this
-        U secs_l=secs&15
-        U secs_h=secs>>4
-        set_oam_x(i, 0) // x-position
-        set_oam_y(i, 0) // y-position
-        set_oam_p(i, $F6+secs_h) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        set_oam_x(i, 8) // x-position
-        set_oam_y(i, 0) // y-position
-        set_oam_p(i, $F6+secs_l) // tile
-        set_oam_a(i, 0)  // pal+options
         i += 4
     //
 
@@ -1647,7 +1614,6 @@ fn update_animation()
         
     //
 
-// clears the current square background to make rotation animation nicer
 fn clear_curr_square_bg()
     U scr_xpos=squares_x_coords[square_selector-1]
     U scr_ypos=squares_y_coords[square_selector-1]
@@ -1661,80 +1627,9 @@ fn clear_curr_square_bg()
     attempt_new_mt_change(scr_xpos+2, scr_ypos, 8, true)
     attempt_new_mt_change(scr_xpos+2, scr_ypos+1, 8, true)
 
-// starts the rotation animation
 fn start_rot_anim()
         during_animation=true // starts the rotation animation process
         anim_frame=0
         anim_delay_counter=0
         during_anim_final_rot=false
         clear_curr_square_bg() // clears the square bg to clean the view below the sprites
-
-// updates the seconds, minutes, and hours passed since level start
-// each cipher is stored in a nible ej secs=55 -> secs=0x55
-fn update_time()
-/*    secs+=1
-    if (secs >= 60)
-        mins+=1
-    if (mins >= 60)
-        hours+=1
-*/
-    Bool secs_overflow=increment_secs()
-    if (secs_overflow)
-        Bool mins_overflow=increment_mins()
-        if (mins_overflow)
-            increment_hours()
-
-
-// increment seconds in 1
-fn increment_secs() Bool
-    U secs_h=(secs >> 4)
-    U secs_l=(secs & 15)
-    if (secs_l >= 9) // if lower digit is 9, increment next digit
-        secs_h+=1
-        secs_l=0
-        if (secs_h >= 6)
-            secs=0
-            return true
-        else
-            secs=((secs_h << 4)|secs_l)
-            return false
-    else
-        secs_l+=1
-        secs=((secs_h << 4)|secs_l)
-        return false
-
-// increment minutes in 1
-fn increment_mins() Bool
-    U mins_h=(mins >> 4)
-    U mins_l=(mins & 15)
-    if (mins_l >= 9) // if lower digit is 9, increment next digit
-        mins_h+=1
-        mins_l=0
-        if (mins_h >= 6)
-            mins=0
-            return true
-        else
-            mins=((mins_h << 4)|mins_l)
-            return false
-    else
-        mins_l+=1
-        mins=((mins_h << 4)|mins_l)
-        return false
-
-// increment hours in 1
-fn increment_hours() Bool
-    U hours_h=(hours >> 4)
-    U hours_l=(hours & 15)
-    if (hours_l >= 9) // if lower digit is 9, increment next digit
-        hours_h+=1
-        hours_l=0
-        if (hours_h >= 6)
-            hours=0
-            return true
-        else
-            hours=((hours_h << 4)|hours_l)
-            return false
-    else
-        hours_l+=1
-        hours=((hours_h << 4)|hours_l)
-        return false
