@@ -35,6 +35,8 @@ ct U ANIM_DELAY=5 // num frame the rotation animation slows down
 ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
 
 ct U NUM_FRAMES_PER_SEC=60
+ct U TIMER_XPOS=100
+ct U TIMER_YPOS=225
 
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
@@ -105,11 +107,8 @@ vars /game_vars
     U[4] side_spr_table_v1 = U[4]($14, $24, $16, $26)
     U[4] side_spr_table_v2 = U[4]($15, $25, $17, $27)
     U rotation_dir
-/*    S[5] sprt_disp_x = S[5](0, -9, 0, 9, 0)
-    S[5] sprt_disp_y = S[5](0, -34, -32, -25, 0)
-    U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)*/
 
-    // time accounting variables, the time is stored one cipher in every nibble, to make it easier to display
+    // timer variables, the time is stored one cipher in every nibble, to make it easier to display
     U secs=0
     U mins=0
     U hours=0
@@ -447,13 +446,6 @@ mode level2()
     // init vars
     current_level=2
     //
-/*    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // this is necessary because we want the palette
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)*/
-    //
     
     // prepare the level squares values
     level_squares[0].active=true
@@ -495,6 +487,12 @@ mode level2()
     redraw_all_sqrs()
     //
     puf.play_track(0)
+    //
+    U frame_counter=0
+    secs=0
+    mins=0
+    hours=0
+    //
 
     while true
         update_pads()
@@ -502,6 +500,12 @@ mode level2()
         update_animation() // before update sprites
         update_sprites() 
         check_if_success()
+        //
+        frame_counter+=1
+        if (frame_counter>NUM_FRAMES_PER_SEC)
+            frame_counter=0
+            update_time() // updates the seconds, minutes, and hours passed since level start
+        //
         nmi // Wait for the next NMI
     //
 
@@ -509,13 +513,6 @@ mode level3()
 : nmi play_level_nmi
     // init vars
     current_level=3
-    //
-/*    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // this is necessary because we want the palette
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)*/
     //
     
     // prepare the level squares values
@@ -562,6 +559,12 @@ mode level3()
     redraw_all_sqrs()
     //
     puf.play_track(0)
+    //
+    U frame_counter=0
+    secs=0
+    mins=0
+    hours=0
+    //
 
     while true
         update_pads()
@@ -569,6 +572,12 @@ mode level3()
         update_animation() // before update sprites
         update_sprites() 
         check_if_success()
+        //
+        frame_counter+=1
+        if (frame_counter>NUM_FRAMES_PER_SEC)
+            frame_counter=0
+            update_time() // updates the seconds, minutes, and hours passed since level start
+        //
         nmi // Wait for the next NMI
     //
 
@@ -576,13 +585,6 @@ mode level4()
 : nmi play_level_nmi
     // init vars
     current_level=4
-    //
-/*    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // this is necessary because we want the palette
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)*/
     //
     
     // prepare the level squares values
@@ -637,6 +639,12 @@ mode level4()
     redraw_all_sqrs()
     //
     puf.play_track(0)
+    //
+    U frame_counter=0
+    secs=0
+    mins=0
+    hours=0
+    //
 
     while true
         update_pads()
@@ -644,6 +652,12 @@ mode level4()
         update_animation() // before update sprites
         update_sprites() 
         check_if_success()
+        //
+        frame_counter+=1
+        if (frame_counter>NUM_FRAMES_PER_SEC)
+            frame_counter=0
+            update_time() // updates the seconds, minutes, and hours passed since level start
+        //
         nmi // Wait for the next NMI
     //
 
@@ -651,13 +665,6 @@ mode level5()
 : nmi play_level_nmi
     // init vars
     current_level=5
-    //
-/*    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // this is necessary because we want the palette
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)*/
     //
     
     // prepare the level squares values
@@ -720,6 +727,12 @@ mode level5()
     redraw_all_sqrs()
     //
     puf.play_track(0)
+    //
+    U frame_counter=0
+    secs=0
+    mins=0
+    hours=0
+    //
 
     while true
         update_pads()
@@ -727,6 +740,12 @@ mode level5()
         update_animation() // before update sprites
         update_sprites() 
         check_if_success()
+        //
+        frame_counter+=1
+        if (frame_counter>NUM_FRAMES_PER_SEC)
+            frame_counter=0
+            update_time() // updates the seconds, minutes, and hours passed since level start
+        //
         nmi // Wait for the next NMI
     //
 
@@ -734,13 +753,6 @@ mode level6()
 : nmi play_level_nmi
     // init vars
     current_level=6
-    //
-/*    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)*/
     //
     
     // prepare the level squares values
@@ -803,6 +815,12 @@ mode level6()
     redraw_all_sqrs()
     //
     puf.play_track(0)
+    //
+    U frame_counter=0
+    secs=0
+    mins=0
+    hours=0
+    //
 
     while true
         update_pads()
@@ -810,6 +828,12 @@ mode level6()
         update_animation() // before update sprites
         update_sprites() 
         check_if_success()
+        //
+        frame_counter+=1
+        if (frame_counter>NUM_FRAMES_PER_SEC)
+            frame_counter=0
+            update_time() // updates the seconds, minutes, and hours passed since level start
+        //
         nmi // Wait for the next NMI
     //
 
@@ -817,13 +841,6 @@ mode level7()
 : nmi play_level_nmi
     // init vars
     current_level=7
-    //
-/*    {PPUCTRL}(0)  // Reset PPU control register for new level
-    {PPUMASK}(0) // Reset PPU mask register for new level
-    hide_oam(0)// Clear OAM to start fresh
-    load_screen(@lev_level5) // the name lev_levelX is defined in the levels.macrofab
-    // Tell the NES to trigger NMI once per frame:
-    {PPUCTRL}(PPUCTRL_NMI_ON)*/
     //
     
     // prepare the level squares values
@@ -886,6 +903,12 @@ mode level7()
     redraw_all_sqrs()
     //
     puf.play_track(0)
+    //
+    U frame_counter=0
+    secs=0
+    mins=0
+    hours=0
+    //
 
     while true
         update_pads()
@@ -893,6 +916,12 @@ mode level7()
         update_animation() // before update sprites
         update_sprites() 
         check_if_success()
+        //
+        frame_counter+=1
+        if (frame_counter>NUM_FRAMES_PER_SEC)
+            frame_counter=0
+            update_time() // updates the seconds, minutes, and hours passed since level start
+        //
         nmi // Wait for the next NMI
     //
 
@@ -948,6 +977,8 @@ fn move_player()
     /*if (pads[0].pressed & BUTTON_START) // ToDo: remove this
         randomize_lvl()
         redraw_all_sqrs()*/
+    /*if (pads[0].held & BUTTON_START) // ToDo: remove this
+        update_time()*/
 
     if (pads[0].pressed & BUTTON_SELECT)
         cheat_curr_square()
@@ -992,16 +1023,50 @@ fn update_sprites()
         i += 4
     //
     //
-        // push secs sprites // ToDo: remove this
+        // push timer sprites // ToDo: remove this
+        U hours_l=hours&15
+        U hours_h=hours>>4
+        set_oam_x(i, TIMER_XPOS) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+hours_h) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+8) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+hours_l) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+16) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $DB) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        U mins_l=mins&15
+        U mins_h=mins>>4
+        set_oam_x(i, TIMER_XPOS+24) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+mins_h) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+32) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+mins_l) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+40) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $DB) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
         U secs_l=secs&15
         U secs_h=secs>>4
-        set_oam_x(i, 0) // x-position
-        set_oam_y(i, 0) // y-position
+        set_oam_x(i, TIMER_XPOS+48) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
         set_oam_p(i, $F6+secs_h) // tile
         set_oam_a(i, 0)  // pal+options
         i += 4
-        set_oam_x(i, 8) // x-position
-        set_oam_y(i, 0) // y-position
+        set_oam_x(i, TIMER_XPOS+56) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
         set_oam_p(i, $F6+secs_l) // tile
         set_oam_a(i, 0)  // pal+options
         i += 4
