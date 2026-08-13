@@ -35,10 +35,8 @@ ct U ANIM_DELAY=5 // num frame the rotation animation slows down
 ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
 
 ct U NUM_FRAMES_PER_SEC=60
-ct U TIMER_XPOS=96
-ct U TIMER_YPOS=220
-ct U ROTS_XPOS=96
-ct U ROTS_YPOS=230
+ct U TIMER_XPOS=100
+ct U TIMER_YPOS=225
 
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
@@ -114,7 +112,6 @@ vars /game_vars
     U secs=0
     U mins=0
     U hours=0
-    UU num_rotations=0 // again, each nibble holds a cipher, making it easier to display
 
 ////////
 
@@ -427,7 +424,6 @@ mode level1()
     secs=0
     mins=0
     hours=0
-    num_rotations=0
     //
 
     while true
@@ -496,7 +492,6 @@ mode level2()
     secs=0
     mins=0
     hours=0
-    num_rotations=0
     //
 
     while true
@@ -569,7 +564,6 @@ mode level3()
     secs=0
     mins=0
     hours=0
-    num_rotations=0
     //
 
     while true
@@ -650,7 +644,6 @@ mode level4()
     secs=0
     mins=0
     hours=0
-    num_rotations=0
     //
 
     while true
@@ -739,7 +732,6 @@ mode level5()
     secs=0
     mins=0
     hours=0
-    num_rotations=0
     //
 
     while true
@@ -828,7 +820,6 @@ mode level6()
     secs=0
     mins=0
     hours=0
-    num_rotations=0
     //
 
     while true
@@ -917,7 +908,6 @@ mode level7()
     secs=0
     mins=0
     hours=0
-    num_rotations=0
     //
 
     while true
@@ -1033,7 +1023,7 @@ fn update_sprites()
         i += 4
     //
     //
-        // push timer sprites 
+        // push timer sprites // ToDo: remove this
         U hours_l=hours&15
         U hours_h=hours>>4
         set_oam_x(i, TIMER_XPOS) // x-position
@@ -1078,55 +1068,6 @@ fn update_sprites()
         set_oam_x(i, TIMER_XPOS+56) // x-position
         set_oam_y(i, TIMER_YPOS) // y-position
         set_oam_p(i, $F6+secs_l) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        //
-        // push num_rotations sprites
-        // take into account that timer sprites already take 8 per scanline
-        UU c1=((num_rotations>>12)&15)
-        UU c2=((num_rotations>>8)&15)
-        UU c3=((num_rotations>>4)&15)
-        UU c4=(num_rotations&15)
-        set_oam_x(i, ROTS_XPOS) // x-position
-        set_oam_y(i, ROTS_YPOS) // y-position
-        set_oam_p(i, $F6+c1.a) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        //
-        set_oam_x(i, ROTS_XPOS+8) // x-position
-        set_oam_y(i, ROTS_YPOS) // y-position
-        set_oam_p(i, $F6+c2.a) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        //
-        set_oam_x(i, ROTS_XPOS+16) // x-position
-        set_oam_y(i, ROTS_YPOS) // y-position
-        set_oam_p(i, $F6+c3.a) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        //
-        set_oam_x(i, ROTS_XPOS+24) // x-position
-        set_oam_y(i, ROTS_YPOS) // y-position
-        set_oam_p(i, $F6+c4.a) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        // ROT letters
-        //
-        set_oam_x(i, ROTS_XPOS+40) // x-position
-        set_oam_y(i, ROTS_YPOS) // y-position
-        set_oam_p(i, $ED) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        //
-        set_oam_x(i, ROTS_XPOS+48) // x-position
-        set_oam_y(i, ROTS_YPOS) // y-position
-        set_oam_p(i, $EA) // tile
-        set_oam_a(i, 0)  // pal+options
-        i += 4
-        //
-        set_oam_x(i, ROTS_XPOS+56) // x-position
-        set_oam_y(i, ROTS_YPOS) // y-position
-        set_oam_p(i, $EF) // tile
         set_oam_a(i, 0)  // pal+options
         i += 4
     //
@@ -1583,7 +1524,6 @@ fn attempt_to_rotate_curr_square (U direction)
         level_squares[square_selector-1].east=pivot
     //
     update_square(square_selector)
-    increment_numrots()
 
 // rotates the square without updating screen. Used to randomize level. sqr 1..9
 fn rot_sqr_inter(U sqr)
@@ -1797,6 +1737,12 @@ fn start_rot_anim()
 // updates the seconds, minutes, and hours passed since level start
 // each cipher is stored in a nible ej secs=55 -> secs=0x55
 fn update_time()
+/*    secs+=1
+    if (secs >= 60)
+        mins+=1
+    if (mins >= 60)
+        hours+=1
+*/
     Bool secs_overflow=increment_secs()
     if (secs_overflow)
         Bool mins_overflow=increment_mins()
@@ -1857,21 +1803,3 @@ fn increment_hours() Bool
         hours_l+=1
         hours=((hours_h << 4)|hours_l)
         return false
-
-// increment num_rotations in 1, like hours,mins,secs, each nibble contains a cipher
-fn increment_numrots()
-    UU c1=((num_rotations>>12)&15)
-    UU c2=((num_rotations>>8)&15)
-    UU c3=((num_rotations>>4)&15)
-    UU c4=(num_rotations&15)
-    c4+=1
-    if (c4>9)
-        c3+=1
-        c4=0
-        if (c3>9)
-            c2+=1
-            c3=0
-            if (c2>9)
-                c1+=1
-                c2=0
-    num_rotations=(c4|(c3<<4)|(c2<<8)|(c1<<12))
