@@ -35,9 +35,9 @@ ct U ANIM_DELAY=5 // num frame the rotation animation slows down
 ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
 
 ct U NUM_FRAMES_PER_SEC=60
-ct U TIMER_XPOS=96
+ct U TIMER_XPOS=30 //96 centered
 ct U TIMER_YPOS=220
-ct U ROTS_XPOS=96
+ct U ROTS_XPOS=160 //96 centered
 ct U ROTS_YPOS=230
 
 // we have from 2 to 9 squares in a level, all with 4 sides
