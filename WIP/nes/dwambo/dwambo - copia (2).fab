@@ -111,10 +111,10 @@ vars /game_vars
     U rotation_dir
 
     // timer variables, the time is stored one cipher in every nibble, to make it easier to display
-    U secs
-    U mins
-    U hours
-    UU num_rotations // again, each nibble holds a cipher, making it easier to display
+    U secs=0
+    U mins=0
+    U hours=0
+    UU num_rotations=0 // again, each nibble holds a cipher, making it easier to display
 
 ////////
 
@@ -350,34 +350,9 @@ mode see_through_scr()
         //
         nmi // Wait for the next NMI
     //
-    // jump to end screen if last level
     if (current_level>=7)
         goto mode end_scr() 
         : preserves
-    //
-    // wait until we press a button
-    Bool keep_looping=true
-    while (keep_looping)
-        update_pads()
-        if (pads[0].pressed & BUTTON_START)
-            keep_looping=false
-        if (pads[0].pressed & BUTTON_A)
-            keep_looping=false
-        if (pads[0].pressed & BUTTON_B)
-            keep_looping=false
-        //
-        // show stats
-        U i=0
-        i=push_timer_sprites(96, 110, 0, i) 
-        i=push_timer_sprites(96, 112, 2, i) 
-        i=push_rots_sprites(92, 130, 0, i)
-        i=push_rots_sprites(92, 132, 2, i)
-        i=push_stats_sprites(108, 80, 0, i)
-        i=push_stats_sprites(108, 82, 2, i)
-        hide_oam(i)
-        //
-        nmi // Wait for the next NMI
-    //
     // show second see through screen
     num_mt_written=0
     x=0
@@ -1014,8 +989,6 @@ fn move_player()
         redraw_all_sqrs()*/
     /*if (pads[0].held & BUTTON_START) // ToDo: remove this
         update_time()*/
-    /*if (pads[0].held & BUTTON_START) // ToDo: remove this
-        increment_numrots()*/
 
     if (pads[0].pressed & BUTTON_SELECT)
         cheat_curr_square()
@@ -1914,40 +1887,6 @@ fn push_rots_sprites(U xpos, U ypos, U palette, U i) U
     set_oam_y(i, ypos) // y-position
     set_oam_p(i, $EE) // tile
     set_oam_a(i, palette)  // pal+options
-    i += 4
-    //
-    return i
-
-fn push_stats_sprites(U xpos, U ypos, U palette, U i) U
-    //
-    set_oam_x(i, xpos) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EE) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+8) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EF) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+16) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $DC) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+24) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EF) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+32) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EE) // tile
-    set_oam_a(i, palette)  // options
     i += 4
     //
     return i
