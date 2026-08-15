@@ -153,8 +153,8 @@ mode main()
     for UU i=0; i<1024; i+=1
         {PPUDATA}(@start_screen_bytes{i})
     //
-    // Tell the NES to trigger NMI once per frame, and change the BG pattern table addr, since the start src uses the upper ones:
-    {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
+    // Tell the NES to trigger NMI once per frame, and change the BG and SPR pattern table addr, since the start src uses the upper ones:
+    {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000|PPUCTRL_SPR_PT_1000)
     //
     U spriterot=0
     U current_selection=0 // intro screen, which option is selected, 0 or 1
@@ -183,6 +183,25 @@ mode main()
         set_oam_p(i, sprnum) // tile
         set_oam_a(i, 0)  // options
         i+=4
+/*        // push the LOGO sprites
+        U logo_sprite_x=80
+        U logo_sprite_y=80
+        U ix=logo_sprite_x
+        U iy=logo_sprite_y
+        sprnum=$94
+        // ToDo: fix this, I can't show more than 8 sprites per scanline
+        for U ity=0; ity<4; ity+=1
+            for U it=0; it<12; it+=1
+                set_oam_x(i, ix) // x-position
+                set_oam_y(i, iy) // y-position
+                set_oam_p(i, sprnum+it) // tile
+                set_oam_a(i, 0)  // options
+                i += 4
+                ix += 8
+            sprnum+=16
+            ix=logo_sprite_x
+            iy+=8*/
+        //
         hide_oam(i)// Clear the remainder of OAM
         //
         if pads[0].pressed & BUTTON_START
