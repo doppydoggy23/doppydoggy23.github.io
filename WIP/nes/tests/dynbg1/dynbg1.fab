@@ -1,0 +1,278 @@
+
+mapfab(raw, "dynbg1.mapfab", "chr", "palette", "metatiles", "level")
+
+
+data /romdata
+    [] screen1
+        file(raw, "screen1.nam")
+    [] screen2
+        file(raw, "screen2.nam")
+    //U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)
+    /*[5] sprt_chr
+        U(0) 
+        U($94) 
+        U($98) 
+        U($9C) 
+        U(0)*/
+
+ct U NUM_FPS=60
+ct U NUM_FPS_WAIT=10
+
+vars /game_vars
+
+    // these vars contain the metatile map of the current level
+    U[16*15] level_mt_map // current screen map of metatiles in RAM
+    //pointer to the arrays of the 2x2 tiles (and attr) that make every metatile
+    CC/metatiles mt_nw
+    CC/metatiles mt_ne
+    CC/metatiles mt_sw
+    CC/metatiles mt_se
+    CC/metatiles mt_attr
+    //
+
+    U curr_frames=0
+    Bool second_bank=false
+
+
+////////
+
+// entrance point NMI
+nmi main_nmi()
+    // Update OAM and poll the pads:
+    ppu_upload_oam_poll_pads(0)
+    // Turn on rendering:
+    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+    // Reset the scroll
+    ppu_reset_scroll(0, 0)
+    //
+    curr_frames+=1
+    if (curr_frames>=NUM_FPS_WAIT)
+        curr_frames=0
+        if (second_bank)
+            {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
+            second_bank=false
+        else
+            {PPUCTRL}(PPUCTRL_NMI_ON)
+            second_bank=true
+
+
+// entrance point function
+mode main()
+: nmi main_nmi
+    //
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten. //ToDo: make it load palette only?
+    //
+    // load start screen made in NEXXT whose data is in ROM start screen uses the upper 256 set of chr
+    ppu_reset_addr($2000)
+    for UU i=0; i<1024; i+=1
+        {PPUDATA}(@screen1{i})
+    //
+    // Tell the NES to trigger NMI once per frame, and change the BG pattern table addr, since the start src uses the upper ones:
+    //{PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
+    curr_frames=0
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+    //
+    while true
+        update_pads()
+        move_player()
+        update_sprites() 
+        //
+        nmi // Wait for the next NMI
+    //
+
+
+//////////
+
+fn move_player()
+
+/*    if (pads[0].pressed & BUTTON_LEFT)
+        attempt_to_move_selector_left()
+    if (pads[0].pressed & BUTTON_RIGHT)
+        attempt_to_move_selector_right()
+    if (pads[0].pressed & BUTTON_UP)
+        attempt_to_move_selector_up()
+    if (pads[0].pressed & BUTTON_DOWN)
+        attempt_to_move_selector_down()
+*/
+    if (pads[0].pressed & BUTTON_A)
+        {PPUCTRL}(0)  // Reset PPU control register for new level
+        {PPUMASK}(0) // Reset PPU mask register for new level
+        ppu_reset_addr($2000)
+        for UU i=0; i<1024; i+=1
+            {PPUDATA}(@screen1{i})
+        curr_frames=0
+        {PPUCTRL}(PPUCTRL_NMI_ON)
+    if (pads[0].pressed & BUTTON_B)
+        {PPUCTRL}(0)  // Reset PPU control register for new level
+        {PPUMASK}(0) // Reset PPU mask register for new level
+        ppu_reset_addr($2000)
+        for UU i=0; i<1024; i+=1
+            {PPUDATA}(@screen2{i})
+        curr_frames=0
+        {PPUCTRL}(PPUCTRL_NMI_ON)
+
+    /*if (pads[0].pressed & BUTTON_START) // ToDo: remove this
+        randomize_lvl()
+        redraw_all_sqrs()*/
+    /*if (pads[0].held & BUTTON_START) // ToDo: remove this
+        update_time()*/
+    /*if (pads[0].held & BUTTON_START) // ToDo: remove this
+        increment_numrots()*/
+
+fn update_sprites()
+    U i=0
+    /*set_oam_x(i, ix) // x-position
+    set_oam_y(i, iy) // y-position
+    set_oam_p(i, sprnum+it) // tile
+    set_oam_a(i, 0)  // options
+    i += 4*/
+    hide_oam(i)
+
+/*
+Loads a 16x15 metatiles screen made with MapFab. 
+Its only argument is a pointer to the levels struct 
+made with the macros included in the earlier mapfab()
+*/
+fn load_screen(CCC/levels my_lvl_pointer)
+    U chr_bank = read U(my_lvl_pointer)
+    CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
+    CC/metatiles mymetatiles=read CC/metatiles(my_lvl_pointer)
+    UU size = UU(read U(my_lvl_pointer)) // width in metatiles of screen
+    //after all these reads, now my_lvl_pointer points to the metatiles matrix
+
+    // set palette
+    load_palette(pal)
+    ppu_upload_palette()
+       
+    UU mt_size = UU(read U(mymetatiles)) // number of metatiles
+    if mt_size == 0
+        mt_size = 256
+    //after this read now mymetatiles points to the 
+    // metatiles struct made with the metatiles.macrofab in the mapfab ()
+    
+    mt_nw=mymetatiles
+    mt_ne=mt_nw
+    mt_ne+=mt_size
+    mt_sw=mt_ne
+    mt_sw+=mt_size
+    mt_se=mt_sw
+    mt_se+=mt_size
+    mt_attr=mt_se
+    mt_attr+=mt_size
+    // now every pointer points where it should
+
+    UU i=0
+    ppu_reset_addr($2000)
+    
+    // upload namespace data
+    for U y=0; y<15; y+=1
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U nw_tile=mt_nw[my_metatile]
+            U ne_tile=mt_ne[my_metatile]
+            {PPUDATA}(nw_tile)
+            {PPUDATA}(ne_tile)
+            i+=1
+        i=i-16
+        for U x=0; x<16; x+=1
+            U my_metatile=my_lvl_pointer{i}
+            U sw_tile=mt_sw[my_metatile]
+            U se_tile=mt_se[my_metatile]
+            {PPUDATA}(sw_tile)
+            {PPUDATA}(se_tile)
+            i+=1
+
+    //upload attributes data, we need to OR it together
+    //for every 2x2 metatiles block (https://www.nesdev.org/wiki/PPU_attribute_tables)
+    i=0
+    for U y=0; y<15; y+=2
+        for U x=0; x<16; x+=2
+            U my_metatile=my_lvl_pointer{i}
+            U my_attr=mt_attr[my_metatile]
+            //
+            my_metatile=my_lvl_pointer{i+1}
+            my_attr|=(mt_attr[my_metatile]<<2)
+            //
+            my_metatile=my_lvl_pointer{i+16}
+            my_attr|=(mt_attr[my_metatile]<<4)
+            //
+            my_metatile=my_lvl_pointer{i+17}
+            my_attr|=(mt_attr[my_metatile]<<6)
+            i+=2
+            {PPUDATA}(my_attr)
+        i+=16
+            
+    // copy the level metatiles map to RAM
+    for UU iv=0; iv<(16*15); iv+=1
+        level_mt_map{iv}=my_lvl_pointer{iv}
+
+fn load_palette_from(CCC/levels my_lvl_pointer)
+    U chr_bank = read U(my_lvl_pointer)
+    CCC/palettes pal=read CCC/palettes(my_lvl_pointer)
+    // set palette
+    load_palette(pal)
+    ppu_upload_palette()
+
+
+/*
+returns the map metatile at screen pixel position (px, py)
+*/
+fn get_metatile_at_pix (U px, U py) U
+    UU lvlmtm=(((py>>4)<<4)+(px>>4))
+    U t=level_mt_map{lvlmtm}
+    return t
+/*
+
+returns the map metatile at screen column/row
+*/
+fn get_metatile_at_col_row (U col, U row) U
+    UU disp=(row<<4)+col
+    return level_mt_map{disp}
+
+/*
+Sets the row,col metatile to a new value.
+This is done in the level_mt_map variable which is in ram
+and to the PPU GFX RAM too.
+Notice that x,y are UU values, if defined as U, 
+the math here for bit shifting wouldn't work
+*/
+fn set_metatile_at_colrow (UU x, UU y, U new_mt)
+    // write to the ram metatiles map
+    UU map_displacement=((y<<4)+x)
+    level_mt_map{map_displacement}=new_mt
+
+    // change that metatile position in GFX RAM
+    // first the tiles
+    UU gfx_addr=((y<<6)+(x<<1))
+    gfx_addr+=$2000
+    ppu_reset_addr(gfx_addr)    
+    {PPUDATA}( mt_nw[new_mt] )
+    {PPUDATA}( mt_ne[new_mt] )
+    gfx_addr+=32
+    ppu_reset_addr(gfx_addr)    
+    {PPUDATA}( mt_sw[new_mt] )
+    {PPUDATA}( mt_se[new_mt] )
+
+    //calculate the new 2x2 metatiles block attributes byte
+    UU mt_m_disp=(((y & %11111110) <<4)+(x & %11111110))
+    U mt_2x2_pos=U(((y&1)<<1)|(x & 1))
+    //
+    U my_metatile=level_mt_map{mt_m_disp}
+    U new_attr=mt_attr[my_metatile]
+    //
+    my_metatile=level_mt_map{mt_m_disp+1}
+    new_attr|=(mt_attr[my_metatile]<<2)
+    //
+    my_metatile=level_mt_map{mt_m_disp+16}
+    new_attr|=(mt_attr[my_metatile]<<4)
+    //
+    my_metatile=level_mt_map{mt_m_disp+17}
+    new_attr|=(mt_attr[my_metatile]<<6)
+    //
+
+    //now access the attributes(palettes) address
+    UU attr_addr_disp=(((y>>1)<<3)+(x>>1))
+    ppu_reset_addr($2000+960+attr_addr_disp)
+    {PPUDATA}(new_attr)
