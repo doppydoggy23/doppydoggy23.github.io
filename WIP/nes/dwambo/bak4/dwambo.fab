@@ -993,9 +993,6 @@ fn move_player()
     if during_animation
         return
 
-    if (num_ppuops_in_queue > 0) // do nothing if there are pending PPU ops. Otherwise there will be tile corruption.
-        return
-
     if (pads[0].pressed & BUTTON_LEFT)
         attempt_to_move_selector_left()
     if (pads[0].pressed & BUTTON_RIGHT)

@@ -35,10 +35,10 @@ ct U ANIM_DELAY=5 // num frame the rotation animation slows down
 ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
 
 ct U NUM_FRAMES_PER_SEC=60
-ct U TIMER_XPOS=24 //96 centered
+ct U TIMER_XPOS=30 //96 centered
 ct U TIMER_YPOS=220
 ct U ROTS_XPOS=160 //96 centered
-ct U ROTS_YPOS=229
+ct U ROTS_YPOS=230
 
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
@@ -111,10 +111,10 @@ vars /game_vars
     U rotation_dir
 
     // timer variables, the time is stored one cipher in every nibble, to make it easier to display
-    U secs
-    U mins
-    U hours
-    UU num_rotations // again, each nibble holds a cipher, making it easier to display
+    U secs=0
+    U mins=0
+    U hours=0
+    UU num_rotations=0 // again, each nibble holds a cipher, making it easier to display
 
 ////////
 
@@ -350,34 +350,9 @@ mode see_through_scr()
         //
         nmi // Wait for the next NMI
     //
-    // jump to end screen if last level
     if (current_level>=7)
         goto mode end_scr() 
         : preserves
-    //
-    // wait until we press a button
-    Bool keep_looping=true
-    while (keep_looping)
-        update_pads()
-        if (pads[0].pressed & BUTTON_START)
-            keep_looping=false
-        if (pads[0].pressed & BUTTON_A)
-            keep_looping=false
-        if (pads[0].pressed & BUTTON_B)
-            keep_looping=false
-        //
-        // show stats
-        U i=0
-        i=push_timer_sprites(96, 110, 0, i) 
-        i=push_timer_sprites(96, 112, 2, i) 
-        i=push_rots_sprites(92, 130, 0, i)
-        i=push_rots_sprites(92, 132, 2, i)
-        i=push_stats_sprites(108, 80, 0, i)
-        i=push_stats_sprites(108, 82, 2, i)
-        hide_oam(i)
-        //
-        nmi // Wait for the next NMI
-    //
     // show second see through screen
     num_mt_written=0
     x=0
@@ -993,9 +968,6 @@ fn move_player()
     if during_animation
         return
 
-    if (num_ppuops_in_queue > 0) // do nothing if there are pending PPU ops. Otherwise there will be tile corruption.
-        return
-
     if (pads[0].pressed & BUTTON_LEFT)
         attempt_to_move_selector_left()
     if (pads[0].pressed & BUTTON_RIGHT)
@@ -1017,8 +989,6 @@ fn move_player()
         redraw_all_sqrs()*/
     /*if (pads[0].held & BUTTON_START) // ToDo: remove this
         update_time()*/
-    /*if (pads[0].held & BUTTON_START) // ToDo: remove this
-        increment_numrots()*/
 
     if (pads[0].pressed & BUTTON_SELECT)
         cheat_curr_square()
@@ -1061,11 +1031,105 @@ fn update_sprites()
         set_oam_p(i, $DD) // tile
         set_oam_a(i, 1)  // pal+options
         i += 4
+    //
+    //
+        // push timer sprites 
+        U hours_l=hours&15
+        U hours_h=hours>>4
+        set_oam_x(i, TIMER_XPOS) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+hours_h) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+8) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+hours_l) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+16) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $DB) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        U mins_l=mins&15
+        U mins_h=mins>>4
+        set_oam_x(i, TIMER_XPOS+24) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+mins_h) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+32) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+mins_l) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+40) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $DB) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        U secs_l=secs&15
+        U secs_h=secs>>4
+        set_oam_x(i, TIMER_XPOS+48) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+secs_h) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        set_oam_x(i, TIMER_XPOS+56) // x-position
+        set_oam_y(i, TIMER_YPOS) // y-position
+        set_oam_p(i, $F6+secs_l) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
         //
-        i=push_timer_sprites(TIMER_XPOS, TIMER_YPOS, 0, i)
-        i=push_timer_sprites(TIMER_XPOS, TIMER_YPOS+2, 2, i)
-        i=push_rots_sprites(ROTS_XPOS, ROTS_YPOS, 0, i)
-        i=push_rots_sprites(ROTS_XPOS, ROTS_YPOS+2, 2, i)
+        // push num_rotations sprites
+        // take into account that timer sprites already take 8 per scanline
+        UU c1=((num_rotations>>12)&15)
+        UU c2=((num_rotations>>8)&15)
+        UU c3=((num_rotations>>4)&15)
+        UU c4=(num_rotations&15)
+        set_oam_x(i, ROTS_XPOS) // x-position
+        set_oam_y(i, ROTS_YPOS) // y-position
+        set_oam_p(i, $F6+c1.a) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        //
+        set_oam_x(i, ROTS_XPOS+8) // x-position
+        set_oam_y(i, ROTS_YPOS) // y-position
+        set_oam_p(i, $F6+c2.a) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        //
+        set_oam_x(i, ROTS_XPOS+16) // x-position
+        set_oam_y(i, ROTS_YPOS) // y-position
+        set_oam_p(i, $F6+c3.a) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        //
+        set_oam_x(i, ROTS_XPOS+24) // x-position
+        set_oam_y(i, ROTS_YPOS) // y-position
+        set_oam_p(i, $F6+c4.a) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        // ROT letters
+        //
+        set_oam_x(i, ROTS_XPOS+40) // x-position
+        set_oam_y(i, ROTS_YPOS) // y-position
+        set_oam_p(i, $ED) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        //
+        set_oam_x(i, ROTS_XPOS+48) // x-position
+        set_oam_y(i, ROTS_YPOS) // y-position
+        set_oam_p(i, $EA) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+        //
+        set_oam_x(i, ROTS_XPOS+56) // x-position
+        set_oam_y(i, ROTS_YPOS) // y-position
+        set_oam_p(i, $EF) // tile
+        set_oam_a(i, 0)  // pal+options
+        i += 4
+    //
 
     //
     if during_animation
@@ -1811,146 +1875,3 @@ fn increment_numrots()
                 c1+=1
                 c2=0
     num_rotations=(c4|(c3<<4)|(c2<<8)|(c1<<12))
-
-// pushes timer sprites into the position given, returns the number of oam positions taken
-fn push_timer_sprites(U xpos, U ypos, U mypalette, U i) U
-    // push timer sprites 
-    U hours_l=hours&15
-    U hours_h=hours>>4
-    set_oam_x(i, xpos) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+hours_h) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    set_oam_x(i, xpos+8) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+hours_l) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    set_oam_x(i, xpos+16) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $DB) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    U mins_l=mins&15
-    U mins_h=mins>>4
-    set_oam_x(i, xpos+24) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+mins_h) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    set_oam_x(i, xpos+32) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+mins_l) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    set_oam_x(i, xpos+40) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $DB) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    U secs_l=secs&15
-    U secs_h=secs>>4
-    set_oam_x(i, xpos+48) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+secs_h) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    set_oam_x(i, xpos+56) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+secs_l) // tile
-    set_oam_a(i, mypalette)  // pal+options
-    i += 4
-    //
-    return i
-
-fn push_rots_sprites(U xpos, U ypos, U palette, U i) U
-    // push num_rotations sprites
-    // take into account that timer sprites already take 8 per scanline
-    UU c1=((num_rotations>>12)&15)
-    UU c2=((num_rotations>>8)&15)
-    UU c3=((num_rotations>>4)&15)
-    UU c4=(num_rotations&15)
-    set_oam_x(i, xpos) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+c1.a) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    //
-    set_oam_x(i, xpos+8) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+c2.a) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    //
-    set_oam_x(i, xpos+16) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+c3.a) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    //
-    set_oam_x(i, xpos+24) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $F6+c4.a) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    // ROTS letters
-    //
-    set_oam_x(i, xpos+40) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $ED) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    //
-    set_oam_x(i, xpos+48) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $EA) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    //
-    set_oam_x(i, xpos+56) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $EF) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    set_oam_x(i, xpos+64) // x-position
-    set_oam_y(i, ypos) // y-position
-    set_oam_p(i, $EE) // tile
-    set_oam_a(i, palette)  // pal+options
-    i += 4
-    //
-    return i
-
-fn push_stats_sprites(U xpos, U ypos, U palette, U i) U
-    //
-    set_oam_x(i, xpos) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EE) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+8) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EF) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+16) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $DC) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+24) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EF) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    set_oam_x(i, xpos+32) // North row1
-    set_oam_y(i, ypos) // 
-    set_oam_p(i, $EE) // tile
-    set_oam_a(i, palette)  // options
-    i += 4
-    //
-    return i
