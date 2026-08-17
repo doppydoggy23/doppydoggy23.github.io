@@ -7,7 +7,7 @@ audio(puf1_sfx) // needed to play songs.txt, even if not used
 
 data /romdata
     [] start_screen_bytes
-        file(raw, "startscr2.nam")
+        file(raw, "startscr.nam")
     [] help_screen_bytes
         file(raw, "helpscr.nam")
     [] end_screen_bytes
@@ -156,19 +156,51 @@ mode main()
     // Tell the NES to trigger NMI once per frame, and change the BG and SPR pattern table addr, since the start src uses the upper ones:
     {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000|PPUCTRL_SPR_PT_1000)
     //
-    U current_selection=0
+    U spriterot=0
+    U current_selection=0 // intro screen, which option is selected, 0 or 1
     //
     while true
         update_pads()
         //
         // update shown sprites
         U i=0
-        i=push_letter_in_block ($90, 115, 10, 0, i) // D
-        i=push_letter_in_block ($93, 135, 40, 1, i) // W
-        i=push_letter_in_block ($96, 135, 70, 2, i) // A
-        i=push_letter_in_block ($99, 115, 100, 0, i) // M
-        i=push_letter_in_block ($9C, 95, 70, 1, i) // B
-        i=push_letter_in_line ($C0, 95, 40, 2, i) // O
+        U sprnum
+        U spritex=88
+        U spritey=176
+        //
+        if (current_selection>0)
+            spritey+=16
+        sprnum=72+((spriterot>>2) & 7)
+        spriterot+=1
+        //
+        set_oam_x(i, spritex) // x-position
+        set_oam_y(i, spritey) // y-position
+        set_oam_p(i, sprnum) // tile
+        set_oam_a(i, 0)  // options
+        i+=4
+        set_oam_x(i, spritex+88) // x-position
+        set_oam_y(i, spritey) // y-position
+        set_oam_p(i, sprnum) // tile
+        set_oam_a(i, 0)  // options
+        i+=4
+/*        // push the LOGO sprites
+        U logo_sprite_x=80
+        U logo_sprite_y=80
+        U ix=logo_sprite_x
+        U iy=logo_sprite_y
+        sprnum=$94
+        // ToDo: fix this, I can't show more than 8 sprites per scanline
+        for U ity=0; ity<4; ity+=1
+            for U it=0; it<12; it+=1
+                set_oam_x(i, ix) // x-position
+                set_oam_y(i, iy) // y-position
+                set_oam_p(i, sprnum+it) // tile
+                set_oam_a(i, 0)  // options
+                i += 4
+                ix += 8
+            sprnum+=16
+            ix=logo_sprite_x
+            iy+=8*/
         //
         hide_oam(i)// Clear the remainder of OAM
         //
@@ -1940,48 +1972,4 @@ fn push_stats_sprites(U xpos, U ypos, U palette, U i) U
     set_oam_a(i, palette)  // options
     i += 4
     //
-    return i
-
-// pushes the sprites of a letter DWAMBO. Sprite in a block
-fn push_letter_in_block(U sprstart, U xpos, U ypos, U pal, U sprindex) U
-    U letter_x=xpos
-    U letter_y=ypos
-    U ix=letter_x
-    U iy=letter_y
-    U sprnum=sprstart
-    U i=sprindex
-    //
-    for U ity=0; ity<3; ity+=1
-        for U it=0; it<3; it+=1
-            set_oam_x(i, ix) // x-position
-            set_oam_y(i, iy) // y-position
-            set_oam_p(i, sprnum+it) // tile
-            set_oam_a(i, pal)  // options
-            i += 4
-            ix += 8
-        sprnum+=16
-        ix=letter_x
-        iy+=8
-    return i
-
-// pushes the sprites of a letter DWAMBO. Sprite in a line
-fn push_letter_in_line(U sprstart, U xpos, U ypos, U pal, U sprindex) U
-    U letter_x=xpos
-    U letter_y=ypos
-    U ix=letter_x
-    U iy=letter_y
-    U sprnum=sprstart
-    U i=sprindex
-    //
-    for U ity=0; ity<3; ity+=1
-        for U it=0; it<3; it+=1
-            set_oam_x(i, ix) // x-position
-            set_oam_y(i, iy) // y-position
-            set_oam_p(i, sprnum) // tile
-            set_oam_a(i, pal)  // options
-            i += 4
-            ix += 8
-            sprnum+=1
-        ix=letter_x
-        iy+=8
     return i
