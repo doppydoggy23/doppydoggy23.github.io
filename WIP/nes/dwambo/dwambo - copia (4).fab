@@ -157,64 +157,18 @@ mode main()
     {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000|PPUCTRL_SPR_PT_1000)
     //
     U current_selection=0
-    U[6] angles= U[6](0, 42, 84, 126, 168, 210) // 0..2*PI = 0..256
     //
     while true
         update_pads()
         //
         // update shown sprites
         U i=0
-/*        i=push_letter_in_block ($90, 115, 10, 0, i) // D
+        i=push_letter_in_block ($90, 115, 10, 0, i) // D
         i=push_letter_in_block ($93, 135, 40, 1, i) // W
         i=push_letter_in_block ($96, 135, 70, 2, i) // A
         i=push_letter_in_block ($99, 115, 100, 0, i) // M
         i=push_letter_in_block ($9C, 95, 70, 1, i) // B
-        i=push_letter_in_line ($C0, 95, 40, 2, i) // O*/
-        ct SF RADIUS=50.0
-        ct U XCENTER=128-12
-        ct U YCENTER=60
-        U xpos
-        U ypos
-        /*U xpos=U (100+(cos(angles[0])*15)) // center+(cos(angle)*radius)
-        U ypos=U (50+(sin(angles[0])*15))*/
-        xpos=XCENTER
-        ypos=YCENTER
-        xpos+=S (cos(angles[0])*RADIUS) // center+(cos(angle)*radius)
-        ypos+=S (sin(angles[0])*RADIUS)
-        i=push_letter_in_block ($90, xpos, ypos, 0, i) // D
-        //
-        xpos=XCENTER
-        ypos=YCENTER
-        xpos+=S (cos(angles[1])*RADIUS) // center+(cos(angle)*radius)
-        ypos+=S (sin(angles[1])*RADIUS)
-        i=push_letter_in_block ($93, xpos, ypos, 1, i) // W
-        //
-        xpos=XCENTER
-        ypos=YCENTER
-        xpos+=S (cos(angles[2])*RADIUS) // center+(cos(angle)*radius)
-        ypos+=S (sin(angles[2])*RADIUS)
-        i=push_letter_in_block ($96, xpos, ypos, 2, i) // A
-        //
-        xpos=XCENTER
-        ypos=YCENTER
-        xpos+=S (cos(angles[3])*RADIUS) // center+(cos(angle)*radius)
-        ypos+=S (sin(angles[3])*RADIUS)
-        i=push_letter_in_block ($99, xpos, ypos, 0, i) // M
-        //
-        xpos=XCENTER
-        ypos=YCENTER
-        xpos+=S (cos(angles[4])*RADIUS) // center+(cos(angle)*radius)
-        ypos+=S (sin(angles[4])*RADIUS)
-        i=push_letter_in_block ($9C, xpos, ypos, 1, i) // B
-        //
-        xpos=XCENTER
-        ypos=YCENTER
-        xpos+=S (cos(angles[5])*RADIUS) // center+(cos(angle)*radius)
-        ypos+=S (sin(angles[5])*RADIUS)
-        i=push_letter_in_line ($C0, xpos, ypos, 2, i) // O
-        //
-        for U n=0; n<6; n+=1 // make letters rotate
-            angles[n]+=1
+        i=push_letter_in_line ($C0, 95, 40, 2, i) // O
         //
         hide_oam(i)// Clear the remainder of OAM
         //
