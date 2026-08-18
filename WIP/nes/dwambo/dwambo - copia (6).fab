@@ -49,7 +49,6 @@ struct Square
     U west
 
 ct U MAX_PPUOPS_PENDING = 80 // max number of queued PPU OPerations
-ct U INTRO_BG_SCRL_SLWD = 4 // slow down of BG scrolling in the intro screen
 
 vars /game_vars
 
@@ -117,9 +116,6 @@ vars /game_vars
     U hours
     UU num_rotations // again, each nibble holds a cipher, making it easier to display
 
-    U scroll_x
-    U scroll_y
-
 ////////
 
 // entrance point NMI
@@ -129,7 +125,7 @@ nmi main_nmi()
     // Turn on rendering:
     {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
     // Reset the scroll
-    ppu_reset_scroll(scroll_x, scroll_y)
+    ppu_reset_scroll(0, 0)
     //
     rnd_tmp+=1 // change the xor rng seed
     if (rnd_tmp==0) // if the xor rng seed is 0, the result always is 0
@@ -148,17 +144,12 @@ mode main()
     //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
-    //hide_oam(0)// Clear OAM to start fresh
+    hide_oam(0)// Clear OAM to start fresh
     load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten. //ToDo: make it load palette only?
     preload_screens(@lev_dwambo, @lev_level5) // preloads the DWAMBO screen and the next level into its matching variables in RAM
     //
-    scroll_x=0
-    scroll_y=0
     // load start screen made in NEXXT whose data is in ROM start screen uses the upper 256 set of chr
     ppu_reset_addr($2000)
-    for UU i=0; i<1024; i+=1
-        {PPUDATA}(@start_screen_bytes{i})
-    ppu_reset_addr($2400)
     for UU i=0; i<1024; i+=1
         {PPUDATA}(@start_screen_bytes{i})
     //
@@ -168,7 +159,6 @@ mode main()
     U current_selection=0
     U[6] angles= U[6](0, 42, 84, 126, 168, 210) // 0..2*PI = 0..256
     U d_let_shift=0
-    U bg_slow_down=0
     //
     while true
         update_pads()
@@ -245,16 +235,7 @@ mode main()
             current_selection=0
         if (pads[0].pressed & BUTTON_DOWN)
             current_selection=1
-        //
-        if (bg_slow_down >= INTRO_BG_SCRL_SLWD) // slow down bg movement
-            scroll_x+=1
-            scroll_y+=1
-            bg_slow_down=0
-        else
-            bg_slow_down+=1
-        //
-        if (scroll_y>=240)
-            scroll_y=0
+
         nmi // Wait for the next NMI
     //
 
