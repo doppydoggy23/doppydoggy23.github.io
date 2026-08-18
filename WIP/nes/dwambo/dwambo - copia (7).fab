@@ -7,7 +7,7 @@ audio(puf1_sfx) // needed to play songs.txt, even if not used
 
 data /romdata
     [] start_screen_bytes
-        file(raw, "startscr3.nam")
+        file(raw, "startscr2.nam")
     [] help_screen_bytes
         file(raw, "helpscr.nam")
     [] end_screen_bytes
