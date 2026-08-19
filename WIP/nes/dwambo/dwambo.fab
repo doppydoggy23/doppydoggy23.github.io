@@ -366,6 +366,9 @@ nmi play_level_nmi()
     if ( (frame_counter >= BG_ANIM_DELAY) && chr_change)
         frame_counter=0
         ppu_bg_1000^=PPUCTRL_BG_PT_1000
+        fence
+        {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
+        fence
         {PPUCTRL}(PPUCTRL_NMI_ON|ppu_bg_1000)
     //
     puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
