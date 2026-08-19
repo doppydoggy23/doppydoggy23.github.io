@@ -8,8 +8,6 @@ audio(puf1_sfx) // needed to play songs.txt, even if not used
 data /romdata
     [] start_screen_bytes
         file(raw, "startscr4.nam")
-    [] start_screenb_bytes
-        file(raw, "startscr4b.nam")
     [] help_screen_bytes
         file(raw, "helpscr.nam")
     [] end_screen_bytes
@@ -160,9 +158,9 @@ mode main()
     ppu_reset_addr($2000)
     for UU i=0; i<1024; i+=1
         {PPUDATA}(@start_screen_bytes{i})
-    ppu_reset_addr($2800)
+    ppu_reset_addr($2400)
     for UU i=0; i<1024; i+=1
-        {PPUDATA}(@start_screenb_bytes{i})
+        {PPUDATA}(@start_screen_bytes{i})
     //
     // Tell the NES to trigger NMI once per frame, and change the BG and SPR pattern table addr, since the start src uses the upper ones:
     {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000|PPUCTRL_SPR_PT_1000)
@@ -250,13 +248,12 @@ mode main()
         //
         if (bg_slow_down >= INTRO_BG_SCRL_SLWD) // slow down bg movement
             scroll_x+=1
-            scroll_y+=1
             bg_slow_down=0
         else
             bg_slow_down+=1
         //
-        if (scroll_y>=224)
-            scroll_y=0
+/*        if (scroll_y>=240)
+            scroll_y=0*/
         nmi // Wait for the next NMI
     //
 
