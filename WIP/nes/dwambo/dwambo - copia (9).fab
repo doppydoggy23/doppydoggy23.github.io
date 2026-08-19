@@ -42,8 +42,6 @@ ct U TIMER_YPOS=220
 ct U ROTS_XPOS=160 //96 centered
 ct U ROTS_YPOS=229
 
-ct U BG_ANIM_DELAY=60 // number of frames to wait until BG set swap
-
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
     Bool active // it might be that not all squares are active in a level
@@ -123,11 +121,6 @@ vars /game_vars
 
     U scroll_x
     U scroll_y
-
-    // vars for CHR Set change in BG (Dynamic BG)
-    U frame_counter=0
-    U ppu_bg_1000=0
-    Bool chr_change=true
 
 ////////
 
@@ -361,12 +354,6 @@ nmi play_level_nmi()
     {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
     // Reset the scroll
     ppu_reset_scroll(0, 0)
-    //control CHR set switching for BG animation
-    frame_counter+=1
-    if ( (frame_counter >= BG_ANIM_DELAY) && chr_change)
-        frame_counter=0
-        ppu_bg_1000^=PPUCTRL_BG_PT_1000
-        {PPUCTRL}(PPUCTRL_NMI_ON|ppu_bg_1000)
     //
     puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
 
@@ -374,7 +361,6 @@ nmi play_level_nmi()
 mode see_through_scr()
 : nmi play_level_nmi
     //
-    chr_change=false
     {PPUCTRL}(PPUCTRL_NMI_ON)
     //
     // show first see through screen
@@ -478,7 +464,6 @@ mode level1()
 : nmi play_level_nmi
     // init vars
     current_level=1
-    chr_change=true
     //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
@@ -551,7 +536,6 @@ mode level2()
 : nmi play_level_nmi
     // init vars
     current_level=2
-    chr_change=true
     //
     
     // prepare the level squares values
@@ -621,7 +605,6 @@ mode level3()
 : nmi play_level_nmi
     // init vars
     current_level=3
-    chr_change=true
     //
     
     // prepare the level squares values
@@ -695,7 +678,6 @@ mode level4()
 : nmi play_level_nmi
     // init vars
     current_level=4
-    chr_change=true
     //
     
     // prepare the level squares values
@@ -777,7 +759,6 @@ mode level5()
 : nmi play_level_nmi
     // init vars
     current_level=5
-    chr_change=true
     //
     
     // prepare the level squares values
@@ -867,7 +848,6 @@ mode level6()
 : nmi play_level_nmi
     // init vars
     current_level=6
-    chr_change=true
     //
     
     // prepare the level squares values
@@ -957,7 +937,6 @@ mode level7()
 : nmi play_level_nmi
     // init vars
     current_level=7
-    chr_change=true
     //
     
     // prepare the level squares values
