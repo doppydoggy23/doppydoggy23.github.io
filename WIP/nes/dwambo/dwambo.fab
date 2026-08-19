@@ -232,6 +232,8 @@ mode main()
             i=push_start_sprites(108, 190, 3, i, d_let_shift, false)
             i=push_help_sprites(112, 205, 3, i, d_let_shift, true)
         //
+        hide_oam(i) // there is one sprite left
+        //
         d_let_shift+=1
         //
         //hide_oam(i)// Clear the remainder of OAM
