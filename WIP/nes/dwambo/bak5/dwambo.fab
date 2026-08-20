@@ -14,8 +14,6 @@ data /romdata
         file(raw, "helpscr.nam")
     [] end_screen_bytes
         file(raw, "endscr.nam")
-    [] lower_screen_bytes
-        file(raw, "lowerscr.nam")
     //U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)
     /*[5] sprt_chr
         U(0) 
@@ -44,7 +42,7 @@ ct U TIMER_YPOS=220
 ct U ROTS_XPOS=160 //96 centered
 ct U ROTS_YPOS=229
 
-ct U BG_ANIM_DELAY=10 // number of frames to wait until BG set swap
+ct U BG_ANIM_DELAY=60 // number of frames to wait until BG set swap
 
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
@@ -126,10 +124,10 @@ vars /game_vars
     U scroll_x
     U scroll_y
 
-    // vars for Dynamic Background
-    U curr_frames=0 // accounts the frames left for the next animation
-    U ppu_ctrl_b=0 // byte that goes to PPUCTRL
-    U dyn_bg_frame=0 // 4 animation frames
+    // vars for CHR Set change in BG (Dynamic BG)
+    U frame_counter=0
+    U ppu_bg_1000=0
+    Bool chr_change=true
 
 ////////
 
@@ -363,11 +361,15 @@ nmi play_level_nmi()
     {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
     // Reset the scroll
     ppu_reset_scroll(0, 0)
-    //
-    fence
-    {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
-    fence
-    {PPUCTRL}(PPUCTRL_NMI_ON|ppu_ctrl_b)
+    //control CHR set switching for BG animation
+    frame_counter+=1
+    if ( (frame_counter >= BG_ANIM_DELAY) && chr_change)
+        frame_counter=0
+        ppu_bg_1000^=PPUCTRL_BG_PT_1000
+        fence
+        {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
+        fence
+        {PPUCTRL}(PPUCTRL_NMI_ON|ppu_bg_1000)
     //
     puf.process(PUF_DEFAULT) // process sound, puf.process(PUF_LOOP) doesn't work?
 
@@ -375,6 +377,7 @@ nmi play_level_nmi()
 mode see_through_scr()
 : nmi play_level_nmi
     //
+    chr_change=false
     {PPUCTRL}(PPUCTRL_NMI_ON)
     //
     // show first see through screen
@@ -478,15 +481,12 @@ mode level1()
 : nmi play_level_nmi
     // init vars
     current_level=1
+    chr_change=true
     //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
     hide_oam(0)// Clear OAM to start fresh
     load_screen(@lev_level5) // this is necessary because we want the palette
-    //
-    ppu_reset_addr($2800)
-    for UU i=0; i<1024; i+=1
-        {PPUDATA}(@lower_screen_bytes{i})
     // Tell the NES to trigger NMI once per frame:
     {PPUCTRL}(PPUCTRL_NMI_ON)
     //
@@ -547,7 +547,6 @@ mode level1()
             frame_counter=0
             update_time() // updates the seconds, minutes, and hours passed since level start
         //
-        manage_dyn_bg()
         nmi // Wait for the next NMI
     //
 
@@ -555,6 +554,7 @@ mode level2()
 : nmi play_level_nmi
     // init vars
     current_level=2
+    chr_change=true
     //
     
     // prepare the level squares values
@@ -617,7 +617,6 @@ mode level2()
             frame_counter=0
             update_time() // updates the seconds, minutes, and hours passed since level start
         //
-        manage_dyn_bg()
         nmi // Wait for the next NMI
     //
 
@@ -625,6 +624,7 @@ mode level3()
 : nmi play_level_nmi
     // init vars
     current_level=3
+    chr_change=true
     //
     
     // prepare the level squares values
@@ -691,7 +691,6 @@ mode level3()
             frame_counter=0
             update_time() // updates the seconds, minutes, and hours passed since level start
         //
-        manage_dyn_bg()
         nmi // Wait for the next NMI
     //
 
@@ -699,6 +698,7 @@ mode level4()
 : nmi play_level_nmi
     // init vars
     current_level=4
+    chr_change=true
     //
     
     // prepare the level squares values
@@ -773,7 +773,6 @@ mode level4()
             frame_counter=0
             update_time() // updates the seconds, minutes, and hours passed since level start
         //
-        manage_dyn_bg()
         nmi // Wait for the next NMI
     //
 
@@ -781,6 +780,7 @@ mode level5()
 : nmi play_level_nmi
     // init vars
     current_level=5
+    chr_change=true
     //
     
     // prepare the level squares values
@@ -863,7 +863,6 @@ mode level5()
             frame_counter=0
             update_time() // updates the seconds, minutes, and hours passed since level start
         //
-        manage_dyn_bg()
         nmi // Wait for the next NMI
     //
 
@@ -871,6 +870,7 @@ mode level6()
 : nmi play_level_nmi
     // init vars
     current_level=6
+    chr_change=true
     //
     
     // prepare the level squares values
@@ -953,7 +953,6 @@ mode level6()
             frame_counter=0
             update_time() // updates the seconds, minutes, and hours passed since level start
         //
-        manage_dyn_bg()
         nmi // Wait for the next NMI
     //
 
@@ -961,7 +960,9 @@ mode level7()
 : nmi play_level_nmi
     // init vars
     current_level=7
-    //    
+    chr_change=true
+    //
+    
     // prepare the level squares values
     level_squares[0].active=true
     level_squares[0].north=GREEN
@@ -1042,7 +1043,6 @@ mode level7()
             frame_counter=0
             update_time() // updates the seconds, minutes, and hours passed since level start
         //
-        manage_dyn_bg()
         nmi // Wait for the next NMI
     //
 
@@ -1485,9 +1485,6 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
     // change that metatile position in GFX RAM
     // first the tiles
     UU gfx_addr=((y<<6)+(x<<1))
-    // MOD to write to lower screen too
-    UU old_gfx_addr=gfx_addr 
-    // MOD to write to lower screen too
     gfx_addr+=$2000
     ppu_reset_addr(gfx_addr)    
     {PPUDATA}( mt_nw[new_mt] )
@@ -1496,16 +1493,6 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
     ppu_reset_addr(gfx_addr)    
     {PPUDATA}( mt_sw[new_mt] )
     {PPUDATA}( mt_se[new_mt] )
-    //MOD to write to lower screen too
-    old_gfx_addr+=$2800
-    ppu_reset_addr(old_gfx_addr)    
-    {PPUDATA}( mt_nw[new_mt] )
-    {PPUDATA}( mt_ne[new_mt] )
-    old_gfx_addr+=32
-    ppu_reset_addr(old_gfx_addr)    
-    {PPUDATA}( mt_sw[new_mt] )
-    {PPUDATA}( mt_se[new_mt] )
-    //
 
     //calculate the new 2x2 metatiles block attributes byte
     UU mt_m_disp=(((y & %11111110) <<4)+(x & %11111110))
@@ -1528,10 +1515,6 @@ fn set_metatile_at_colrow (UU x, UU y, U new_mt)
     UU attr_addr_disp=(((y>>1)<<3)+(x>>1))
     ppu_reset_addr($2000+960+attr_addr_disp)
     {PPUDATA}(new_attr)
-    //MOD to write to lower screen too
-    ppu_reset_addr($2800+960+attr_addr_disp)
-    {PPUDATA}(new_attr)
-    //MOD to write to lower screen too
 
 /*
  Attempts a new write to the PPU mem and level_mt_map variable,
@@ -2245,25 +2228,3 @@ fn push_help_sprites(U xpos, U ypos, U palette, U i, U xshifting, Bool animate) 
     i += 4
     //
     return i
-
-// manages all dynamic BG variables
-fn manage_dyn_bg()
-    if (curr_frames>=BG_ANIM_DELAY)
-        curr_frames=0
-        if (dyn_bg_frame==0)
-            dyn_bg_frame=1
-            ppu_ctrl_b=0
-        else
-            if (dyn_bg_frame==1)
-                dyn_bg_frame=2
-                ppu_ctrl_b=PPUCTRL_BG_PT_1000
-            else
-                if (dyn_bg_frame==2)
-                    dyn_bg_frame=3
-                    ppu_ctrl_b=2
-                else
-                    if (dyn_bg_frame==3)
-                        dyn_bg_frame=0
-                        ppu_ctrl_b=PPUCTRL_BG_PT_1000|2
-    else
-        curr_frames+=1
