@@ -469,6 +469,13 @@ mode see_through_scr()
         else
             x+=1
         nmi // Wait for the next NMI
+    // overwrite the bottom screen
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    ppu_reset_addr($2800)
+    for UU i=0; i<1024; i+=1
+        {PPUDATA}(@lower_screen_bytes{i})
+    {PPUCTRL}(PPUCTRL_NMI_ON)
     //
     current_level+=1
     play_level(current_level) // finally, we start the new level
