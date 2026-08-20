@@ -7,13 +7,9 @@ data /romdata
         file(raw, "screen1.nam")
     [] screen2
         file(raw, "screen2.nam")
-    //U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)
-    /*[5] sprt_chr
-        U(0) 
-        U($94) 
-        U($98) 
-        U($9C) 
-        U(0)*/
+    [] palette1
+        file(raw, "screen.pal")
+
 
 ct U NUM_FPS=60
 ct U NUM_FPS_WAIT=4
@@ -58,9 +54,19 @@ mode main()
     //
     {PPUCTRL}(0)  // Reset PPU control register for new level
     {PPUMASK}(0) // Reset PPU mask register for new level
-    load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten. //ToDo: make it load palette only?
+    //load_screen(@lev_start) // loads a screen in mapfab. I only use it to get the palettes. The namespace is overwritten. //ToDo: make it load palette only?
     //
-    // load start screen made in NEXXT whose data is in ROM start screen uses the upper 256 set of chr
+    // Loads a NEXXT half palette (BG only) into the global var palette
+    U pal_i=0
+    for U i=0; i<16; i+=4
+        palette[pal_i]=@palette1[i+1]
+        palette[pal_i+1]=@palette1[i+2]
+        palette[pal_i+2]=@palette1[i+3]
+        pal_i+=3
+    palette[24]=@palette1[0] // BG universal color
+    ppu_upload_palette()
+    //
+    // load start screen made in NEXXT
     ppu_reset_addr($2000)
     for UU i=0; i<1024; i+=1
         {PPUDATA}(@screen1{i})
