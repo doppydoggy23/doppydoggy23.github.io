@@ -18,13 +18,6 @@ data /romdata
         file(raw, "endscr.pal")
     [] lower_screen_bytes
         file(raw, "lowerscr.nam")
-    //U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)
-    /*[5] sprt_chr
-        U(0) 
-        U($94) 
-        U($98) 
-        U($9C) 
-        U(0)*/
 
 
 // Square Sides Color enums
@@ -124,6 +117,10 @@ vars /game_vars
     U mins
     U hours
     UU num_rotations // again, each nibble holds a cipher, making it easier to display
+    U g_secs //  global stats variables (sum of all levels)
+    U g_mins
+    U g_hours
+    UU g_num_rot
 
     U scroll_x
     U scroll_y
@@ -351,6 +348,11 @@ mode end_scr()
     //
     // Tell the NES to trigger NMI once per frame
     {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
+    // swap stat accounting vars to show them appropiately
+    secs=g_secs
+    mins=g_mins
+    hours=g_hours
+    num_rotations=g_num_rot
     //
     while true
         update_pads()
@@ -469,7 +471,7 @@ mode see_through_scr()
         nmi // Wait for the next NMI
     //
     // jump to end screen if last level
-    if (current_level>=2)
+    if (current_level>=7)
         goto mode end_scr() 
         : preserves
     //
@@ -559,6 +561,10 @@ mode level1()
     mins=0
     hours=0
     num_rotations=0
+    g_secs=0
+    g_mins=0
+    g_hours=0
+    g_num_rot=0
     //
 
     while true
@@ -1867,7 +1873,14 @@ fn update_time()
         Bool mins_overflow=increment_mins()
         if (mins_overflow)
             increment_hours()
+    update_g_time()
 
+fn update_g_time()
+    Bool secs_overflow=g_increment_secs()
+    if (secs_overflow)
+        Bool mins_overflow=g_increment_mins()
+        if (mins_overflow)
+            g_increment_hours()
 
 // increment seconds in 1
 fn increment_secs() Bool
@@ -1923,6 +1936,57 @@ fn increment_hours() Bool
         hours=((hours_h << 4)|hours_l)
         return false
 
+fn g_increment_secs() Bool
+    U secs_h=(g_secs >> 4)
+    U secs_l=(g_secs & 15)
+    if (secs_l >= 9) // if lower digit is 9, increment next digit
+        secs_h+=1
+        secs_l=0
+        if (secs_h >= 6)
+            g_secs=0
+            return true
+        else
+            g_secs=((secs_h << 4)|secs_l)
+            return false
+    else
+        secs_l+=1
+        g_secs=((secs_h << 4)|secs_l)
+        return false
+
+fn g_increment_mins() Bool
+    U mins_h=(g_mins >> 4)
+    U mins_l=(g_mins & 15)
+    if (mins_l >= 9) // if lower digit is 9, increment next digit
+        mins_h+=1
+        mins_l=0
+        if (mins_h >= 6)
+            g_mins=0
+            return true
+        else
+            g_mins=((mins_h << 4)|mins_l)
+            return false
+    else
+        mins_l+=1
+        g_mins=((mins_h << 4)|mins_l)
+        return false
+
+fn g_increment_hours() Bool
+    U hours_h=(g_hours >> 4)
+    U hours_l=(g_hours & 15)
+    if (hours_l >= 9) // if lower digit is 9, increment next digit
+        hours_h+=1
+        hours_l=0
+        if (hours_h >= 6)
+            g_hours=0
+            return true
+        else
+            g_hours=((hours_h << 4)|hours_l)
+            return false
+    else
+        hours_l+=1
+        g_hours=((hours_h << 4)|hours_l)
+        return false
+
 // increment num_rotations in 1, like hours,mins,secs, each nibble contains a cipher
 fn increment_numrots()
     UU c1=((num_rotations>>12)&15)
@@ -1940,6 +2004,24 @@ fn increment_numrots()
                 c1+=1
                 c2=0
     num_rotations=(c4|(c3<<4)|(c2<<8)|(c1<<12))
+    g_increment_numrots()
+
+fn g_increment_numrots()
+    UU c1=((g_num_rot>>12)&15)
+    UU c2=((g_num_rot>>8)&15)
+    UU c3=((g_num_rot>>4)&15)
+    UU c4=(g_num_rot&15)
+    c4+=1
+    if (c4>9)
+        c3+=1
+        c4=0
+        if (c3>9)
+            c2+=1
+            c3=0
+            if (c2>9)
+                c1+=1
+                c2=0
+    g_num_rot=(c4|(c3<<4)|(c2<<8)|(c1<<12))
 
 // pushes timer sprites into the position given, returns the number of oam positions taken
 fn push_timer_sprites(U xpos, U ypos, U mypalette, U i) U
