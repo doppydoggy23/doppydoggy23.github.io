@@ -14,8 +14,6 @@ data /romdata
         file(raw, "helpscr.nam")
     [] end_screen_bytes
         file(raw, "endscr.nam")
-    [] end_pal_bytes
-        file(raw, "endscr.pal")
     [] lower_screen_bytes
         file(raw, "lowerscr.nam")
     //U[5] sprt_chr = U[5](0, $94, $98, $9C, 0)
@@ -338,31 +336,14 @@ mode end_scr()
     for UU i=0; i<1024; i+=1
         {PPUDATA}(@end_screen_bytes{i})
     //
-    // Loads a NEXXT half palette (BG only) into the global var palette
-    U pal_i=0
-    for U i=0; i<16; i+=4
-        palette[pal_i]=@end_pal_bytes[i+1]
-        palette[pal_i+1]=@end_pal_bytes[i+2]
-        palette[pal_i+2]=@end_pal_bytes[i+3]
-        pal_i+=3
-    palette[24]=@end_pal_bytes[0] // BG universal color
-    palette[PALETTE_SPR+1]=$30// sprites 0-pal color (white)
-    ppu_upload_palette()
-    //
     // Tell the NES to trigger NMI once per frame
-    {PPUCTRL}(PPUCTRL_NMI_ON|PPUCTRL_BG_PT_1000)
+    {PPUCTRL}(PPUCTRL_NMI_ON)
     //
     while true
         update_pads()
         if pads[0].pressed & BUTTON_START
             goto mode main()  //go to main screen
             : preserves
-            // show stats
-        U i=0
-        i=push_timer_sprites(96, 144, 0, i) 
-        i=push_rots_sprites(96, 168, 0, i)
-        hide_oam(i)
-        //
         nmi // Wait for the next NMI
     //
 
@@ -445,6 +426,11 @@ mode see_through_scr()
         //
         nmi // Wait for the next NMI
     //
+    // jump to end screen if last level
+    if (current_level>=7)
+        goto mode end_scr() 
+        : preserves
+    //
     // wait until we press a button
     Bool keep_looping=true
     while (keep_looping)
@@ -467,11 +453,6 @@ mode see_through_scr()
         hide_oam(i)
         //
         nmi // Wait for the next NMI
-    //
-    // jump to end screen if last level
-    if (current_level>=2)
-        goto mode end_scr() 
-        : preserves
     //
     // show second see through screen
     num_mt_written=0
