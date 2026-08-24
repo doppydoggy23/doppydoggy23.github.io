@@ -555,7 +555,6 @@ mode level1()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
-    check_if_success(true) // check if we have an already solved grid
     redraw_all_sqrs()
     //
     puf.play_track(0)
@@ -576,7 +575,7 @@ mode level1()
         move_player()
         update_animation() // before update sprites
         update_sprites() 
-        check_if_success(false)
+        check_if_success()
         //
         frame_counter+=1
         if (frame_counter>NUM_FRAMES_PER_SEC)
@@ -633,7 +632,6 @@ mode level2()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
-    check_if_success(true) // check if we have an already solved grid
     redraw_all_sqrs()
     //
     puf.play_track(0)
@@ -650,7 +648,7 @@ mode level2()
         move_player()
         update_animation() // before update sprites
         update_sprites() 
-        check_if_success(false)
+        check_if_success()
         //
         frame_counter+=1
         if (frame_counter>NUM_FRAMES_PER_SEC)
@@ -712,7 +710,6 @@ mode level3()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
-    check_if_success(true) // check if we have an already solved grid
     redraw_all_sqrs()
     //
     puf.play_track(0)
@@ -729,7 +726,7 @@ mode level3()
         move_player()
         update_animation() // before update sprites
         update_sprites() 
-        check_if_success(false)
+        check_if_success()
         //
         frame_counter+=1
         if (frame_counter>NUM_FRAMES_PER_SEC)
@@ -799,7 +796,6 @@ mode level4()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
-    check_if_success(true) // check if we have an already solved grid
     redraw_all_sqrs()
     //
     puf.play_track(0)
@@ -816,7 +812,7 @@ mode level4()
         move_player()
         update_animation() // before update sprites
         update_sprites() 
-        check_if_success(false)
+        check_if_success()
         //
         frame_counter+=1
         if (frame_counter>NUM_FRAMES_PER_SEC)
@@ -894,7 +890,6 @@ mode level5()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
-    check_if_success(true) // check if we have an already solved grid
     redraw_all_sqrs()
     //
     puf.play_track(0)
@@ -911,7 +906,7 @@ mode level5()
         move_player()
         update_animation() // before update sprites
         update_sprites() 
-        check_if_success(false)
+        check_if_success()
         //
         frame_counter+=1
         if (frame_counter>NUM_FRAMES_PER_SEC)
@@ -989,7 +984,6 @@ mode level6()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
-    check_if_success(true) // check if we have an already solved grid
     redraw_all_sqrs()
     //
     puf.play_track(0)
@@ -1005,7 +999,7 @@ mode level6()
         move_player()
         update_animation() // before update sprites
         update_sprites() 
-        check_if_success(false)
+        check_if_success()
         //
         frame_counter+=1
         if (frame_counter>NUM_FRAMES_PER_SEC)
@@ -1082,7 +1076,6 @@ mode level7()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
-    check_if_success(true) // check if we have an already solved grid
     redraw_all_sqrs()
     //
     puf.play_track(0)
@@ -1098,7 +1091,7 @@ mode level7()
         move_player()
         update_animation() // before update sprites
         update_sprites() 
-        check_if_success(false)
+        check_if_success()
         //
         frame_counter+=1
         if (frame_counter>NUM_FRAMES_PER_SEC)
@@ -1697,7 +1690,7 @@ fn rot_sqr_inter(U sqr)
 
 
 // checks if the player solved the puzzle
-fn check_if_success(Bool is_checking_start)
+fn check_if_success()
     if (during_animation || (num_ppuops_in_queue > 0)) // we don't want to change level while there are pending anims
         return
     Bool game_success=true
@@ -1760,10 +1753,6 @@ fn check_if_success(Bool is_checking_start)
                 game_success=false
             if ( (level_squares[5].active) && (level_squares[5].south != level_squares[8].north) )
                 game_success=false
-    //
-    if (game_success && is_checking_start) // with this, we should never get an already solved grid at level start
-        rot_sqr_inter(5)
-        return
     //
     if game_success
         /*fence
