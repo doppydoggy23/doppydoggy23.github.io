@@ -549,9 +549,6 @@ mode level1()
     level_squares[7].active=false
     //
     level_squares[8].active=false
-    // add some randomness by rotating the 3x3 grid
-    rotate_grid_random()
-    randomize_colours()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
@@ -591,6 +588,7 @@ mode level2()
     // init vars
     current_level=2
     //
+    
     // prepare the level squares values
     level_squares[0].active=true
     level_squares[0].north=RED
@@ -625,10 +623,6 @@ mode level2()
     level_squares[7].active=false
     //
     level_squares[8].active=false
-    //
-    // add some randomness by rotating the 3x3 grid
-    rotate_grid_random()
-    randomize_colours()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
@@ -703,10 +697,6 @@ mode level3()
     level_squares[7].west=YELLOW
     //
     level_squares[8].active=false
-    //
-    // add some randomness by rotating the 3x3 grid
-    rotate_grid_random()
-    randomize_colours()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
@@ -789,10 +779,6 @@ mode level4()
     level_squares[8].east=YELLOW
     level_squares[8].south=GREEN
     level_squares[8].west=GREEN
-    //
-    // add some randomness by rotating the 3x3 grid
-    rotate_grid_random()
-    randomize_colours()
     //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
@@ -884,10 +870,6 @@ mode level5()
     level_squares[8].south=GREEN
     level_squares[8].west=YELLOW
     //
-    // add some randomness by rotating the 3x3 grid
-    rotate_grid_random()
-    randomize_colours()
-    //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
@@ -978,10 +960,6 @@ mode level6()
     level_squares[8].south=VIOLET
     level_squares[8].west=YELLOW
     //
-    // add some randomness by rotating the 3x3 grid
-    rotate_grid_random()
-    randomize_colours()
-    //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
@@ -994,6 +972,7 @@ mode level6()
     hours=0
     num_rotations=0
     //
+
     while true
         update_pads()
         move_player()
@@ -1070,10 +1049,6 @@ mode level7()
     level_squares[8].south=RED
     level_squares[8].west=YELLOW
     //
-    // add some randomness by rotating the 3x3 grid
-    rotate_grid_random()
-    randomize_colours()
-    //
     copy_to_solved_squares()
     randomize_lvl() // randomize level
     redraw_all_sqrs()
@@ -1086,6 +1061,7 @@ mode level7()
     hours=0
     num_rotations=0
     //
+
     while true
         update_pads()
         move_player()
@@ -2399,64 +2375,3 @@ fn manage_dyn_bg()
                         ppu_ctrl_b=PPUCTRL_BG_PT_1000|2
     else
         curr_frames+=1
-
-// copies the 3x3 grid from the solved_squares variable (used as temp) to level_squares
-fn copy_from_solved_squares()
-    for U i=0; i<9; i+=1
-        level_squares[i].north=solved_squares[i].north
-        level_squares[i].south=solved_squares[i].south
-        level_squares[i].east=solved_squares[i].east
-        level_squares[i].west=solved_squares[i].west
-        level_squares[i].active=solved_squares[i].active
-
-// copies a square sqr1 from level_squares to solved_squares (used as temp) sqr2 and rotates it CW
-fn rot_cpy_sqr_inter(U sqr1, U sqr2)
-    solved_squares[sqr2-1].north=level_squares[sqr1-1].west
-    solved_squares[sqr2-1].west=level_squares[sqr1-1].south
-    solved_squares[sqr2-1].south=level_squares[sqr1-1].east
-    solved_squares[sqr2-1].east=level_squares[sqr1-1].north
-    solved_squares[sqr2-1].active=level_squares[sqr1-1].active
-
-// rotates the grid CW once, it uses solved_squares as a temporary var
-fn rotate_grid_once()
-    rot_cpy_sqr_inter(7, 1)
-    rot_cpy_sqr_inter(4, 2)
-    rot_cpy_sqr_inter(1, 3)
-    rot_cpy_sqr_inter(8, 4)
-    rot_cpy_sqr_inter(5, 5)
-    rot_cpy_sqr_inter(2, 6)
-    rot_cpy_sqr_inter(9, 7)
-    rot_cpy_sqr_inter(6, 8)
-    rot_cpy_sqr_inter(3, 9)
-    copy_from_solved_squares() // copy them back to level_squares
-
-// rotates the grid a random amount of times, it uses solved_squares as a temporary var
-fn rotate_grid_random()
-    U rotval=rotation_table[(xorshiftrnd8()&3)] // if we don't use a rotation table, the game freezes (possible compiler bug?)
-    for U i=0; i<rotval; i+=1
-        rotate_grid_once() // rotate by a random-value times
-
-
-// this functions randomizes and changes the colours of the squares
-fn randomize_colours()
-    U rnd = (xorshiftrnd8()&3)
-    U[4] color_table=U[4](RED, VIOLET, YELLOW, GREEN)
-    U c1=color_table[(rnd&3)] 
-    rnd+=1
-    U c2=color_table[(rnd&3)] 
-    rnd+=1
-    U c3=color_table[(rnd&3)] 
-    rnd+=1
-    U c4=color_table[(rnd&3)] 
-    //
-    U[4] rnd_color_table=U[4](c1, c2, c3, c4)
-    //
-    for U i=0; i<9; i+=1
-        level_squares[i].north=rnd_color_table[level_squares[i].north]
-        level_squares[i].south=rnd_color_table[level_squares[i].south]
-        level_squares[i].east=rnd_color_table[level_squares[i].east]
-        level_squares[i].west=rnd_color_table[level_squares[i].west]
-
-
-    
-
