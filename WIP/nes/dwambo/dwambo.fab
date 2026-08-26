@@ -2,7 +2,8 @@
 mapfab(raw, "dwambo.mapfab", "chr", "palette", "metatiles", "level")
 
 audio(puf1_music, "songs.txt")
-audio(puf1_sfx) // needed to play songs.txt, even if not used
+//audio(puf1_sfx) // needed to play songs.txt, even if not used
+audio(puf1_sfx, "sfx.txt", "sfx.nsf")
 
 
 data /romdata
@@ -40,6 +41,11 @@ ct U ROTS_XPOS=160 //96 centered
 ct U ROTS_YPOS=229
 
 ct U BG_ANIM_DELAY=10 // number of frames to wait until BG set swap
+
+ct U SFX_WIN=0
+ct U SFX_ROT=1
+ct U SFX_MOVE=2
+
 
 // we have from 2 to 9 squares in a level, all with 4 sides
 struct Square
@@ -1642,6 +1648,7 @@ fn attempt_to_move_selector_left()
     if (sel_col > 0)
         if (level_squares[square_selector-2].active)
             square_selector-=1
+            puf.play_sfx(SFX_MOVE)
 //
 fn attempt_to_move_selector_right()
     if (num_ppuops_in_queue > 0) // do not move if there are pending PPU ops
@@ -1650,6 +1657,7 @@ fn attempt_to_move_selector_right()
     if (sel_col < 2)
         if (level_squares[square_selector].active)
             square_selector+=1
+            puf.play_sfx(SFX_MOVE)
 //
 fn attempt_to_move_selector_up()
     if (num_ppuops_in_queue > 0) // do not move if there are pending PPU ops
@@ -1658,6 +1666,7 @@ fn attempt_to_move_selector_up()
     if (sel_row > 0)
         if (level_squares[square_selector-4].active)
             square_selector-=3
+            puf.play_sfx(SFX_MOVE)
 //
 fn attempt_to_move_selector_down()
     if (num_ppuops_in_queue > 0) // do not move if there are pending PPU ops
@@ -1666,6 +1675,7 @@ fn attempt_to_move_selector_down()
     if (sel_row < 2)
         if (level_squares[square_selector+2].active)
             square_selector+=3
+            puf.play_sfx(SFX_MOVE)
 
 fn attempt_to_rotate_curr_square (U direction)
     if (num_ppuops_in_queue > 0) // do not rotate if there are pending PPU ops
@@ -1686,6 +1696,7 @@ fn attempt_to_rotate_curr_square (U direction)
     //
     update_square(square_selector)
     increment_numrots()
+    puf.play_sfx(SFX_ROT)
 
 // rotates the square without updating screen. Used to randomize level. sqr 1..9
 fn rot_sqr_inter(U sqr)
@@ -1773,6 +1784,7 @@ fn check_if_success(Bool is_checking_start)
         fence*/
         //play_level(current_level)        
         puf.stop(0)
+        puf.play_sfx(SFX_WIN)
         //
         goto mode see_through_scr() 
         : preserves
