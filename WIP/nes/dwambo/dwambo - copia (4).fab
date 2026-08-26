@@ -30,7 +30,7 @@ ct U YELLOW=3
 ct U ROT_CW=0
 ct U ROT_CCW=1
 
-ct U ANIM_DELAY=3//5 // num frame the rotation animation slows down
+ct U ANIM_DELAY=5 // num frame the rotation animation slows down
 ct U NUM_ROT_ANIM_FR=5 // num frames the rotation animation has
 
 ct U NUM_FRAMES_PER_SEC=60
