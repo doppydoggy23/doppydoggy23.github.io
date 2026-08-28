@@ -186,8 +186,6 @@ mode main()
     U d_let_shift=0
     U bg_slow_down=0
     //
-    puf.play_track(1)
-    //
     while true
         update_pads()
         //
@@ -255,7 +253,6 @@ mode main()
         //hide_oam(i)// Clear the remainder of OAM
         //
         if pads[0].pressed & BUTTON_START
-            puf.stop(0)
             if (current_selection==0)
                 current_level=1
                 play_level(1)
