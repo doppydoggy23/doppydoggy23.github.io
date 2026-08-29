@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NESFab Tutorial Dynamic Background</title>
+<meta charset="utf-8">
+<style>
+
+#mainDiv {
+  background-color: white;
+  width: 1000px;
+  text-align: left;
+  margin:auto;
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+pre code {
+			background-color: #eee;
+			border: 1px solid #999;
+			display: block;
+			padding: 20px;			
+}
+
+img {
+      display: block;
+      margin: auto;
+}
+
+</style>
+
+
+</head>
+<body>
+
+<section>
+
+    <div id="mainDiv">
+
+        <h1>NESFab Tutorial - Dynamic Background in NROM</h1>
+
+        <h2>Limitations of the NES Background</h2>
+        <p>
+            As you already know, the NES is very limited about what you can do to the background. It wasn't engineered to have a dynamic background by itself, but there a few ways we can remedy that. 
+            You probably know this one: changing the CHR Bank in the middle of a VBlank. Changing the CHR Bank has the effect of changing the background on the fly at the cost of ROM size, but what if
+            we don't want to inflate the ROM size? I'll show you one trick we can do in NROM.
+        </p>
+
+<pre> <code>
+    // Snake enemies
+    struct Enemy
+        UU map_x
+        UU map_y
+        UU initial_x
+        UU final_x
+        S x_speed
+        U status // 0-alive 1-killed and falling 2-killed and off the screen
+    //
+    ct U level1_num_enemies=8
+    ct UU enemy_char_width=16
+    ct UU enemy_char_height=16
+    ...
+    //enemies
+    Enemy[level1_num_enemies] enemies
+</code></pre>
+
+        <h2>Dynamic Background in NROM</h2>
+
+        <p>
+            As you already know, in NROM we don't have CHR banks, so we'll have to settle with changing between the 2 CHR sets of the only CHR bank. Ok, that gives us 2 frames of animation, 
+            but, what if we need more? In <a href="sdfhihsdfiuhidfs.zip">this example</a> I show you how to get 4 frames of background animation in NROM if your game only uses 1 screen.
+            Indeed, if you don't need scrolling, you can reuse the extra screen in the scrolling space to get 2x2=4 frames of animation.
+        </p>
+
+        <p>
+            NEXXT link
+            dibujo de extra scrolling space
+            GIF animado de resultado
+            código de la demo en la pagina web
+            link con el còdigo de la demo        
+            enlaces apuntando a nesdev con los registros a tocar    
+        </p>
+
+    <img src="t6t1.png" alt="player and enemies">
+    <img src="t6t2.png" alt="player and enemies">
+
+    </div>
+
+</section>
+<footer id="docfooter">
+</footer>
+
+</body>
+</html>
+
+
+
