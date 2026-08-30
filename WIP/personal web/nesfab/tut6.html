@@ -47,24 +47,6 @@ img {
             we don't want to inflate the ROM size? I'll show you one trick we can do in NROM.
         </p>
 
-<pre> <code>
-    // Snake enemies
-    struct Enemy
-        UU map_x
-        UU map_y
-        UU initial_x
-        UU final_x
-        S x_speed
-        U status // 0-alive 1-killed and falling 2-killed and off the screen
-    //
-    ct U level1_num_enemies=8
-    ct UU enemy_char_width=16
-    ct UU enemy_char_height=16
-    ...
-    //enemies
-    Enemy[level1_num_enemies] enemies
-</code></pre>
-
         <h2>Dynamic Background in NROM</h2>
 
         <p>
@@ -81,14 +63,15 @@ img {
         <img src="dbi2.png" alt="chr set 2">
 
         <p>
-            In the following images made in <a href="https://frankengraphics.itch.io/nexxt">NEXXT</a>, you can see that we have 2 screen, the first one is made of tile 0, and the second one is made of tile 1.
+            In the following images made in <a href="https://frankengraphics.itch.io/nexxt">NEXXT</a>, you can see that we have 2 screens, the first one is made of tile 0, and the second one is made of tile 1.
         </p>
 
         <img src="dbi3.png" alt="NEXXT screen 1">
         <img src="dbi4.png" alt="NEXXT screen 1">
 
         <p>
-            Our example uses horizontal mirroring. We write the first background screen to ADDR odfkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk and the second BG screen to ADDR ddddddddddddddddddddddddddddd.
+            Our example uses horizontal mirroring. We write the first background screen to ADDR $2000 and the second BG screen to ADDR $2800 
+            <a href="https://www.nesdev.org/wiki/PPU_nametables">https://www.nesdev.org/wiki/PPU_nametables</a>.
             We start displaying image1 CHR set 0.
             <ul>
                 <li>1. We start with screen 1, BG CHR set 0, displaying ones.</li>
@@ -98,19 +81,69 @@ img {
                 <li>Repeat.</li>                
               </ul>
 
-            In the example code, we use the 4 animation frames to display a fake screen scrolling.
+              In the example code, we use the 4 animation frames to display a fake screen scrolling.
         </p>
 
-    
         <p>
-            NEXXT link
-            dibujo de extra scrolling space
-            GIF animado de resultado
-            código de la demo en la pagina web
-            link con el còdigo de la demo        
-            enlaces apuntando a nesdev con los registros a tocar    
+            Here is the main routine:
         </p>
 
+<pre> <code>
+            while true
+                update_pads()
+                move_player()
+                update_sprites() 
+                //
+                if (curr_frames>=NUM_FPS_WAIT)
+                    curr_frames=0
+                    if (dyn_bg_frame==0)
+                        dyn_bg_frame=1
+                        ppu_ctrl_b=0
+                    else
+                        if (dyn_bg_frame==1)
+                            dyn_bg_frame=2
+                            ppu_ctrl_b=PPUCTRL_BG_PT_1000
+                        else
+                            if (dyn_bg_frame==2)
+                                dyn_bg_frame=3
+                                ppu_ctrl_b=2
+                            else
+                                if (dyn_bg_frame==3)
+                                    dyn_bg_frame=0
+                                    ppu_ctrl_b=PPUCTRL_BG_PT_1000|2
+                else
+                    curr_frames+=1
+                nmi // Wait for the next NMI
+</code></pre>        
+
+        <p>
+            It changes the ppu_ctrl_b variable to set or unset the PPUCTRL_BG_PT_1000 (change CHR set) and bit 1 (vertical scroll screen).
+            More information at <a href="https://www.nesdev.org/wiki/PPU_registers#PPUCTRL_-_Miscellaneous_settings_($2000_write)">NESdev</a> .
+            Here is the code of the NMI function that merely writes to PPUCRL:
+        </p>
+
+<code><pre>
+// entrance point NMI
+nmi main_nmi()
+    // Update OAM and poll the pads:
+    ppu_upload_oam_poll_pads(0)
+    // Turn on rendering:
+    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+    // Reset the scroll
+    ppu_reset_scroll(0, 0)
+    //
+    fence
+    {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
+    fence
+    {PPUCTRL}(PPUCTRL_NMI_ON|ppu_ctrl_b)
+</code></pre>        
+
+
+        <p>
+            Here is the final result. It's using dynamic background. There is no scroll:
+        </p>
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/mBreV-RyPxM?si=qt05jmNWYkoZMuLq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
     </div>
 
