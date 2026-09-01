@@ -1178,8 +1178,8 @@ fn move_player()
     /*if (pads[0].held & BUTTON_START) // ToDo: remove this
         increment_numrots()*/
 
-    if (pads[0].pressed & BUTTON_SELECT)
-        cheat_curr_square()
+/*    if (pads[0].pressed & BUTTON_SELECT) // activate cheats
+        cheat_curr_square()*/
     
 
 
