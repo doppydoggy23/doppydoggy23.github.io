@@ -1,0 +1,132 @@
+
+mapfab(raw, "dynbg3.mapfab", "chr", "palette", "metatiles", "level")
+
+
+data /romdata
+    [] screen1
+        file(raw, "screen1.nam")
+
+
+ct U NUM_FPS=60
+ct U RAIN_FPS_WAIT=5
+
+vars /game_vars
+
+    U curr_frames=0
+    U pal_num=0
+
+    U[4] rain_pal_1 = U[4]($30, $0F, $0F, $0F) // the 3 colors of a pallete, plus the UBG color
+    U[4] rain_pal_2 = U[4]($0F, $30, $0F, $0F) // the 3 colors of a pallete, plus the UBG color
+    U[4] rain_pal_3 = U[4]($0F, $0F, $30, $0F) // the 3 colors of a pallete, plus the UBG color
+
+////////
+
+// entrance point NMI
+nmi main_nmi()
+    // Update OAM and poll the pads:
+    ppu_upload_oam_poll_pads(0)
+    // upload palette
+    ppu_upload_palette()
+    // Turn on rendering:
+    {PPUMASK}(PPUMASK_ON | PPUMASK_NO_CLIP)
+    // Reset the scroll
+    ppu_reset_scroll(0, 0)
+    //
+    fence
+    {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
+    fence
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+
+
+// entrance point function
+mode main()
+: nmi main_nmi
+    //
+    {PPUCTRL}(0)  // Reset PPU control register for new level
+    {PPUMASK}(0) // Reset PPU mask register for new level
+    // load start screen made in NEXXT
+    ppu_reset_addr($2000)
+    for UU i=0; i<1024; i+=1
+        {PPUDATA}(@screen1{i})
+    //
+    fence
+    {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
+    fence
+    {PPUCTRL}(PPUCTRL_NMI_ON)
+    //
+    curr_frames=0
+    pal_num=0
+    //
+    palette[0]=$0F
+    palette[1]=$0F
+    palette[2]=$0F
+    palette[24]=$0F
+
+    while true
+        update_pads()
+        move_player()
+        update_sprites() 
+        //
+        if (curr_frames>=RAIN_FPS_WAIT)
+            curr_frames=0
+            //
+            if (pal_num==0)
+                palette[0]=rain_pal_1[0]
+                palette[1]=rain_pal_1[1]
+                palette[2]=rain_pal_1[2]
+                palette[24]=rain_pal_1[3]
+            else
+                if (pal_num==1)
+                    palette[0]=rain_pal_2[0]
+                    palette[1]=rain_pal_2[1]
+                    palette[2]=rain_pal_2[2]
+                    palette[24]=rain_pal_2[3]
+                else
+                    if (pal_num==2)
+                        palette[0]=rain_pal_3[0]
+                        palette[1]=rain_pal_3[1]
+                        palette[2]=rain_pal_3[2]
+                        palette[24]=rain_pal_3[3]
+            pal_num+=1
+            if (pal_num>2)
+                pal_num=0
+
+        else
+            curr_frames+=1
+        nmi // Wait for the next NMI
+    //
+
+
+//////////
+
+fn move_player()
+    U b
+    b=10
+
+/*    if (pads[0].pressed & BUTTON_LEFT)
+        attempt_to_move_selector_left()
+    if (pads[0].pressed & BUTTON_RIGHT)
+        attempt_to_move_selector_right()
+    if (pads[0].pressed & BUTTON_UP)
+        attempt_to_move_selector_up()
+    if (pads[0].pressed & BUTTON_DOWN)
+        attempt_to_move_selector_down()
+*/
+
+    /*if (pads[0].pressed & BUTTON_START) // ToDo: remove this
+        randomize_lvl()
+        redraw_all_sqrs()*/
+    /*if (pads[0].held & BUTTON_START) // ToDo: remove this
+        update_time()*/
+    /*if (pads[0].held & BUTTON_START) // ToDo: remove this
+        increment_numrots()*/
+
+fn update_sprites()
+    U i=0
+    /*set_oam_x(i, ix) // x-position
+    set_oam_y(i, iy) // y-position
+    set_oam_p(i, sprnum+it) // tile
+    set_oam_a(i, 0)  // options
+    i += 4*/
+    hide_oam(i)
+
