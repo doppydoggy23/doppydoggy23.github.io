@@ -5,8 +5,6 @@ mapfab(raw, "dynbg3.mapfab", "chr", "palette", "metatiles", "level")
 data /romdata
     [] screen1
         file(raw, "screen1.nam")
-    [] screen2
-        file(raw, "screen2.nam")
 
 
 ct U NUM_FPS=60
@@ -37,7 +35,7 @@ nmi main_nmi()
     fence
     {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
     fence
-    {PPUCTRL}(PPUCTRL_NMI_ON) // Investigate why I have to put this to start at nametable $2000, is this some kind of NES bug when ppu_upload_pallete()?
+    {PPUCTRL}(PPUCTRL_NMI_ON) // I should investigate why I have to put this, is this some kind of NES bug when uploading the palette?
 
 
 // entrance point function
@@ -49,7 +47,12 @@ mode main()
     // load start screen made in NEXXT
     ppu_reset_addr($2000)
     for UU i=0; i<1024; i+=1
-        {PPUDATA}(@screen2{i})
+        {PPUDATA}(@screen1{i})
+    //
+    fence
+    {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
+    fence
+    {PPUCTRL}(PPUCTRL_NMI_ON)
     //
     curr_frames=0
     pal_num=0
@@ -58,13 +61,6 @@ mode main()
     palette[1]=$0F
     palette[2]=$0F
     palette[24]=$0F
-    ppu_upload_palette()
-    //
-    fence
-    {PPUSTATUS}() // we need to read PPUSTATUS to avoid triggering a double NMI
-    fence
-    {PPUCTRL}(PPUCTRL_NMI_ON)
-    //
 
     while true
         update_pads()
