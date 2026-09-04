@@ -11,7 +11,7 @@ data /romdata
 
 ct U NUM_FPS=60
 ct U RAIN_FPS_WAIT=5
-ct U RAY_FPS_WAIT=30
+ct U RAY_FPS_WAIT=60
 ct U RAY_DURATION=10
 
 vars /game_vars
@@ -22,6 +22,7 @@ vars /game_vars
 
 //    U[4] rain_pal_1 = U[4]($30, $0F, $0F, $0F) // the 3 colors of a pallete, plus the UBG color
 //    U[4] rain_pal_2 = U[4]($0F, $30, $0F, $0F) // the 3 colors of a pallete, plus the UBG color
+    U[8] flash_pal = U[8]($0F, $00, $10, $20, $10, $00, $0F, $0F)
 
 ////////
 
@@ -73,30 +74,36 @@ mode main()
         update_pads()
         move_player()
         update_sprites() 
-        //
+        // Rain
         if (curr_frames>=RAIN_FPS_WAIT)
             curr_frames=0
             //
             if (pal_num==0)
-                palette[0]=$30
+                palette[0]=$11
                 palette[1]=$0F
             else
                 if (pal_num==1)
                     palette[0]=$0F
-                    palette[1]=$30
+                    palette[1]=$11
             pal_num+=1
             if (pal_num>1)
                 pal_num=0
 
         else
             curr_frames+=1
-        //
-        if (ray_frames>RAY_FPS_WAIT)
-            if (ray_frames>RAY_FPS_WAIT+RAY_DURATION)
+        // Thunders
+        if (ray_frames>=RAY_FPS_WAIT)
+            if (ray_frames>(RAY_FPS_WAIT+RAY_DURATION))
                 ray_frames=0
                 palette[2]=$0F
             else
-                palette[2]=$30
+                palette[2]=$38
+        // Sky Flash
+        if (ray_frames>=RAY_FPS_WAIT)
+            U f_pal_i=ray_frames-RAY_FPS_WAIT
+            if (f_pal_i<8)
+                palette[24]=flash_pal[f_pal_i]
+        //
         ray_frames+=1
         //
         nmi // Wait for the next NMI
