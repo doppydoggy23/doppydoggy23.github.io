@@ -5,20 +5,22 @@ mapfab(raw, "dynbg3.mapfab", "chr", "palette", "metatiles", "level")
 data /romdata
     [] screen1
         file(raw, "screen1.nam")
-    [] screen2
-        file(raw, "screen2.nam")
+    [] palette1
+        file(raw, "screen1.pal")
 
 
-ct U NUM_FPS=60
-ct U RAIN_FPS_WAIT=5
-ct U RAY_FPS_WAIT=60
-ct U RAY_DURATION=10
+
+ct U RAIN_FPS_WAIT=5 // how many frames until rain update
+ct U RAY_FPS_WAIT_MIN=30 // how many frames until thunder strikes
+ct U RAY_FPS_WAIT_MAX=200
+ct U RAY_DURATION=10 // how many frames the thunder lasts
 
 vars /game_vars
 
     U curr_frames=0
     U pal_num=0
     U ray_frames=0
+    U next_ray=RAY_FPS_WAIT_MIN
 
 //    U[4] rain_pal_1 = U[4]($30, $0F, $0F, $0F) // the 3 colors of a pallete, plus the UBG color
 //    U[4] rain_pal_2 = U[4]($0F, $30, $0F, $0F) // the 3 colors of a pallete, plus the UBG color
@@ -53,11 +55,21 @@ mode main()
     // load start screen made in NEXXT
     ppu_reset_addr($2000)
     for UU i=0; i<1024; i+=1
-        {PPUDATA}(@screen2{i})
+        {PPUDATA}(@screen1{i})
+    // copy palette to the PPU
+    U pal_i=0
+    for U i=0; i<16; i+=4
+        palette[pal_i]=@palette1[i+1]
+        palette[pal_i+1]=@palette1[i+2]
+        palette[pal_i+2]=@palette1[i+3]
+        pal_i+=3
+    palette[24]=@palette1[0] // BG universal color
+    ppu_upload_palette()
     //
     curr_frames=0
     pal_num=0
     ray_frames=0
+    next_ray=RAY_FPS_WAIT_MIN
     //
     palette[0]=$0F
     palette[1]=$0F
@@ -93,17 +105,22 @@ mode main()
         else
             curr_frames+=1
         // Thunders
-        if (ray_frames>=RAY_FPS_WAIT)
-            if (ray_frames>(RAY_FPS_WAIT+RAY_DURATION))
+        if (ray_frames>=next_ray)
+            if (ray_frames>(next_ray+RAY_DURATION))
                 ray_frames=0
                 palette[2]=$0F
+                next_ray=rand() // randomly schedule next ray
+                if (next_ray<RAY_FPS_WAIT_MIN)
+                    next_ray=RAY_FPS_WAIT_MIN
+                if (next_ray>RAY_FPS_WAIT_MAX)
+                    next_ray=RAY_FPS_WAIT_MAX
             else
                 //palette[2]=$38
-                U y_pal_i=ray_frames-RAY_FPS_WAIT
+                U y_pal_i=ray_frames-next_ray
                 palette[2]=ray_pal[(y_pal_i & 7)]
         // Sky Flash
-        if (ray_frames>=RAY_FPS_WAIT)
-            U f_pal_i=ray_frames-RAY_FPS_WAIT
+        if (ray_frames>=next_ray)
+            U f_pal_i=ray_frames-next_ray
             if (f_pal_i<8)
                 palette[24]=flash_pal[f_pal_i]
         //
