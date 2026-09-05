@@ -92,18 +92,14 @@ mode main()
             curr_frames=0
             //
             if (pal_num==0)
-                palette[0]=$0F
-                palette[1]=$11
+                palette[0]=$11
+                palette[1]=$0F
             else
                 if (pal_num==1)
-                    palette[0]=$11
+                    palette[0]=$0F
                     palette[1]=$11
-                else
-                    if (pal_num==2)
-                        palette[0]=$11
-                        palette[1]=$0F
             pal_num+=1
-            if (pal_num>2)
+            if (pal_num>1)
                 pal_num=0
 
         else
