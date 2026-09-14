@@ -74,6 +74,7 @@ mode main()
     palette[0]=$0F
     palette[1]=$0F
     palette[2]=$0F
+    palette[5]=$0F
     palette[24]=$0F
     ppu_upload_palette()
     //
@@ -115,7 +116,7 @@ mode main()
         if (ray_frames>=next_ray)
             if (ray_frames>(next_ray+RAY_DURATION))
                 ray_frames=0
-                palette[2]=$0F
+                palette[5]=$0F
                 next_ray=rand() // randomly schedule next ray
                 if (next_ray<RAY_FPS_WAIT_MIN)
                     next_ray=RAY_FPS_WAIT_MIN
@@ -124,7 +125,7 @@ mode main()
             else
                 //palette[2]=$38
                 U y_pal_i=ray_frames-next_ray
-                palette[2]=ray_pal[(y_pal_i & 7)]
+                palette[5]=ray_pal[(y_pal_i & 7)]
         // Sky Flash
         if (ray_frames>=next_ray)
             U f_pal_i=ray_frames-next_ray
