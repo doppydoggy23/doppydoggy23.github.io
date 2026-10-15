@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- This code belongs to public domain (2023) -->
+<title>Additive synthesizer</title>
+<style>
+
+#docfooter {
+  /*background-color: red;*/
+}
+
+.LowerMenuButtons {
+  padding: 10px;
+}
+
+</style>
+
+  <script src="fft.js"></script>
+  <script src="subss.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
+
+  <!-- <script src="https://kit.webawesome.com/87e9f4289a514101.js" crossorigin="anonymous"></script> -->
+  <!-- Required: default theme + autoloader -->
+  <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.14.0/styles/themes/default.css" />
+  <script type="module" src="https://ka-f.webawesome.com/webawesome@3.14.0/webawesome.loader.js"></script>
+
+  <!-- Recommended: utility classes ("CSS Utilities") -->
+  <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.14.0/styles/utilities.css" />
+
+  <!-- Optional: CSS reset ("Native Styles") -->
+  <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.14.0/styles/native.css" />
+
+</head>
+
+<body onload="initializeUI()">
+
+  <h1 style="text-align: center;">Substractive Synthesis Sound Generator</h1>  
+
+  <div width="300px">
+    <wa-slider id="MinFreqSlider" label="Min frequency" hint="freqmin" value="20" min="0" max="100" step="1" oninput="MinFreqSliderInput()" with-markers with-tooltip></wa-slider>
+    <wa-slider id="MaxFreqSlider" label="Max frequency" hint="freqmax" value="50" min="0" max="100" step="1" oninput="MaxFreqSliderInput()" with-markers with-tooltip></wa-slider>
+  </div>
+
+  <wa-button id="PlayContinuously" onclick="PlayContinuouslyClick()">Play Continuously</wa-button>
+  <wa-button id="StopPlayContinuously" onclick="StopPlayContinuouslyClick()">Stop Continuous Play</wa-button>
+
+<footer id="docfooter">
+
+</footer>
+
+</body>
+</html>
