@@ -36,13 +36,14 @@
 
   <h1 style="text-align: center;">Substractive Synthesis Sound Generator</h1>  
 
-  <div width="300px">
+  <div style="width:600px">
     <wa-slider id="MinFreqSlider" label="Min frequency" hint="freqmin" value="20" min="0" max="100" step="1" oninput="MinFreqSliderInput()" with-markers with-tooltip></wa-slider>
     <wa-slider id="MaxFreqSlider" label="Max frequency" hint="freqmax" value="50" min="0" max="100" step="1" oninput="MaxFreqSliderInput()" with-markers with-tooltip></wa-slider>
   </div>
 
   <wa-button id="PlayContinuously" onclick="PlayContinuouslyClick()">Play Continuously</wa-button>
   <wa-button id="StopPlayContinuously" onclick="StopPlayContinuouslyClick()">Stop Continuous Play</wa-button>
+  <wa-button id="PlayOnce" onclick="PlayOnceClick()">Play once</wa-button>
 
 <footer id="docfooter">
 
