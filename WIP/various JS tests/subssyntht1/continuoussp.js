@@ -9,15 +9,90 @@ class continuoussp extends AudioWorkletProcessor {
     samplesProcessed=0;
     parsedValues=null;
 
+    // audio buffer vars
+    bufferLength=1024;
+    bufferStart=0;
+    bufferNumOfSamples=0;
+    bufferFFT=new Float64Array(this.bufferLength); // signal to be processed
+    // audio buffer vars
+
+    // fills the audio buffer
+    fillBuffer() {
+      for (let i=0; i<this.bufferLength; i++) {
+        let t=this.samplesProcessed/this.audioCtxSampleRate;
+        this.samplesProcessed++;
+        this.bufferFFT[i]=this.getSineAmplitudeFor(t);
+      }
+      this.bufferStart=0;
+      this.bufferNumOfSamples=this.bufferLength;
+      //
+      // perform the FFT for the band-pass
+      let bandPassFreq1=0;
+      let bandPassFreq2=24000;
+      if (this.parsedValues.MinFreq<=this.parsedValues.MaxFreq) {
+        bandPassFreq1=this.parsedValues.MinFreq;
+        bandPassFreq2=this.parsedValues.MaxFreq; 
+      }
+      else {
+        bandPassFreq2=this.parsedValues.MinFreq;
+        bandPassFreq1=this.parsedValues.MaxFreq; 
+      }
+      bandPassFreq1=bandPassFreq1*(this.audioCtxSampleRate*0.5)/100; 
+      bandPassFreq2=bandPassFreq2*(this.audioCtxSampleRate*0.5)/100; 
+      //
+      let phasors = fft(this.bufferFFT);
+      // first we clear the upper part of the FFT
+      for (let i=(phasors.real.length/2)+1; i<phasors.real.length; i++) {
+          phasors.real[i]=0;
+          phasors.imag[i]=0;
+      }
+      // we cut all the frequencies except between bandPassFreq1 and bandPassFreq2
+      // The frequency of the kth bin is given by, k × (sampling_rate / N)
+      for (let i=0; i<=(phasors.real.length/2); i++) {
+        let thisBinFreq=i*this.audioCtxSampleRate/this.bufferLength;
+        if ((thisBinFreq<bandPassFreq1) || (thisBinFreq>bandPassFreq2)) {
+            phasors.real[i]=0;
+            phasors.imag[i]=0;
+        }
+      }
+      // after that, we need to double the remaining coeficients in the
+      // left half to compensate for the loss of energy
+      for (let i=0; i<=(phasors.real.length/2); i++) {
+        phasors.real[i]*=2;
+        phasors.imag[i]*=2;
+      }
+      //
+      let reconstructedSignal = ifft(phasors);
+      for (let i=0; i<this.bufferLength; i++)
+        this.bufferFFT[i]=reconstructedSignal.real[i];
+      // FFT
+    }
+
+    // gets one sample from buffer
+    getOneSample() {
+      if (this.bufferNumOfSamples<=0)
+        this.fillBuffer()
+      let res=this.bufferFFT[this.bufferStart];
+      this.bufferStart++;
+      this.bufferNumOfSamples--;
+      return res;
+    }
 
     //generate a square wave
-    getAmplitudeFor (t) {
+    getSquareAmplitudeFor (t) {
       let freq=440;
       let v=Math.sin( (2*Math.PI*freq*t) );
       let squarewave=1;
       if (v<0)
         squarewave=-1;
       return squarewave;
+    }
+
+    //generate a sine wave
+    getSineAmplitudeFor (t) {
+      let freq=440;
+      let v=Math.sin( (2*Math.PI*freq*t) );
+      return v;
     }
 
     // we need to define an onmessage function to received the audio data from audio.js
@@ -45,12 +120,12 @@ class continuoussp extends AudioWorkletProcessor {
       output.forEach((channel) => {
           for (let i = 0; i < channel.length; i++) {
 
-            let t=((i+this.samplesProcessed)/this.audioCtxSampleRate);    // this is why we need the count of samples processed, to get time t
-            channel[i] = this.getAmplitudeFor(t); // simply write the amplitude values to output buffer
+            //let t=((i+this.samplesProcessed)/this.audioCtxSampleRate);    // this is why we need the count of samples processed, to get time t
+            channel[i] = this.getOneSample(); //this.getAmplitudeFor(t); // simply write the amplitude values to output buffer
           }
 
           // FFT TEST
-          let bandPassFreq1=0;
+/*          let bandPassFreq1=0;
           let bandPassFreq2=24000;
           if (this.parsedValues.MinFreq<=this.parsedValues.MaxFreq) {
             bandPassFreq1=this.parsedValues.MinFreq;
@@ -93,9 +168,11 @@ class continuoussp extends AudioWorkletProcessor {
           for (let i=0; i<channel.length; i++)
             channel[i]=reconstructedSignal.real[i];
           // FFT TEST
+          
 
       });
       this.samplesProcessed+=output[0].length; // wee need the count of samples processed to obtain time t
+    */ });
 
       if (this.audioTestStopRequested==true) {
             console.log("AudioWorkletProcessor: exit requested");
@@ -304,6 +381,9 @@ let ifft = function(signal){
   return complexSignal;
 }
 
+function Hann(n, N) {
+  return (0.5-( 0.5*Math.cos((2*Math.PI*n)/N) ));
+}
   
   registerProcessor("continuoussp", continuoussp);
   
