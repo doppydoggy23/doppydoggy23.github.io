@@ -10,7 +10,7 @@ class continuoussp extends AudioWorkletProcessor {
     parsedValues=null;
 
     // audio buffer vars
-    bufferLength=1024;
+    bufferLength=4096;
     bufferStart=0;
     bufferNumOfSamples=0;
     bufferFFT=new Float64Array(this.bufferLength); // signal to be processed
@@ -21,7 +21,7 @@ class continuoussp extends AudioWorkletProcessor {
       for (let i=0; i<this.bufferLength; i++) {
         let t=this.samplesProcessed/this.audioCtxSampleRate;
         this.samplesProcessed++;
-        this.bufferFFT[i]=this.getSineAmplitudeFor(t);
+        this.bufferFFT[i]=this.getSquareAmplitudeFor(t);
       }
       this.bufferStart=0;
       this.bufferNumOfSamples=this.bufferLength;
