@@ -14,19 +14,40 @@ class continuoussp extends AudioWorkletProcessor {
     bufferStart=0;
     bufferNumOfSamples=0;
     bufferFFT=new Float64Array(this.bufferLength); // signal to be processed
+    bufferFFTOldHalf=new Float64Array(this.bufferLength/2); // signal to be processed
+    bufferFFTFutureWindow=new Float64Array(this.bufferLength); // signal to be processed
     // audio buffer vars
 
     // fills the audio buffer
     fillBuffer() {
+      // fill the current fft buffer
       for (let i=0; i<this.bufferLength; i++) {
         let t=this.samplesProcessed/this.audioCtxSampleRate;
         this.samplesProcessed++;
-        this.bufferFFT[i]=this.getSquareAmplitudeFor(t);
+        this.bufferFFT[i]=this.getSquareAmplitudeFor(t); //*Hann(i, this.bufferLength);
       }
       this.bufferStart=0;
       this.bufferNumOfSamples=this.bufferLength;
+      
+      //fill the "future" fft buffer with a 50% overlap window
+      let bftwi=0;
+      for (let i=(this.bufferLength/2); i<this.bufferLength; i++) {
+        this.bufferFFTFutureWindow[bftwi]=this.bufferFFT[i];
+        bftwi++;
+      }
+      let bfwisp=0;
+      for (let i=this.bufferLength/2; i<this.bufferLength; i++) {
+        let t=(this.samplesProcessed+bfwisp)/this.audioCtxSampleRate;
+        this.bufferFFTFutureWindow[i]=this.getSquareAmplitudeFor(t);
+        bfwisp++;
+      }
+      for (let i=0; i<this.bufferLength; i++) {
+        this.bufferFFTFutureWindow[i]*=Hann(i, this.bufferLength); // apply hanning to the second window
+        this.bufferFFT[i]*=Hann(i, this.bufferLength); // apply hanning to the first window
+      }
+      // end of fill the "future" fft buffer with a 50% overlap window
       //
-      // perform the FFT for the band-pass
+      // perform the first FFT for the band-pass on the first window with 50% overlap
       let bandPassFreq1=0;
       let bandPassFreq2=24000;
       if (this.parsedValues.MinFreq<=this.parsedValues.MaxFreq) {
@@ -65,8 +86,53 @@ class continuoussp extends AudioWorkletProcessor {
       let reconstructedSignal = ifft(phasors);
       for (let i=0; i<this.bufferLength; i++)
         this.bufferFFT[i]=reconstructedSignal.real[i];
-      // FFT
+      // first FFT
+
+      // apply the average to the first half of the reconstructed signal buffer
+      for (let i=0; i<this.bufferLength/2; i++)
+        this.bufferFFT[i]=((this.bufferFFT[i]+this.bufferFFTOldHalf[i])/2);
+      //
+
+      //
+      // perform the second FFT for the band-pass on the second window with 50% overlap
+      phasors = fft(this.bufferFFTFutureWindow);
+      // first we clear the upper part of the FFT
+      for (let i=(phasors.real.length/2)+1; i<phasors.real.length; i++) {
+          phasors.real[i]=0;
+          phasors.imag[i]=0;
+      }
+      // we cut all the frequencies except between bandPassFreq1 and bandPassFreq2
+      // The frequency of the kth bin is given by, k × (sampling_rate / N)
+      for (let i=0; i<=(phasors.real.length/2); i++) {
+        let thisBinFreq=i*this.audioCtxSampleRate/this.bufferLength;
+        if ((thisBinFreq<bandPassFreq1) || (thisBinFreq>bandPassFreq2)) {
+            phasors.real[i]=0;
+            phasors.imag[i]=0;
+        }
+      }
+      // after that, we need to double the remaining coeficients in the
+      // left half to compensate for the loss of energy
+      for (let i=0; i<=(phasors.real.length/2); i++) {
+        phasors.real[i]*=2;
+        phasors.imag[i]*=2;
+      }
+      //
+      reconstructedSignal = ifft(phasors);
+      for (let i=0; i<this.bufferLength; i++)
+        this.bufferFFTFutureWindow[i]=reconstructedSignal.real[i];
+      // second FFT
+
+      // average the second half of the first ifft with this new second ifft first half
+      for (let i=0; i<this.bufferLength/2; i++)
+        this.bufferFFT[i+(this.bufferLength/2)]=((this.bufferFFT[i+(this.bufferLength/2)]+this.bufferFFTFutureWindow[i])/2);
+      //
+
+      // now copy the later half of the ifft of the second window to the "past" buffer for use on the next iteration
+      for (let i=0; i<this.bufferLength/2; i++)
+        this.bufferFFTOldHalf[i]=this.bufferFFTFutureWindow[i+(this.bufferLength/2)];
+
     }
+    
 
     // gets one sample from buffer
     getOneSample() {
@@ -123,56 +189,7 @@ class continuoussp extends AudioWorkletProcessor {
             //let t=((i+this.samplesProcessed)/this.audioCtxSampleRate);    // this is why we need the count of samples processed, to get time t
             channel[i] = this.getOneSample(); //this.getAmplitudeFor(t); // simply write the amplitude values to output buffer
           }
-
-          // FFT TEST
-/*          let bandPassFreq1=0;
-          let bandPassFreq2=24000;
-          if (this.parsedValues.MinFreq<=this.parsedValues.MaxFreq) {
-            bandPassFreq1=this.parsedValues.MinFreq;
-            bandPassFreq2=this.parsedValues.MaxFreq; 
-          }
-          else {
-            bandPassFreq2=this.parsedValues.MinFreq;
-            bandPassFreq1=this.parsedValues.MaxFreq; 
-          }
-          bandPassFreq1=bandPassFreq1*(this.audioCtxSampleRate*0.5)/100; 
-          bandPassFreq2=bandPassFreq2*(this.audioCtxSampleRate*0.5)/100; 
-          //
-          let bufferFFT=new Float64Array(channel.length); // signal to be processed
-          for (let i=0; i<channel.length; i++)
-            bufferFFT[i]=channel[i];
-          let phasors = fft(bufferFFT);
-          //
-          // first we clear the upper part of the FFT
-          for (let i=(phasors.real.length/2)+1; i<phasors.real.length; i++) {
-              phasors.real[i]=0;
-              phasors.imag[i]=0;
-          }
-          // we cut all the frequencies except between bandPassFreq1 and bandPassFreq2
-          // The frequency of the kth bin is given by, k × (sampling_rate / N)
-          for (let i=0; i<=(phasors.real.length/2); i++) {
-            let thisBinFreq=i*this.audioCtxSampleRate/channel.length;
-            if ((thisBinFreq<bandPassFreq1) || (thisBinFreq>bandPassFreq2)) {
-                phasors.real[i]=0;
-                phasors.imag[i]=0;
-            }
-          }
-          // after that, we need to double the remaining coeficients in the
-          // left half to compensate for the loss of energy
-          for (let i=0; i<=(phasors.real.length/2); i++) {
-            phasors.real[i]*=2;
-            phasors.imag[i]*=2;
-          }
-          //
-          let reconstructedSignal = ifft(phasors);
-          for (let i=0; i<channel.length; i++)
-            channel[i]=reconstructedSignal.real[i];
-          // FFT TEST
-          
-
       });
-      this.samplesProcessed+=output[0].length; // wee need the count of samples processed to obtain time t
-    */ });
 
       if (this.audioTestStopRequested==true) {
             console.log("AudioWorkletProcessor: exit requested");
