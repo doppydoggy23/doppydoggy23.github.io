@@ -24,7 +24,7 @@ class continuoussp extends AudioWorkletProcessor {
       for (let i=0; i<this.bufferLength; i++) {
         let t=this.samplesProcessed/this.audioCtxSampleRate;
         this.samplesProcessed++;
-        this.bufferFFT[i]=this.getSquareAmplitudeFor(t); //*Hann(i, this.bufferLength);
+        this.bufferFFT[i]=this.getSelectedWaveAmplitude(t); //*Hann(i, this.bufferLength);
       }
       this.bufferStart=0;
       this.bufferNumOfSamples=this.bufferLength;
@@ -38,7 +38,7 @@ class continuoussp extends AudioWorkletProcessor {
       let bfwisp=0;
       for (let i=this.bufferLength/2; i<this.bufferLength; i++) {
         let t=(this.samplesProcessed+bfwisp)/this.audioCtxSampleRate;
-        this.bufferFFTFutureWindow[i]=this.getSquareAmplitudeFor(t);
+        this.bufferFFTFutureWindow[i]=this.getSelectedWaveAmplitude(t);
         bfwisp++;
       }
       for (let i=0; i<this.bufferLength; i++) {
@@ -144,8 +144,13 @@ class continuoussp extends AudioWorkletProcessor {
       return res;
     }
 
+    // get the amplitude at time t for the selected waveform
+    getSelectedWaveAmplitude(t){
+      return this.getTriangleWaveAmplitudeFor(t);
+    }
+
     //generate a square wave
-    getSquareAmplitudeFor (t) {
+    getSquareWaveAmplitudeFor (t) {
       let freq=440;
       let v=Math.sin( (2*Math.PI*freq*t) );
       let squarewave=1;
@@ -154,8 +159,17 @@ class continuoussp extends AudioWorkletProcessor {
       return squarewave;
     }
 
+    //generate a triangle wave
+    getTriangleWaveAmplitudeFor (t) {
+      let freq=440;
+      let A=1; // amplitude
+      let P=1/freq; // period
+      let Tx=((4*A/P)*Math.abs( ((t-(P/4)) % P)- (P/2) )) - A;
+      return Tx;
+    }
+
     //generate a sine wave
-    getSineAmplitudeFor (t) {
+    getSineWaveAmplitudeFor (t) {
       let freq=440;
       let v=Math.sin( (2*Math.PI*freq*t) );
       return v;
