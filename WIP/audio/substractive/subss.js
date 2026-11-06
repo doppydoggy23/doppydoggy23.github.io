@@ -153,8 +153,35 @@ function playSound() {
 
 
 function getSelectedWaveAmplitude(t){
-    return getTriangleWaveAmplitudeFor(t);
-  }
+    /* WELCH FUNCTION
+    let N=1;
+    let n=(t*freq)%1;
+    let welch=1-( (((n-(N/2))/ (1/N))*((n-(N/2))/ (1/N))) )
+    return welch;*/
+
+    //Flat top window
+/*    let a0=0.215;
+    let a1=0.416;
+    let a2=0.277;
+    let a3=0.083;
+    let a4=0.006;
+    let n=(t*freq)%1;
+    let N=1;
+    let flattopwindow=a0-(a1*Math.cos((2*Math.PI*n)/N))+(a2*Math.cos((4*Math.PI*n)/N))-(a3*Math.cos((6*Math.PI*n)/N))+(a4*Math.cos((8*Math.PI*n)/N));
+    return flattopwindow;*/
+
+/*    //Exponential or Poisson window
+    // this one is good
+    let n=(t*freq)%1;
+    let N=1;
+    let decay=8.69/60; // try 8.69/decibels
+    let tau=(N/2)*decay;
+    let expo=Math.pow( Math.E, -1*Math.abs(n-(N/2))*(1/tau) );
+    return expo;*/
+
+    //return getTangWaveAmplitudeFor(t);
+    return getExponentialWaveAmplitudeFor(t);
+}
 
   //generate a square wave
 function getSquareWaveAmplitudeFor (t) {
@@ -175,12 +202,31 @@ function getTriangleWaveAmplitudeFor (t) {
     return Tx;
   }
 
+  function getHannWaveAmplitudeFor(t) {
+    let freq=440;
+    return Hann(((freq*t)%1), 1);
+}
+
+function getExponentialWaveAmplitudeFor(t) {
+    let freq=440;
+    let n=(t*freq)%1;
+    let N=1;
+    let decay=8.69/60;
+    let tau=(N/2)*decay;
+    let expo=Math.pow( Math.E, -1*Math.abs(n-(N/2))*(1/tau) );
+    return expo;
+}
   //generate a sine wave
 function getSineWaveAmplitudeFor (t) {
     let freq=440;
     let v=Math.sin( (2*Math.PI*freq*t) );
     return v;
   }
+
+function getTangWaveAmplitudeFor(t) {
+    let freq=440;
+    return ( (Math.tan(2*Math.PI*freq*t)%1) );
+}
 
 //Windowing function (n=sample index, N=numSamples)
 function Hann(n, N) {
