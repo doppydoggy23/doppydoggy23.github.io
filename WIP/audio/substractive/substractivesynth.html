@@ -36,6 +36,15 @@
 
   <h1 style="text-align: center;">Substractive Synthesis Sound Generator</h1>  
 
+  <div style="width:250px">
+    <wa-select id="WaveformSelect" label="Waveform" placeholder="Select waveform" onchange="WaveformSelectChange()">
+      <wa-option value="0" selected>square</wa-option>
+      <wa-option value="1">triangular</wa-option>
+      <wa-option value="2">sawtooth</wa-option>
+      <wa-option value="3">exponential</wa-option>
+    </wa-select>
+  </div>
+
   <div style="width:600px">
     <wa-slider id="MinFreqSlider" label="Min frequency" hint="freqmin" value="20" min="0" max="100" step="1" oninput="MinFreqSliderInput()" with-markers with-tooltip></wa-slider>
     <wa-slider id="MaxFreqSlider" label="Max frequency" hint="freqmax" value="50" min="0" max="100" step="1" oninput="MaxFreqSliderInput()" with-markers with-tooltip></wa-slider>

@@ -146,34 +146,69 @@ class continuoussp extends AudioWorkletProcessor {
 
     // get the amplitude at time t for the selected waveform
     getSelectedWaveAmplitude(t){
-      return this.getTriangleWaveAmplitudeFor(t);
+      if (this.parsedValues.WaveForm==0)
+        return this.getSquareWaveAmplitudeFor(t);
+      if (this.parsedValues.WaveForm==1)
+        return this.getTriangleWaveAmplitudeFor(t);
+      if (this.parsedValues.WaveForm==2)
+        return this.getSawtoothWaveAmplitudeFor(t);
+      if (this.parsedValues.WaveForm==3)
+        return this.getExponentialWaveAmplitudeFor(t);
     }
 
-    //generate a square wave
-    getSquareWaveAmplitudeFor (t) {
-      let freq=440;
-      let v=Math.sin( (2*Math.PI*freq*t) );
-      let squarewave=1;
-      if (v<0)
-        squarewave=-1;
-      return squarewave;
-    }
+  //generate a square wave
+   getSquareWaveAmplitudeFor (t) {
+    let freq=440;
+    let v=Math.sin( (2*Math.PI*freq*t) );
+    let squarewave=1;
+    if (v<0)
+      squarewave=-1;
+    return squarewave;
+  }
 
-    //generate a triangle wave
-    getTriangleWaveAmplitudeFor (t) {
-      let freq=440;
-      let A=1; // amplitude
-      let P=1/freq; // period
-      let Tx=((4*A/P)*Math.abs( ((t-(P/4)) % P)- (P/2) )) - A;
-      return Tx;
-    }
+  //generate a triangle wave
+  getTriangleWaveAmplitudeFor (t) {
+    let freq=440;
+    let A=1; // amplitude
+    let P=1/freq; // period
+    let Tx=((4*A/P)*Math.abs( ((t-(P/4)) % P)- (P/2) )) - A;
+    return Tx;
+  }
 
-    //generate a sine wave
-    getSineWaveAmplitudeFor (t) {
-      let freq=440;
-      let v=Math.sin( (2*Math.PI*freq*t) );
-      return v;
-    }
+   getHannWaveAmplitudeFor(t) {
+    let freq=440;
+    return Hann(((freq*t)%1), 1);
+  }
+
+  getExponentialWaveAmplitudeFor(t) {
+    let freq=440;
+    let n=(t*freq)%1;
+    let N=1;
+    let decay=8.69/60;
+    let tau=(N/2)*decay;
+    let expo=Math.pow( Math.E, -1*Math.abs(n-(N/2))*(1/tau) );
+    return expo;
+  }
+
+  getSawtoothWaveAmplitudeFor(t) {
+    let freq=440;
+    //let T=freq*t;
+    let period=1/freq;
+    let sawt=2*( (t/period)- Math.floor(0.5+(t/period)) );
+    return sawt;
+  }
+
+  //generate a sine wave
+  getSineWaveAmplitudeFor (t) {
+    let freq=440;
+    let v=Math.sin( (2*Math.PI*freq*t) );
+    return v;
+  }
+
+  getTangWaveAmplitudeFor(t) {
+    let freq=440;
+    return ( (Math.tan(2*Math.PI*freq*t)%1) );
+  }
 
     // we need to define an onmessage function to received the audio data from audio.js
     constructor(...args) {

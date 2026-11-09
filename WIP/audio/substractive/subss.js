@@ -1,5 +1,6 @@
 //ToDo: fix sliders ranges (display limits values) and sizes
-//ToDo: add play button
+//ToDo: add sawtooth waveform
+// make the sliders wider to select the pass-band frequencies more accurately
 
 
 "use strict";
@@ -37,7 +38,8 @@ async function PlayContinuouslyClick() {
 
     const minslider = document.getElementById('MinFreqSlider');
     const maxslider = document.getElementById('MaxFreqSlider');
-    let myAudioProcessorMessage =new PCAudioProcessorMessage({MinFreq: minslider.value, MaxFreq: maxslider.value}, false, audioContext.sampleRate); // create config message
+    const WFSelect = document.getElementById('WaveformSelect');
+    let myAudioProcessorMessage =new PCAudioProcessorMessage({MinFreq: minslider.value, MaxFreq: maxslider.value, WaveForm: WFSelect.value}, false, audioContext.sampleRate); // create config message
     testSPNode.port.postMessage(myAudioProcessorMessage); // send configuration message
 
     //global variables
@@ -85,20 +87,30 @@ class PCAudioProcessorMessage {
 function MinFreqSliderInput(){
     const minslider = document.getElementById('MinFreqSlider');
     const maxslider = document.getElementById('MaxFreqSlider');
-    //console.log ("MinFreqSlider.value="+ slider.value)
+    const WFSelect = document.getElementById('WaveformSelect');
 
     if (GlobalVariables.isSoundTestRunning)
-        GlobalVariables.signalProcessor.port.postMessage(new PCAudioProcessorMessage( {MinFreq: minslider.value, MaxFreq: maxslider.value}, false, GlobalVariables.myAudioContext.sampleRate));
+        GlobalVariables.signalProcessor.port.postMessage(new PCAudioProcessorMessage( {MinFreq: minslider.value, MaxFreq: maxslider.value, WaveForm: WFSelect.value}, false, GlobalVariables.myAudioContext.sampleRate));
 }
 
 function MaxFreqSliderInput(){
     const minslider = document.getElementById('MinFreqSlider');
     const maxslider = document.getElementById('MaxFreqSlider');
-    //console.log ("MaxFreqSlider.value="+ slider.value)
+    const WFSelect = document.getElementById('WaveformSelect');
 
     if (GlobalVariables.isSoundTestRunning)
-        GlobalVariables.signalProcessor.port.postMessage(new PCAudioProcessorMessage( {MinFreq: minslider.value, MaxFreq: maxslider.value}, false, GlobalVariables.myAudioContext.sampleRate));
+        GlobalVariables.signalProcessor.port.postMessage(new PCAudioProcessorMessage( {MinFreq: minslider.value, MaxFreq: maxslider.value, WaveForm: WFSelect.value}, false, GlobalVariables.myAudioContext.sampleRate));
 }
+
+function WaveformSelectChange(){
+    const WFSelect = document.getElementById('WaveformSelect');
+    const minslider = document.getElementById('MinFreqSlider');
+    const maxslider = document.getElementById('MaxFreqSlider');
+
+    if (GlobalVariables.isSoundTestRunning)
+        GlobalVariables.signalProcessor.port.postMessage(new PCAudioProcessorMessage( {MinFreq: minslider.value, MaxFreq: maxslider.value, WaveForm: WFSelect.value}, false, GlobalVariables.myAudioContext.sampleRate));
+}
+
 
 function PlayOnceClick(){
     playSound();
@@ -153,34 +165,16 @@ function playSound() {
 
 
 function getSelectedWaveAmplitude(t){
-    /* WELCH FUNCTION
-    let N=1;
-    let n=(t*freq)%1;
-    let welch=1-( (((n-(N/2))/ (1/N))*((n-(N/2))/ (1/N))) )
-    return welch;*/
-
-    //Flat top window
-/*    let a0=0.215;
-    let a1=0.416;
-    let a2=0.277;
-    let a3=0.083;
-    let a4=0.006;
-    let n=(t*freq)%1;
-    let N=1;
-    let flattopwindow=a0-(a1*Math.cos((2*Math.PI*n)/N))+(a2*Math.cos((4*Math.PI*n)/N))-(a3*Math.cos((6*Math.PI*n)/N))+(a4*Math.cos((8*Math.PI*n)/N));
-    return flattopwindow;*/
-
-/*    //Exponential or Poisson window
-    // this one is good
-    let n=(t*freq)%1;
-    let N=1;
-    let decay=8.69/60; // try 8.69/decibels
-    let tau=(N/2)*decay;
-    let expo=Math.pow( Math.E, -1*Math.abs(n-(N/2))*(1/tau) );
-    return expo;*/
-
-    //return getTangWaveAmplitudeFor(t);
-    return getExponentialWaveAmplitudeFor(t);
+    const WFSelect = document.getElementById('WaveformSelect');
+    if (WFSelect.value==0)
+        return getSquareWaveAmplitudeFor(t);
+    if (WFSelect.value==1)
+        return getTriangleWaveAmplitudeFor(t);
+    if (WFSelect.value==2)
+        return getSawtoothWaveAmplitudeFor(t);
+    if (WFSelect.value==3)
+        return getExponentialWaveAmplitudeFor(t);
+    //console.log(WFSelect.value);
 }
 
   //generate a square wave
@@ -216,6 +210,14 @@ function getExponentialWaveAmplitudeFor(t) {
     let expo=Math.pow( Math.E, -1*Math.abs(n-(N/2))*(1/tau) );
     return expo;
 }
+
+function getSawtoothWaveAmplitudeFor(t) {
+    let freq=440;
+    let period=1/freq;
+    let sawt=2*( (t/period)- Math.floor(0.5+(t/period)) );
+    return sawt;
+}
+
   //generate a sine wave
 function getSineWaveAmplitudeFor (t) {
     let freq=440;
