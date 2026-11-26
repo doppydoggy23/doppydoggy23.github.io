@@ -1,4 +1,4 @@
-//ToDo: vaciar los bufferes de la FFT cuando se pulse una tecla y llenarlos de nuevo para evitar el retraso en el sonido?
+//ToDo: it doesn't work with several keys at once. Not even with one key at a time: when one key releases, the active key is marked as null, and no sound can be heard
 'use strict';
 
 // Audio worklet code
@@ -11,8 +11,8 @@ class midisp extends AudioWorkletProcessor {
 
     // audio buffer vars
     bufferLength=4096;
-    bufferStart=0;
-    bufferNumOfSamples=0;
+    bufferStart=0; // index into the current buffer
+    bufferNumOfSamples=0; // samples left in the current buffer
     bufferFFT=new Float64Array(this.bufferLength); // signal to be processed
     bufferFFTOldHalf=new Float64Array(this.bufferLength/2); // signal to be processed
     bufferFFTFutureWindow=new Float64Array(this.bufferLength); // signal to be processed
@@ -182,6 +182,12 @@ class midisp extends AudioWorkletProcessor {
       return res;
     }
 
+    discardCurrentBuffer() { // when a new key is played, we need to discard this buffer
+      //take into account the samples not yet played of this buffer
+      this.samplesProcessed-=this.bufferNumOfSamples;
+      this.fillBuffer() // refill the buffers with new data
+    }
+
     // get the amplitude at time t for the selected waveform
     getSelectedWaveAmplitude(t){
       if (this.parsedValues.WaveForm==0)
@@ -248,6 +254,13 @@ class midisp extends AudioWorkletProcessor {
     return ( (Math.tan(2*Math.PI*freq*t)%1) );
   }
 
+  noteOnEvent(){
+    this.discardCurrentBuffer();
+  }
+
+  noteOffEvent(){
+  }
+
     // we need to define an onmessage function to received the audio data from audio.js
     constructor(...args) {
         super(...args);
@@ -263,7 +276,10 @@ class midisp extends AudioWorkletProcessor {
             this.activeKey=e.data.parsedValues.key;
             this.activeKeyTimeShift=e.data.parsedValues.speedUp;
             this.parsedValues.WaveForm=e.data.parsedValues.waveform;
+            this.parsedValues.MinFreq=e.data.parsedValues.cutFreqLow;
+            this.parsedValues.MaxFreq=e.data.parsedValues.cutFreqHi;
             //console.log ("WaveForm="+this.parsedValues.WaveForm);
+            this.noteOnEvent();
           }
           if (e.data.parsedValues.msgType=="noteOff") { // keyoff
             console.log ("midisp: keyOff. Key: "+e.data.parsedValues.key);
@@ -271,7 +287,10 @@ class midisp extends AudioWorkletProcessor {
             this.activeKey=null;
             this.activeKeyTimeShift=null;
             this.parsedValues.WaveForm=e.data.parsedValues.waveform;
+            this.parsedValues.MinFreq=e.data.parsedValues.cutFreqLow;
+            this.parsedValues.MaxFreq=e.data.parsedValues.cutFreqHi;
             //console.log ("samplerate="+this.audioCtxSampleRate);
+            this.noteOffEvent();
           }
           
           //

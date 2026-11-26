@@ -103,12 +103,12 @@ class MIDIAudioProcessorMessage {
     audioCtxSampleRate= -1;
     parsedValues=null;
 
-    constructor(messageTypep, keyp, timeShiftingRatiop, sampleratep, exitreqp, WaveFormp) { 
+    constructor(messageTypep, keyp, timeShiftingRatiop, sampleratep, exitreqp, WaveFormp, cutFreqLowp, cutFreqHip) { 
 
         this.audioCtxSampleRate=sampleratep;
         this.audioStopRequested=exitreqp;    
 
-        this.parsedValues= {msgType: messageTypep, key: keyp, speedUp: timeShiftingRatiop, waveform: WaveFormp};
+        this.parsedValues= {msgType: messageTypep, key: keyp, speedUp: timeShiftingRatiop, waveform: WaveFormp, cutFreqLow: cutFreqLowp, cutFreqHi: cutFreqHip};
     }  
 }
 
@@ -211,8 +211,10 @@ async function keyPressed(keyCode) {
 
     if (mustIPlayThisKey) {
         const WFVal = document.getElementById('WaveformSelect').value;
-        //console.log ("WFSelect.value="+WFVal);
-        let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOn", keyCode, myTimeShiftingRatio, GlobalVariables.myAudioContext.sampleRate, false, WFVal);
+        const minFreq = document.getElementById('MinFreqSlider').value;
+        const maxFreq = document.getElementById('MaxFreqSlider').value;
+
+        let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOn", keyCode, myTimeShiftingRatio, GlobalVariables.myAudioContext.sampleRate, false, WFVal, minFreq, maxFreq);
         GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
     }
 }
@@ -228,7 +230,9 @@ async function keyReleased(keyCode) {
 
     //
     const WFVal = document.getElementById('WaveformSelect').value;
-    let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOff", keyCode, null, GlobalVariables.myAudioContext.sampleRate, false, WFVal);
+    const minFreq = document.getElementById('MinFreqSlider').value;
+    const maxFreq = document.getElementById('MaxFreqSlider').value;
+    let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOff", keyCode, null, GlobalVariables.myAudioContext.sampleRate, false, WFVal, minFreq, maxFreq);
     GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
 }
 
