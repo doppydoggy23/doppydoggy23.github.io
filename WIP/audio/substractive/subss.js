@@ -12,11 +12,23 @@ This code belongs to pubic domain (2026)
 let GlobalVariables = {
     signalProcessor: null,
     myAudioContext:null,
-    isSoundTestRunning:false
+    isSoundTestRunning:false,
+    WebMIDIOnDialogAlreadyDisplayed: false
 }
 
 function initializeUI() {
-
+        document.addEventListener("keydown", (event) => {
+        if (event.repeat) // avoid repeated keystrokes
+            return;
+        keyPressed(event.keyCode);
+        // do something
+      });
+    document.addEventListener("keyup", (event) => {
+        if (event.repeat)
+            return;
+        keyReleased(event.keyCode);
+        // do something
+      });
 }
 
 
@@ -63,6 +75,7 @@ function StopPlayContinuouslyClick(){
         GlobalVariables.signalProcessor=null;
         GlobalVariables.myAudioContext=null;
         GlobalVariables.isSoundTestRunning=false;    
+        CheckWebMidiClick(); // we re-install midi sound processor
     }        
 }
 
@@ -81,6 +94,21 @@ class PCAudioProcessorMessage {
         
         this.audioCtxSampleRate=smplerate;
         this.audioTestStopRequested=extirreq;    
+    }  
+}
+
+// constains the info sent via message to a MIDI audio signal processor
+class MIDIAudioProcessorMessage {  
+    audioStopRequested= false; // request audio signal processing to stop
+    audioCtxSampleRate= -1;
+    parsedValues=null;
+
+    constructor(messageTypep, keyp, timeShiftingRatiop, sampleratep, exitreqp) { 
+
+        this.audioCtxSampleRate=sampleratep;
+        this.audioStopRequested=exitreqp;    
+
+        this.parsedValues= {msgType: messageTypep, key: keyp, speedUp: timeShiftingRatiop};
     }  
 }
 
@@ -114,6 +142,214 @@ function WaveformSelectChange(){
 
 function PlayOnceClick(){
     playSound();
+}
+
+function PlayMidiClick(){
+        CheckWebMidiClick(); // install midi sound processor
+}
+
+// we can have multiple  keypressed events for the same key (repetition)
+/* This function triggers when a keyboard key is pressed, via computer keyboard or midi device
+*/
+async function keyPressed(keyCode) {
+    //console.log("keyPressed :"+keyCode)
+
+    if (GlobalVariables.isSoundTestRunning)
+        return;
+
+    if ((GlobalVariables.myAudioContext==null)||(GlobalVariables.signalProcessor==null))
+        return;
+
+    //
+    let myTimeShiftingRatio=1;
+    let mustIPlayThisKey=false;
+
+    // stretch the time T to play the correct note
+    switch (keyCode) {
+        case 65: //A
+            myTimeShiftingRatio=349/440;
+            mustIPlayThisKey=true;
+            break;
+        case 83: //S
+            myTimeShiftingRatio=369/440;
+            mustIPlayThisKey=true;
+            break;
+        case 68: //D
+            myTimeShiftingRatio=392/440;
+            mustIPlayThisKey=true;
+            break;
+        case 70: //F
+            myTimeShiftingRatio=415/440;
+            mustIPlayThisKey=true;
+            break;
+        case 71: //G
+            myTimeShiftingRatio=440/440;
+            mustIPlayThisKey=true;
+            break;
+        case 72: //H
+            myTimeShiftingRatio=466/440;
+            mustIPlayThisKey=true;
+            break;
+        case 74: //J
+            myTimeShiftingRatio=493/440;
+            mustIPlayThisKey=true;
+            break;
+        case 75: //K
+            myTimeShiftingRatio=525/440;
+            mustIPlayThisKey=true;
+            break;
+        case 76: //L
+            myTimeShiftingRatio=554/440;
+            mustIPlayThisKey=true;
+            break;
+    }
+
+    if (keyCode>1000){ // received from MIDI dev
+        myTimeShiftingRatio=midiNoteToFrequency(keyCode-1000)/440; // convert the key received from midi device into frequency
+        mustIPlayThisKey=true;
+    }
+
+    if (mustIPlayThisKey) {
+        let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOn", keyCode, myTimeShiftingRatio, GlobalVariables.myAudioContext.sampleRate, false);
+        GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
+    }
+}
+
+async function keyReleased(keyCode) {
+    //console.log("keyReleased :"+keyCode)    
+
+    if (GlobalVariables.isSoundTestRunning)
+        return;
+
+    if ((GlobalVariables.myAudioContext==null)||(GlobalVariables.signalProcessor==null))
+        return;
+
+    //
+    let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOff", keyCode, null, GlobalVariables.myAudioContext.sampleRate, false);
+    GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
+}
+
+/*
+Checks if webmidi is available and configures it, but first, installs the midi sound processor.
+*/
+async function CheckWebMidiClick() {
+
+    if (GlobalVariables.isSoundTestRunning)
+        return;
+
+    if (GlobalVariables.myAudioContext!=null) {
+        GlobalVariables.myAudioContext.close();
+    }
+
+    //console.log(""+window.signalProcessor.constructor.name);
+
+    // create the audio worklet and configure it via a message
+    const audioContext = new AudioContext();
+    await audioContext.audioWorklet.addModule("midisp.js");
+        //
+    let midiSPNode = new AudioWorkletNode(
+        audioContext,
+        "midisp",
+    );
+    //
+    midiSPNode.port.onmessage = (e) => console.log("Main app: Received from sound procesor: "+e.data);
+    midiSPNode.connect(audioContext.destination);
+    
+    //global variables
+    GlobalVariables.signalProcessor=midiSPNode;
+    GlobalVariables.myAudioContext=audioContext; //global var
+
+    // send configuration message
+    //GlobalVariables.signalProcessor.port.postMessage( {messageType:"config", audioTestStopRequested:false, audioCtxSampleRate: audioContext.sampleRate});
+    let myAudioProcessorMessage =new MIDIAudioProcessorMessage(null, null, null, GlobalVariables.myAudioContext.sampleRate, false);
+    GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
+
+
+    await navigator.requestMIDIAccess()
+    .then(
+      (midi) => midiReady(midi),
+      (err) => console.log('MIDI: Something went wrong', err));
+
+    if (!GlobalVariables.WebMIDIOnDialogAlreadyDisplayed) {
+        //document.getElementById("MIDIDialog").show(); //show dialog informing that you can use midi
+        alert("WebMIDI active");
+        GlobalVariables.WebMIDIOnDialogAlreadyDisplayed=true;
+    }
+}
+
+function midiReady(midi) {
+    // Also react to device changes.
+    midi.addEventListener('statechange', (event) => MIDIinitDevices(event.target));
+    MIDIinitDevices(midi); // see the next section!
+  }
+
+  function MIDIinitDevices(midi) {
+    // Reset.
+    let midiIn = [];
+    let midiOut = [];
+    
+    // MIDI devices that send you data.
+    const inputs = midi.inputs.values();
+    for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
+      midiIn.push(input.value);
+    }
+    
+    // MIDI devices that you send data to.
+    const outputs = midi.outputs.values();
+    for (let output = outputs.next(); output && !output.done; output = outputs.next()) {
+      midiOut.push(output.value);
+    }
+    
+    //displayDevices();
+    MIDIstartListening(midiIn);
+  }
+  
+  
+  // Start listening to MIDI messages.
+  function MIDIstartListening(midiIn) {
+    for (const input of midiIn) {
+      input.addEventListener('midimessage', midiMessageReceived);
+    }
+  }
+
+  function midiMessageReceived(event) {
+    // MIDI commands we care about. See
+    // http://webaudio.github.io/web-midi-api/#a-simple-monophonic-sine-wave-midi-synthesizer.
+    const NOTE_ON = 9;
+    const NOTE_OFF = 8;
+  
+    const cmd = event.data[0] >> 4;
+    const pitch = event.data[1];
+    const velocity = (event.data.length > 2) ? event.data[2] : 1;
+    
+    // You can use the timestamp to figure out the duration of each note.
+    //const timestamp = Date.now();
+    
+    // Note that not all MIDI controllers send a separate NOTE_OFF command for every NOTE_ON.
+    if (cmd === NOTE_OFF || (cmd === NOTE_ON && velocity === 0)) {
+      //console.log(`from ${event.srcElement.name} note off: pitch:${pitch}, velocity: ${velocity}`);
+      /////console.log ("Noteoff: NoteId="+pitch);
+      keyReleased(1000+pitch);
+    
+/*      // Complete the note!
+      const note = notesOn.get(pitch);
+      if (note) {
+        console.log(`🎵 pitch:${pitch}, duration:${timestamp - note} ms.`);
+        //notesOn.delete(pitch);
+      }*/
+
+    } else if (cmd === NOTE_ON) {
+      //console.log(`from ${event.srcElement.name} note on: pitch:${pitch}, velocity: {velocity}`);
+      ///////////////console.log ("NoteOn: NoteID= "+pitch+"freq="+midiNoteToFrequency(event.data[1]));
+      keyPressed(1000+pitch);
+      
+      // One note can only be on at once.
+      //notesOn.set(pitch, timestamp);
+    }
+  }
+
+function midiNoteToFrequency (note) {
+    return Math.pow(2, ((note - 69) / 12)) * 440;
 }
 
 // called when play sound button is pressed
