@@ -103,12 +103,12 @@ class MIDIAudioProcessorMessage {
     audioCtxSampleRate= -1;
     parsedValues=null;
 
-    constructor(messageTypep, keyp, timeShiftingRatiop, sampleratep, exitreqp) { 
+    constructor(messageTypep, keyp, timeShiftingRatiop, sampleratep, exitreqp, WaveFormp) { 
 
         this.audioCtxSampleRate=sampleratep;
         this.audioStopRequested=exitreqp;    
 
-        this.parsedValues= {msgType: messageTypep, key: keyp, speedUp: timeShiftingRatiop};
+        this.parsedValues= {msgType: messageTypep, key: keyp, speedUp: timeShiftingRatiop, waveform: WaveFormp};
     }  
 }
 
@@ -210,7 +210,9 @@ async function keyPressed(keyCode) {
     }
 
     if (mustIPlayThisKey) {
-        let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOn", keyCode, myTimeShiftingRatio, GlobalVariables.myAudioContext.sampleRate, false);
+        const WFVal = document.getElementById('WaveformSelect').value;
+        //console.log ("WFSelect.value="+WFVal);
+        let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOn", keyCode, myTimeShiftingRatio, GlobalVariables.myAudioContext.sampleRate, false, WFVal);
         GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
     }
 }
@@ -225,7 +227,8 @@ async function keyReleased(keyCode) {
         return;
 
     //
-    let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOff", keyCode, null, GlobalVariables.myAudioContext.sampleRate, false);
+    const WFVal = document.getElementById('WaveformSelect').value;
+    let myAudioProcessorMessage =new MIDIAudioProcessorMessage("noteOff", keyCode, null, GlobalVariables.myAudioContext.sampleRate, false, WFVal);
     GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
 }
 
@@ -261,7 +264,7 @@ async function CheckWebMidiClick() {
 
     // send configuration message
     //GlobalVariables.signalProcessor.port.postMessage( {messageType:"config", audioTestStopRequested:false, audioCtxSampleRate: audioContext.sampleRate});
-    let myAudioProcessorMessage =new MIDIAudioProcessorMessage(null, null, null, GlobalVariables.myAudioContext.sampleRate, false);
+    let myAudioProcessorMessage =new MIDIAudioProcessorMessage(null, null, null, GlobalVariables.myAudioContext.sampleRate, false, null);
     GlobalVariables.signalProcessor.port.postMessage(myAudioProcessorMessage);
 
 

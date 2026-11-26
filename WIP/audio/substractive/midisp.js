@@ -1,3 +1,4 @@
+//ToDo: vaciar los bufferes de la FFT cuando se pulse una tecla y llenarlos de nuevo para evitar el retraso en el sonido?
 'use strict';
 
 // Audio worklet code
@@ -17,11 +18,16 @@ class midisp extends AudioWorkletProcessor {
     bufferFFTFutureWindow=new Float64Array(this.bufferLength); // signal to be processed
     // audio buffer vars
 
-    // fills the audio buffer
-    fillBuffer() {
-      // fill the current fft buffer
+    // active key info
+    activeKey=null;
+    activeKeyTimeShift=null;
+    parsedValues={MinFreq:0, MaxFreq:24000, WaveForm: 0};
+
+    fillBuffers() {
       for (let i=0; i<this.bufferLength; i++) {
         let t=this.samplesProcessed/this.audioCtxSampleRate;
+        if (this.activeKeyTimeShift != null)
+          t*=this.activeKeyTimeShift;
         this.samplesProcessed++;
         this.bufferFFT[i]=this.getSelectedWaveAmplitude(t); //*Hann(i, this.bufferLength);
       }
@@ -37,6 +43,8 @@ class midisp extends AudioWorkletProcessor {
       let bfwisp=0;
       for (let i=this.bufferLength/2; i<this.bufferLength; i++) {
         let t=(this.samplesProcessed+bfwisp)/this.audioCtxSampleRate;
+        if (this.activeKeyTimeShift != null)
+          t*=this.activeKeyTimeShift;
         this.bufferFFTFutureWindow[i]=this.getSelectedWaveAmplitude(t);
         bfwisp++;
       }
@@ -44,6 +52,37 @@ class midisp extends AudioWorkletProcessor {
         this.bufferFFTFutureWindow[i]*=Hann(i, this.bufferLength); // apply hanning to the second window
         this.bufferFFT[i]*=Hann(i, this.bufferLength); // apply hanning to the first window
       }
+
+    }
+
+    // fills the audio buffer
+    fillBuffer() {
+      // fill the current fft buffer
+      this.fillBuffers();
+      /*for (let i=0; i<this.bufferLength; i++) {
+        let t=this.samplesProcessed/this.audioCtxSampleRate;
+        this.samplesProcessed++;
+        this.bufferFFT[i]=this.getSelectedWaveAmplitude(t); //*Hann(i, this.bufferLength);
+      }*/
+      this.bufferStart=0;
+      this.bufferNumOfSamples=this.bufferLength;
+      
+      //fill the "future" fft buffer with a 50% overlap window
+      /*let bftwi=0;
+      for (let i=(this.bufferLength/2); i<this.bufferLength; i++) {
+        this.bufferFFTFutureWindow[bftwi]=this.bufferFFT[i];
+        bftwi++;
+      }
+      let bfwisp=0;
+      for (let i=this.bufferLength/2; i<this.bufferLength; i++) {
+        let t=(this.samplesProcessed+bfwisp)/this.audioCtxSampleRate;
+        this.bufferFFTFutureWindow[i]=this.getSelectedWaveAmplitude(t);
+        bfwisp++;
+      }
+      for (let i=0; i<this.bufferLength; i++) {
+        this.bufferFFTFutureWindow[i]*=Hann(i, this.bufferLength); // apply hanning to the second window
+        this.bufferFFT[i]*=Hann(i, this.bufferLength); // apply hanning to the first window
+      }*/
       // end of fill the "future" fft buffer with a 50% overlap window
       //
       // perform the first FFT for the band-pass on the first window with 50% overlap
@@ -217,11 +256,22 @@ class midisp extends AudioWorkletProcessor {
           //send deserialized data to variables
           this.audioStopRequested=e.data.audioStopRequested;
           this.audioCtxSampleRate=e.data.audioCtxSampleRate;
+          //
           if (e.data.parsedValues.msgType=="noteOn") { // keyon
             console.log ("midisp: keyOn. Key: "+e.data.parsedValues.key+" Speedup: "+e.data.parsedValues.speedUp);
+            // key went on
+            this.activeKey=e.data.parsedValues.key;
+            this.activeKeyTimeShift=e.data.parsedValues.speedUp;
+            this.parsedValues.WaveForm=e.data.parsedValues.waveform;
+            //console.log ("WaveForm="+this.parsedValues.WaveForm);
           }
           if (e.data.parsedValues.msgType=="noteOff") { // keyoff
             console.log ("midisp: keyOff. Key: "+e.data.parsedValues.key);
+            // key went off
+            this.activeKey=null;
+            this.activeKeyTimeShift=null;
+            this.parsedValues.WaveForm=e.data.parsedValues.waveform;
+            //console.log ("samplerate="+this.audioCtxSampleRate);
           }
           
           //
@@ -231,7 +281,7 @@ class midisp extends AudioWorkletProcessor {
       // function that processes the audio
     process(inputs, outputs, parameters) {
 
-      if (this.audioTestStopRequested==null) { // it hasn't been configured yet
+      if (this.audioStopRequested==null) { // it hasn't been configured yet
         return true;
       }
 
@@ -239,9 +289,10 @@ class midisp extends AudioWorkletProcessor {
       const output = outputs[0];
       output.forEach((channel) => {
           for (let i = 0; i < channel.length; i++) {
-
-            //channel[i] = this.getOneSample(); //this.getAmplitudeFor(t); // simply write the amplitude values to output buffer
-            channel[i]=0;
+            if (this.activeKey==null) // no key is active, it must not sound anything at all
+              channel[i]=0;
+            else  
+              channel[i] = this.getOneSample(); // simply write the amplitude values to output buffer
           }
       });
 
